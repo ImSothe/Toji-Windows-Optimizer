@@ -1,0 +1,10 @@
+{
+  "features": [
+    { "name": "Subsistema de Linux (WSL)", "feature": "Microsoft-Windows-Subsystem-Linux", "desc": "Base de WSL. Para WSL2 completo ejecuta luego 'wsl --install' en una terminal." },
+    { "name": "Plataforma de maquina virtual", "feature": "VirtualMachinePlatform", "desc": "Necesaria para WSL2 y algunas VMs." },
+    { "name": "Hyper-V", "feature": "Microsoft-Hyper-V-All", "desc": "Hipervisor de Microsoft para maquinas virtuales. (Choca con 'hypervisor_off' del optimizador.)" },
+    { "name": "Windows Sandbox", "feature": "Containers-DisposableClientVM", "desc": "Entorno desechable para probar apps sospechosas. Ideal para ciberseguridad." },
+    { "name": ".NET Framework 3.5", "feature": "NetFx3", "desc": "Requerido por algunos programas antiguos." },
+    { "name": "Cliente Telnet", "feature": "TelnetClient", "desc": "Cliente Telnet para pruebas de red." }
+  ]
+}

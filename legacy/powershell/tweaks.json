@@ -1,0 +1,1429 @@
+{
+  "version": 1,
+  "_leyenda_danger": "safe = reversible, sin impacto en seguridad/estabilidad | moderate = rendimiento con efectos secundarios | high = reduce seguridad o quita componentes | extreme = 'lo prohibido': expone o desestabiliza el sistema",
+  "tweaks": [
+    {
+      "id": "game_mode",
+      "name": "Activar Game Mode",
+      "category": "Rendimiento",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Prioriza recursos al juego en primer plano.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\GameBar",
+          "name": "AutoGameModeEnabled",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\GameBar",
+          "name": "AllowAutoGameMode",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "gamebar_dvr_off",
+      "name": "Desactivar Game Bar / DVR",
+      "category": "Rendimiento",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Quita la grabacion en segundo plano que roba FPS.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\System\\GameConfigStore",
+          "name": "GameDVR_Enabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
+          "name": "AllowGameDVR",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "mouse_accel_off",
+      "name": "Desactivar aceleracion del raton",
+      "category": "Input",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Aim 1:1 sin Enhance Pointer Precision. Imprescindible en tactical shooters.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Control Panel\\Mouse",
+          "name": "MouseSpeed",
+          "value": "0",
+          "kind": "String"
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\Control Panel\\Mouse",
+          "name": "MouseThreshold1",
+          "value": "0",
+          "kind": "String"
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\Control Panel\\Mouse",
+          "name": "MouseThreshold2",
+          "value": "0",
+          "kind": "String"
+        }
+      ]
+    },
+    {
+      "id": "menu_delay_off",
+      "name": "Quitar retardo de menus",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Interfaz de Windows mas instantanea al abrir menus.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Control Panel\\Desktop",
+          "name": "MenuShowDelay",
+          "value": "0",
+          "kind": "String"
+        }
+      ]
+    },
+    {
+      "id": "bing_search_off",
+      "name": "Quitar Bing/web de la busqueda del menu Inicio",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "La busqueda del PC deja de consultar internet: mas rapida y local.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+          "name": "BingSearchEnabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
+          "name": "DisableSearchBoxSuggestions",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "transparency_off",
+      "name": "Desactivar transparencias",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Menos carga de composicion del escritorio (DWM).",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "EnableTransparency",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "vfx_performance",
+      "name": "Efectos visuales: rendimiento",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Quita animaciones y sombras de Windows.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects",
+          "name": "VisualFXSetting",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "telemetry_off",
+      "name": "Desactivar telemetria",
+      "category": "Privacidad",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Detiene la recopilacion de diagnosticos de Windows.",
+      "warning": "Windows Update puede reactivarla: reaplica tu codigo tras actualizar.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+          "name": "AllowTelemetry",
+          "value": 0
+        },
+        {
+          "type": "service",
+          "name": "DiagTrack",
+          "startup": "Disabled"
+        },
+        {
+          "type": "service",
+          "name": "dmwappushservice",
+          "startup": "Disabled"
+        }
+      ]
+    },
+    {
+      "id": "consumer_features_off",
+      "name": "Bloquear bloatware/anuncios auto-instalados",
+      "category": "Privacidad",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Evita que Windows instale apps promocionadas y anuncios en el menu Inicio.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent",
+          "name": "DisableWindowsConsumerFeatures",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "widgets_off",
+      "name": "Desactivar Widgets / Noticias",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Quita el panel de widgets y su proceso residente.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Dsh",
+          "name": "AllowNewsAndInterests",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "bg_apps_off",
+      "name": "Desactivar apps en segundo plano",
+      "category": "Rendimiento",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Cierra apps UWP que consumen CPU/red en background.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications",
+          "name": "GlobalUserDisabled",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "power_high_performance",
+      "name": "Plan de energia Alto rendimiento",
+      "category": "Energia",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "La CPU no baja de frecuencia en reposo.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
+          "revert": "powercfg /setactive 381b4222-f694-41f0-9685-ff5bb260df2e"
+        }
+      ]
+    },
+    {
+      "id": "cpu_max_state",
+      "name": "CPU siempre al 100%",
+      "category": "Energia",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Estado minimo y maximo del procesador al 100%: cero throttling, mas consumo/calor.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 100; powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100; powercfg /setactive SCHEME_CURRENT",
+          "revert": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 5; powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100; powercfg /setactive SCHEME_CURRENT"
+        }
+      ]
+    },
+    {
+      "id": "core_parking_off",
+      "name": "Desactivar Core Parking",
+      "category": "Energia",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Mantiene todos los nucleos despiertos; menos micro-tirones al despertar hilos.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 100; powercfg /setactive SCHEME_CURRENT",
+          "revert": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 10; powercfg /setactive SCHEME_CURRENT"
+        }
+      ]
+    },
+    {
+      "id": "network_latency",
+      "name": "Latencia de red para juegos",
+      "category": "Red",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Quita el limitador de throttling multimedia y prioriza respuesta del sistema.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+          "name": "NetworkThrottlingIndex",
+          "value": -1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+          "name": "SystemResponsiveness",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "nagle_off",
+      "name": "Desactivar Nagle's Algorithm",
+      "category": "Red",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Deja de agrupar paquetes pequenos: menos latencia en shooters.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' | ForEach-Object { Set-ItemProperty $_.PSPath -Name TcpAckFrequency -Value 1 -Type DWord -Force; Set-ItemProperty $_.PSPath -Name TCPNoDelay -Value 1 -Type DWord -Force }",
+          "revert": "Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' | ForEach-Object { Remove-ItemProperty $_.PSPath -Name TcpAckFrequency -ErrorAction SilentlyContinue; Remove-ItemProperty $_.PSPath -Name TCPNoDelay -ErrorAction SilentlyContinue }"
+        }
+      ]
+    },
+    {
+      "id": "gaming_gpu_priority",
+      "name": "Prioridad de GPU/CPU para juegos",
+      "category": "Rendimiento",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Sube la prioridad de la tarea 'Games' del planificador multimedia.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+          "name": "GPU Priority",
+          "value": 8
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+          "name": "Priority",
+          "value": 6
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+          "name": "Scheduling Category",
+          "value": "High",
+          "kind": "String"
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile\\Tasks\\Games",
+          "name": "SFIO Priority",
+          "value": "High",
+          "kind": "String"
+        }
+      ]
+    },
+    {
+      "id": "fullscreen_optim_off",
+      "name": "Desactivar Fullscreen Optimizations",
+      "category": "Rendimiento",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Empuja a pantalla completa exclusiva real: menos latencia de composicion.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\System\\GameConfigStore",
+          "name": "GameDVR_FSEBehaviorMode",
+          "value": 2
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\System\\GameConfigStore",
+          "name": "GameDVR_HonorUserFSEBehaviorMode",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\System\\GameConfigStore",
+          "name": "GameDVR_DXGIHonorFSEWindowsCompatible",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "sysmain_off",
+      "name": "Desactivar SysMain (Superfetch)",
+      "category": "Rendimiento",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Sin precarga agresiva a RAM/disco. Util en SSD/NVMe rapido.",
+      "ops": [
+        {
+          "type": "service",
+          "name": "SysMain",
+          "startup": "Disabled"
+        }
+      ]
+    },
+    {
+      "id": "search_index_off",
+      "name": "Desactivar indexado de busqueda",
+      "category": "Rendimiento",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Menos I/O de disco en segundo plano.",
+      "warning": "Las busquedas en el explorador se vuelven mas lentas.",
+      "ops": [
+        {
+          "type": "service",
+          "name": "WSearch",
+          "startup": "Disabled"
+        }
+      ]
+    },
+    {
+      "id": "hibernate_off",
+      "name": "Desactivar hibernacion (liberar disco)",
+      "category": "Almacenamiento",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Elimina hiberfil.sys; libera disco ~ tu cantidad de RAM.",
+      "warning": "Pierdes hibernar y el inicio rapido.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "powercfg /hibernate off",
+          "revert": "powercfg /hibernate on"
+        }
+      ]
+    },
+    {
+      "id": "gpu_hw_scheduling",
+      "name": "Programacion de GPU por hardware (HAGS)",
+      "category": "GPU",
+      "danger": "moderate",
+      "portable": false,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Deja que la GPU gestione su propia planificacion. A veces baja latencia, a veces empeora: prueba.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+          "name": "HwSchMode",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "vbs_off",
+      "name": "Desactivar VBS (seguridad por virtualizacion)",
+      "category": "Seguridad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "El causante no1 de bajones de FPS tras actualizar. Recuperalos.",
+      "warning": "Windows Update lo reactiva a menudo. Reduce proteccion frente a exploits de kernel.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard",
+          "name": "EnableVirtualizationBasedSecurity",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "hvci_off",
+      "name": "Desactivar Aislamiento del nucleo (HVCI)",
+      "category": "Seguridad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": true,
+      "reboot": true,
+      "desc": "Libera CPU para el juego a cambio de menos proteccion de memoria.",
+      "warning": "Revisa que Vanguard (Valorant) siga arrancando antes de competir.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity",
+          "name": "Enabled",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "camera_off",
+      "name": "Desactivar camara (para apps)",
+      "category": "Privacidad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Ninguna app podra acceder a la webcam.",
+      "warning": "Bloquea el acceso; para apagar el dispositivo de verdad usa el Administrador de dispositivos.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\webcam",
+          "name": "Value",
+          "value": "Deny",
+          "kind": "String"
+        }
+      ]
+    },
+    {
+      "id": "smartscreen_off",
+      "name": "Desactivar SmartScreen",
+      "category": "Seguridad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Quita el filtro de reputacion de apps/descargas.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "EnableSmartScreen",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "uac_noprompt",
+      "name": "UAC sin avisos (admin)",
+      "category": "Seguridad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "No vuelve a preguntar al elevar (UAC sigue tecnicamente activo).",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "ConsentPromptBehaviorAdmin",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "copilot_off",
+      "name": "Desactivar Copilot",
+      "category": "Privacidad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Quita el asistente Copilot de Windows.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+          "name": "TurnOffWindowsCopilot",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "recall_off",
+      "name": "Desactivar Recall (capturas de IA)",
+      "category": "Privacidad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Impide que Windows analice y guarde snapshots de tu actividad.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI",
+          "name": "DisableAIDataAnalysis",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "update_defer_features",
+      "name": "Aplazar updates de funciones (mantener seguridad)",
+      "category": "Windows Update",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Aplaza las grandes actualizaciones de version ~1 ano, PERO sigue recibiendo parches de seguridad. La via honesta a 'solo seguridad'.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdates",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+          "name": "DeferFeatureUpdatesPeriodInDays",
+          "value": 365
+        }
+      ]
+    },
+    {
+      "id": "windows_update_off",
+      "name": "Desactivar Windows Update (total)",
+      "category": "Windows Update",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Corta todas las actualizaciones, incluidas las de seguridad.",
+      "warning": "Deja el PC sin parches. Reactivalo cada cierto tiempo o usa el aplazamiento en su lugar.",
+      "ops": [
+        {
+          "type": "service",
+          "name": "wuauserv",
+          "startup": "Disabled"
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+          "name": "NoAutoUpdate",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "defender_realtime_off",
+      "name": "Desactivar proteccion en tiempo real de Defender",
+      "category": "Seguridad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Apaga el analisis en tiempo real del antivirus de Windows.",
+      "warning": "La Proteccion contra manipulaciones (Tamper Protection) puede revertirlo. Desactivala a mano en Seguridad de Windows para que persista.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+          "name": "DisableRealtimeMonitoring",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "debloat_appx",
+      "name": "Debloat de apps preinstaladas",
+      "category": "Debloat",
+      "danger": "high",
+      "portable": false,
+      "anticheat": false,
+      "desc": "Elimina bloatware tipico de Windows (clima, noticias, 3D Viewer, solitario, mapas, etc.).",
+      "warning": "NO es auto-reversible: para recuperarlas hay que reinstalar desde la Microsoft Store.",
+      "ops": [
+        {
+          "type": "appx",
+          "package": "Microsoft.BingWeather"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.BingNews"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.GetHelp"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.Getstarted"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.Microsoft3DViewer"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.MicrosoftOfficeHub"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.MicrosoftSolitaireCollection"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.MixedReality.Portal"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.People"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.WindowsFeedbackHub"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.WindowsMaps"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.YourPhone"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.ZuneMusic"
+        },
+        {
+          "type": "appx",
+          "package": "Microsoft.ZuneVideo"
+        }
+      ]
+    },
+    {
+      "id": "spectre_meltdown_off",
+      "name": "Desactivar mitigaciones Spectre/Meltdown",
+      "category": "PROHIBIDO",
+      "danger": "extreme",
+      "portable": true,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Recupera algo de rendimiento de CPU eliminando las mitigaciones de ejecucion especulativa.",
+      "warning": "Deja la CPU expuesta a esa familia de ataques. Solo tiene sentido en un PC 100% de juego y sin datos sensibles.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management",
+          "name": "FeatureSettingsOverride",
+          "value": 3
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management",
+          "name": "FeatureSettingsOverrideMask",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "hypervisor_off",
+      "name": "Desactivar Hypervisor (bcdedit)",
+      "category": "PROHIBIDO",
+      "danger": "extreme",
+      "portable": false,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Apaga el hipervisor a nivel de arranque; complementa VBS off para exprimir FPS.",
+      "warning": "Rompe Hyper-V, Sandbox de Windows y WSL2. Requiere reinicio.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "bcdedit /set hypervisorlaunchtype off",
+          "revert": "bcdedit /set hypervisorlaunchtype auto"
+        }
+      ]
+    },
+    {
+      "id": "firewall_off",
+      "name": "Desactivar Firewall de Windows",
+      "category": "PROHIBIDO",
+      "danger": "extreme",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Apaga el cortafuegos en todos los perfiles.",
+      "warning": "El PC queda abierto en la red. No lo hagas en redes publicas.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "netsh advfirewall set allprofiles state off",
+          "revert": "netsh advfirewall set allprofiles state on"
+        }
+      ]
+    },
+    {
+      "id": "uac_full_off",
+      "name": "Desactivar UAC por completo",
+      "category": "PROHIBIDO",
+      "danger": "extreme",
+      "portable": true,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Elimina el Control de cuentas de usuario entero.",
+      "warning": "Rompe muchas apps de la Store y baja mucho la seguridad. Requiere reinicio.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+          "name": "EnableLUA",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "show_file_ext",
+      "name": "Mostrar extensiones de archivo",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Muestra .exe .txt .ps1 etc. Basico para no comerte un 'foto.jpg.exe'. Muy util en ciberseguridad.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "HideFileExt",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "dark_mode",
+      "name": "Modo oscuro del sistema",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Pone Windows y las apps en tema oscuro.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "AppsUseLightTheme",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+          "name": "SystemUsesLightTheme",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "taskbar_left",
+      "name": "Barra de tareas a la izquierda",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Alinea los iconos a la izquierda (estilo clasico).",
+      "warning": "Requiere cerrar sesion o reiniciar el Explorador para verse.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "TaskbarAl",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "taskbar_search_hide",
+      "name": "Quitar caja de busqueda de la barra",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Oculta el buscador de la barra de tareas.",
+      "warning": "Requiere reiniciar el Explorador para verse.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+          "name": "SearchboxTaskbarMode",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "taskview_button_off",
+      "name": "Quitar boton Vista de tareas",
+      "category": "Interfaz",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Oculta el boton de Vista de tareas de la barra.",
+      "warning": "Requiere reiniciar el Explorador para verse.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+          "name": "ShowTaskViewButton",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "advertising_id_off",
+      "name": "Desactivar ID de publicidad",
+      "category": "Privacidad",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Apps dejan de usar tu identificador para anuncios personalizados.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo",
+          "name": "Enabled",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "tips_off",
+      "name": "Desactivar sugerencias y anuncios de Windows",
+      "category": "Privacidad",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Quita los 'consejos', tips y contenido promocionado del sistema.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SubscribedContent-338389Enabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+          "name": "SoftLandingEnabled",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "activity_history_off",
+      "name": "Desactivar historial de actividad",
+      "category": "Privacidad",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Windows deja de registrar y subir tu linea de tiempo de actividad.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "EnableActivityFeed",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "PublishUserActivities",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+          "name": "UploadUserActivities",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "cortana_off",
+      "name": "Desactivar Cortana",
+      "category": "Privacidad",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Bloquea Cortana por directiva.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
+          "name": "AllowCortana",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "location_off",
+      "name": "Desactivar ubicacion (para apps)",
+      "category": "Privacidad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Ninguna app podra acceder a tu ubicacion.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\location",
+          "name": "Value",
+          "value": "Deny",
+          "kind": "String"
+        }
+      ]
+    },
+    {
+      "id": "mic_off",
+      "name": "Desactivar microfono (para apps)",
+      "category": "Privacidad",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Ninguna app podra acceder al microfono.",
+      "warning": "Ojo: tambien lo bloquea para Discord, juegos, etc.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone",
+          "name": "Value",
+          "value": "Deny",
+          "kind": "String"
+        }
+      ]
+    },
+    {
+      "id": "power_throttling_off",
+      "name": "Desactivar Power Throttling",
+      "category": "Rendimiento",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Windows deja de frenar apps en segundo plano para ahorrar energia. Mas consistencia, mas consumo.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling",
+          "name": "PowerThrottlingOff",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "fast_startup_off",
+      "name": "Desactivar Inicio rapido",
+      "category": "Energia",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Apagados/arranques mas limpios (util en arranque dual). El PC se apaga del todo en vez de hibernar el kernel.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power",
+          "name": "HiberbootEnabled",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "reserved_storage_off",
+      "name": "Desactivar almacenamiento reservado",
+      "category": "Almacenamiento",
+      "danger": "moderate",
+      "portable": false,
+      "anticheat": false,
+      "desc": "Libera ~7 GB que Windows aparta para updates.",
+      "warning": "Puede tardar unos segundos en aplicarse (DISM).",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "DISM /Online /Set-ReservedStorageState /State:Disabled",
+          "revert": "DISM /Online /Set-ReservedStorageState /State:Enabled"
+        }
+      ]
+    },
+    {
+      "id": "edge_debloat",
+      "name": "Debloat de Microsoft Edge",
+      "category": "Debloat",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Quita el arranque previo y el modo en segundo plano de Edge (deja de correr sin abrirlo).",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "StartupBoostEnabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge",
+          "name": "BackgroundModeEnabled",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "version_watermark_off",
+      "name": "Ocultar marca de agua de version/compilacion",
+      "category": "Activacion",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Oculta el texto de version/compilacion del escritorio (esquina inferior derecha).",
+      "warning": "Esto NO activa Windows ni garantiza quitar el aviso 'Activar Windows' de una copia sin licencia; la unica via limpia para ese es una licencia legitima.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Control Panel\\Desktop",
+          "name": "PaintDesktopVersion",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "power_ultimate",
+      "name": "Plan de energia Ultimate Performance",
+      "category": "Energia",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Activa el plan oculto de maximo rendimiento (mas que 'Alto rendimiento').",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 44444444-4444-4444-4444-444444444444 ; powercfg /setactive 44444444-4444-4444-4444-444444444444",
+          "revert": "powercfg /setactive 381b4222-f694-41f0-9685-ff5bb260df2e ; powercfg -delete 44444444-4444-4444-4444-444444444444"
+        }
+      ]
+    },
+    {
+      "id": "disable_prefetch",
+      "name": "Desactivar Prefetch/Superfetch (registro)",
+      "category": "Rendimiento",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Corta la precarga a disco a nivel de registro. Recomendado en SSD/NVMe.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\\PrefetchParameters",
+          "name": "EnablePrefetcher",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management\\PrefetchParameters",
+          "name": "EnableSuperfetch",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "disable_paging_executive",
+      "name": "Mantener el kernel en RAM",
+      "category": "Rendimiento",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Impide que Windows pagine el nucleo a disco. Mas respuesta si te sobra RAM (16GB+).",
+      "warning": "Con poca RAM puede ser contraproducente.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management",
+          "name": "DisablePagingExecutive",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "win32_priority",
+      "name": "Prioridad total al primer plano",
+      "category": "Rendimiento",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Da mas quantum de CPU a la ventana activa (el juego). Win32PrioritySeparation optimizado.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl",
+          "name": "Win32PrioritySeparation",
+          "value": 38
+        }
+      ]
+    },
+    {
+      "id": "disable_ndu",
+      "name": "Desactivar servicio Ndu (uso de red)",
+      "category": "Red",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Servicio de monitor de datos de red; puede consumir RAM. Lo desactiva.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Ndu",
+          "name": "Start",
+          "value": 4
+        }
+      ]
+    },
+    {
+      "id": "disable_delivery_optimization",
+      "name": "Desactivar Delivery Optimization",
+      "category": "Red",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Windows deja de compartir/descargar updates P2P por tu red.",
+      "ops": [
+        {
+          "type": "service",
+          "name": "DoSvc",
+          "startup": "Disabled"
+        }
+      ]
+    },
+    {
+      "id": "disable_error_reporting",
+      "name": "Desactivar informe de errores",
+      "category": "Privacidad",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Windows deja de enviar informes de errores a Microsoft.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting",
+          "name": "Disabled",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "disable_telemetry_tasks",
+      "name": "Desactivar tareas de telemetria (CEIP)",
+      "category": "Privacidad",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Desactiva las tareas programadas de recopilacion de datos de Windows.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "schtasks /Change /TN \"\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser\" /Disable ; schtasks /Change /TN \"\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator\" /Disable ; schtasks /Change /TN \"\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip\" /Disable",
+          "revert": "schtasks /Change /TN \"\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser\" /Enable ; schtasks /Change /TN \"\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator\" /Enable ; schtasks /Change /TN \"\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip\" /Enable"
+        }
+      ]
+    },
+    {
+      "id": "gpu_tdr_delay",
+      "name": "Subir TdrDelay de la GPU",
+      "category": "GPU",
+      "danger": "high",
+      "portable": false,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Da mas margen antes de reiniciar el driver grafico. Util con overclock agresivo.",
+      "warning": "No sube FPS; evita cuelgues/pantallazos por timeout del driver. Solo si haces OC.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+          "name": "TdrDelay",
+          "value": 10
+        }
+      ]
+    },
+    {
+      "id": "bcd_timer",
+      "name": "Forzar temporizadores del sistema (bcdedit)",
+      "category": "PROHIBIDO",
+      "danger": "extreme",
+      "portable": false,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Fuerza dynamic tick off y platform tick. Puede bajar latencia en algunos equipos.",
+      "warning": "Efecto MUY dependiente del hardware; en muchos PCs no ayuda o empeora. Mide antes/despues.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "bcdedit /set disabledynamictick yes ; bcdedit /set useplatformtick yes",
+          "revert": "bcdedit /set disabledynamictick no ; bcdedit /deletevalue useplatformtick"
+        }
+      ]
+    },
+    {
+      "id": "cpu_idle_disable",
+      "name": "Impedir que la CPU entre en reposo",
+      "category": "PROHIBIDO",
+      "danger": "extreme",
+      "portable": true,
+      "anticheat": false,
+      "desc": "La CPU nunca baja a estados idle: minima latencia posible.",
+      "warning": "Sube MUCHO consumo y temperatura. Solo sobremesa con buena refrigeracion.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IDLEDISABLE 1 ; powercfg /setactive SCHEME_CURRENT",
+          "revert": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IDLEDISABLE 0 ; powercfg /setactive SCHEME_CURRENT"
+        }
+      ]
+    },
+    {
+      "id": "defender_full_off",
+      "name": "Desactivar Defender por completo",
+      "category": "PROHIBIDO",
+      "danger": "extreme",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Apaga todas las capas de Microsoft Defender por directiva.",
+      "warning": "La Proteccion contra manipulaciones (Tamper Protection) revertira esto salvo que la desactives a mano en Seguridad de Windows. Deja el PC sin antivirus.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender",
+          "name": "DisableAntiSpyware",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+          "name": "DisableRealtimeMonitoring",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+          "name": "DisableBehaviorMonitoring",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+          "name": "DisableOnAccessProtection",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection",
+          "name": "DisableScanOnRealtimeEnable",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "hpet_off",
+      "name": "Desactivar HPET (temporizador de eventos)",
+      "category": "PROHIBIDO",
+      "danger": "high",
+      "portable": false,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Desactiva el High Precision Event Timer del sistema y quita useplatformclock. Puede bajar latencia de entrada.",
+      "warning": "Efecto MUY dependiente del hardware: en unos PCs mejora, en otros da microtirones. Mide antes/despues.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "bcdedit /deletevalue useplatformclock ; Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue",
+          "revert": "Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | Enable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue"
+        }
+      ]
+    },
+    {
+      "id": "timer_resolution",
+      "name": "Timer Resolution global (0.5ms)",
+      "category": "Input",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Permite que los juegos mantengan el temporizador a maxima resolucion aunque no esten en foco. Menos input lag.",
+      "warning": "Para FORZAR 0.5ms fijo hace falta ademas una app residente (tipo ISLC); este ajuste solo habilita que se respete.",
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel",
+          "name": "GlobalTimerResolutionRequests",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "timer_res_fixed",
+      "name": "Timer Resolution FIJO (0.5ms residente)",
+      "category": "Input",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Instala un proceso ligero que arranca con Windows y mantiene el temporizador a maxima resolucion fija (no solo cuando una app lo pide).",
+      "warning": "Combinalo con 'timer_resolution' para efecto global. Sube un poco el consumo. Al revertir se quita la tarea y se cierra el proceso.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "Install-TojiTimerRes",
+          "revert": "Uninstall-TojiTimerRes"
+        }
+      ]
+    },
+    {
+      "id": "nvidia_telemetry_off",
+      "name": "Desactivar telemetria de Nvidia",
+      "category": "GPU",
+      "danger": "moderate",
+      "portable": false,
+      "anticheat": false,
+      "desc": "Apaga las tareas y el servicio de telemetria del driver Nvidia (NvTelemetry).",
+      "warning": "No toca ajustes 3D del panel (eso necesita Nvidia Profile Inspector).",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -like 'Nv*' } | Disable-ScheduledTask -ErrorAction SilentlyContinue ; Set-Service NvTelemetryContainer -StartupType Disabled -ErrorAction SilentlyContinue ; Stop-Service NvTelemetryContainer -Force -ErrorAction SilentlyContinue",
+          "revert": "Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -like 'Nv*' } | Enable-ScheduledTask -ErrorAction SilentlyContinue ; Set-Service NvTelemetryContainer -StartupType Manual -ErrorAction SilentlyContinue"
+        }
+      ]
+    },
+    {
+      "id": "gpu_msi_mode",
+      "name": "MSI Mode para la GPU (prioridad de interrupciones)",
+      "category": "GPU",
+      "danger": "high",
+      "portable": false,
+      "anticheat": false,
+      "reboot": true,
+      "desc": "Activa Message Signaled Interrupts en la tarjeta grafica: interrupciones mas eficientes, mejor frametime/latencia.",
+      "warning": "Depende del hardware. Requiere reiniciar. En algun equipo puede no aplicar por permisos del dispositivo.",
+      "ops": [
+        {
+          "type": "command",
+          "apply": "Get-PnpDevice -Class Display -Status OK -ErrorAction SilentlyContinue | ForEach-Object { $k = \"HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\$($_.InstanceId)\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties\"; New-Item -Path $k -Force -ErrorAction SilentlyContinue | Out-Null; Set-ItemProperty -Path $k -Name MSISupported -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue }",
+          "revert": "Get-PnpDevice -Class Display -Status OK -ErrorAction SilentlyContinue | ForEach-Object { $k = \"HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\$($_.InstanceId)\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties\"; Set-ItemProperty -Path $k -Name MSISupported -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue }"
+        }
+      ]
+    }
+  ]
+}

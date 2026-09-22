@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>TOJI</AssemblyName>
+    <RootNamespace>Toji</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.0.0</Version>
+    <Company>TOJI</Company>
+    <Product>TOJI - Suite de sistema</Product>
+  </PropertyGroup>
+
+  <!-- Los JSON viven junto al .exe para poder actualizarlos (OTA) sin recompilar -->
+  <ItemGroup>
+    <None Include="data\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

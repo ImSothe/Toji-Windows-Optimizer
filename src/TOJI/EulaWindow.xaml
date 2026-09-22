@@ -1,0 +1,27 @@
+<Window x:Class="Toji.EulaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TOJI - Aviso legal" Height="460" Width="620"
+        WindowStartupLocation="CenterScreen" Background="#0A0810" ResizeMode="NoResize">
+  <Grid Margin="24">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+      <TextBlock Text="TOJI" FontSize="28" FontWeight="Bold" Foreground="#A78BFA" FontFamily="Segoe UI"/>
+      <TextBlock Text="Restriccion Celestial" FontSize="13" Foreground="#8A83A0" VerticalAlignment="Bottom" Margin="10,0,0,6" FontFamily="Segoe UI"/>
+    </StackPanel>
+    <Border Grid.Row="1" Background="#120D1C" BorderBrush="#241B33" BorderThickness="1" Padding="16">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <TextBlock Foreground="#C9C3D8" TextWrapping="Wrap" FontFamily="Segoe UI" FontSize="13"
+          Text="TOJI es una herramienta para usuarios avanzados que modifica ajustes profundos de Windows (registro, servicios, seguridad).&#10;&#10;AL ACEPTAR, ENTIENDES Y ASUMES QUE:&#10;&#10;- Usas TOJI bajo tu propia responsabilidad y riesgo.&#10;- Algunos ajustes desactivan protecciones de seguridad o pueden causar inestabilidad, perdida de datos o que Windows deje de arrancar.&#10;- Debes crear un punto de restauracion antes de aplicar cambios.&#10;- Los ajustes marcados como PROHIBIDO estan ocultos tras el Modo Avanzado y solo deben usarlos personas que sepan lo que hacen.&#10;- El autor de TOJI NO se hace responsable de ningun dano, perdida de datos, inestabilidad ni de cualquier consecuencia derivada del uso del programa.&#10;- El software se ofrece 'TAL CUAL', sin garantia de ningun tipo.&#10;&#10;Si no estas de acuerdo, cierra el programa."/>
+      </ScrollViewer>
+    </Border>
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+      <Button x:Name="BtnDecline" Content="No acepto" Width="120" Height="34" Margin="0,0,10,0"
+              Background="#1A1428" Foreground="#E9E6F0" BorderBrush="#2E2440" Cursor="Hand"/>
+      <Button x:Name="BtnAccept" Content="Acepto" Width="120" Height="34"
+              Background="#8B5CF6" Foreground="#140B24" FontWeight="Bold" BorderBrush="#8B5CF6" Cursor="Hand"/>
+    </StackPanel>
+  </Grid>
+</Window>

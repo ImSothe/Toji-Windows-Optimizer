@@ -1,0 +1,92 @@
+# ==========================================================
+#  TOJI Celestial Optimizer - .gitignore (C# / .NET / WPF)
+# ==========================================================
+
+# --- Salidas de compilacion ---
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+publish/
+*.binlog
+
+# --- Archivos de usuario / IDE (Visual Studio, Rider, VS Code) ---
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.rsuser
+*.DotSettings.user
+.idea/
+*.sln.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# --- NuGet ---
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+.nuget/
+
+# --- Tests y cobertura ---
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# --- Publicacion / instaladores ---
+*.pubxml.user
+*.publishproj
+*.msi
+*.msix
+*.appx
+*.appxbundle
+
+# --- Temporales ---
+*.tmp
+*.temp
+*.cache
+*.log
+*.bak
+*.swp
+~$*
+
+# --- Secretos: firma de codigo y licencias (NUNCA al repo) ---
+*.pfx
+*.p12
+*.snk
+*.cer
+*.key
+.env
+.env.*
+secrets.json
+appsettings.*.local.json
+
+# --- Sistema operativo ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

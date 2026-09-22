@@ -1,0 +1,127 @@
+<Window x:Class="Toji.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TOJI - Suite de sistema" Height="860" Width="1000"
+        WindowStartupLocation="CenterScreen" Background="#0A0810" FontFamily="Segoe UI">
+  <Window.Resources>
+    <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#E9E6F0"/></Style>
+    <Style TargetType="CheckBox"><Setter Property="Foreground" Value="#E9E6F0"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
+    <ControlTemplate x:Key="BtnTpl" TargetType="Button">
+      <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+              BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      </Border>
+    </ControlTemplate>
+    <Style x:Key="Base" TargetType="Button">
+      <Setter Property="Background" Value="#1A1428"/><Setter Property="Foreground" Value="#E9E6F0"/>
+      <Setter Property="BorderBrush" Value="#2E2440"/><Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="12,7,12,7"/><Setter Property="Margin" Value="0,0,8,8"/>
+      <Setter Property="Cursor" Value="Hand"/><Setter Property="Template" Value="{StaticResource BtnTpl}"/>
+      <Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#251B3A"/></Trigger></Style.Triggers>
+    </Style>
+    <Style x:Key="Primary" TargetType="Button">
+      <Setter Property="Background" Value="#8B5CF6"/><Setter Property="Foreground" Value="#140B24"/><Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="BorderBrush" Value="#8B5CF6"/><Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="14,7,14,7"/><Setter Property="Margin" Value="0,0,8,8"/>
+      <Setter Property="Cursor" Value="Hand"/><Setter Property="Template" Value="{StaticResource BtnTpl}"/>
+      <Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#A78BFA"/></Trigger></Style.Triggers>
+    </Style>
+    <Style x:Key="Profile" TargetType="Button">
+      <Setter Property="Background" Value="#140F1E"/><Setter Property="Foreground" Value="#E9E6F0"/>
+      <Setter Property="BorderBrush" Value="#8B5CF6"/><Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="16,8,16,8"/><Setter Property="Margin" Value="0,0,8,0"/>
+      <Setter Property="Cursor" Value="Hand"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Template" Value="{StaticResource BtnTpl}"/>
+    </Style>
+    <Style TargetType="TabItem">
+      <Setter Property="Template"><Setter.Value>
+        <ControlTemplate TargetType="TabItem">
+          <Border x:Name="bd" Background="#140F1E" BorderBrush="#241B33" BorderThickness="1,1,1,0" Padding="18,9,18,9" Margin="0,0,4,0" TextElement.Foreground="#B4ADC7">
+            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="bd" Property="Background" Value="#1B1430"/><Setter TargetName="bd" Property="BorderBrush" Value="#8B5CF6"/><Setter TargetName="bd" Property="TextElement.Foreground" Value="#A78BFA"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="bd" Property="Background" Value="#1A1330"/></Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value></Setter>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+  </Window.Resources>
+
+  <Grid Margin="18">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+      <TextBlock Text="TOJI" FontSize="34" FontWeight="Bold" Foreground="#A78BFA"/>
+      <TextBlock Text="Restricci&#243;n Celestial" FontSize="14" Foreground="#8A83A0" VerticalAlignment="Bottom" Margin="12,0,0,7"/>
+    </StackPanel>
+
+    <TabControl Grid.Row="1" Background="#0A0810" BorderThickness="0" Padding="0,8,0,0">
+      <TabItem Header="Optimizaciones">
+        <Grid Background="#0A0810" Margin="0,10,0,0">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+          <Border Grid.Row="0" Background="#120D1C" BorderBrush="#241B33" BorderThickness="1" Padding="12">
+            <StackPanel>
+              <TextBlock Text="PERFILES" Foreground="#8A83A0" FontSize="11" Margin="0,0,0,8"/>
+              <WrapPanel x:Name="ProfileBar"/>
+              <TextBlock x:Name="ProfileLabel" Text="Perfil: ninguno (seleccion manual)" Foreground="#8A83A0" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+          </Border>
+          <DockPanel Grid.Row="1" Margin="0,12,0,6">
+            <TextBlock Text="Buscar:" Foreground="#8A83A0" VerticalAlignment="Center" Margin="0,0,8,0" DockPanel.Dock="Left"/>
+            <TextBox x:Name="SearchBox" DockPanel.Dock="Left" Width="220" Background="#171122" Foreground="#E9E6F0" BorderBrush="#2E2440" Padding="6,4,6,4"/>
+            <TextBlock x:Name="CountText" Text="0 seleccionados" Foreground="#A78BFA" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+          </DockPanel>
+          <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock Text="Riesgo:" Foreground="#8A83A0" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <WrapPanel x:Name="RiskChips" VerticalAlignment="Center"/>
+            <TextBlock Text="Categoria:" Foreground="#8A83A0" VerticalAlignment="Center" Margin="16,0,8,0"/>
+            <ComboBox x:Name="CatCombo" Width="180" Height="26" VerticalAlignment="Center"/>
+            <CheckBox x:Name="AdvancedChk" Content="Modo avanzado" Foreground="#CF4A4F" Margin="18,0,0,0"/>
+          </StackPanel>
+          <Border Grid.Row="3" BorderBrush="#241B33" BorderThickness="1" Background="#100B18">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel x:Name="RootList" Margin="8"/></ScrollViewer>
+          </Border>
+          <StackPanel Grid.Row="4" Margin="2,10,2,6">
+            <TextBlock x:Name="StatusText" Foreground="#8A83A0" TextWrapping="Wrap" Text="Al abrir se marca lo que ya tienes aplicado. Crea un punto de restauracion antes de tocar."/>
+            <ProgressBar x:Name="Progress" Height="6" Margin="0,8,0,0" Minimum="0" Maximum="100" Value="0" Visibility="Collapsed" Background="#171122" Foreground="#8B5CF6" BorderThickness="0"/>
+          </StackPanel>
+          <WrapPanel Grid.Row="5">
+            <Button x:Name="BtnApply" Style="{StaticResource Primary}" Content="APLICAR (dejar exacto lo marcado)"/>
+            <Button x:Name="BtnDry" Style="{StaticResource Base}" Content="Simular"/>
+            <Button x:Name="BtnSaveProfile" Style="{StaticResource Base}" Content="Guardar perfil actual"/>
+            <Button x:Name="BtnRevertAll" Style="{StaticResource Base}" Foreground="#CF4A4F" Content="Revertir TODO"/>
+            <Button x:Name="BtnRestore" Style="{StaticResource Base}" Content="Punto de restauracion"/>
+            <Button x:Name="BtnExport" Style="{StaticResource Base}" Content="Exportar codigo"/>
+            <Button x:Name="BtnImport" Style="{StaticResource Base}" Content="Importar codigo"/>
+            <Button x:Name="BtnClean" Style="{StaticResource Base}" Content="Limpiar basura"/>
+          </WrapPanel>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Reparaciones">
+        <Grid Background="#0A0810" Margin="0,10,0,0">
+          <StackPanel Margin="2">
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,6"><Border Background="#8B5CF6" Width="3" Height="16" Margin="0,0,8,0"/><TextBlock Text="BASICAS" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/></StackPanel>
+            <WrapPanel>
+              <Button x:Name="BtnClean2" Style="{StaticResource Base}" Content="Limpiar basura"/>
+              <Button x:Name="BtnFlushDns" Style="{StaticResource Base}" Content="Vaciar cache DNS"/>
+            </WrapPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,14,0,6"><Border Background="#BD9140" Width="3" Height="16" Margin="0,0,8,0"/><TextBlock Text="AVANZADAS" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/></StackPanel>
+            <WrapPanel>
+              <Button x:Name="BtnSFC" Style="{StaticResource Base}" Content="SFC (reparar archivos)"/>
+              <Button x:Name="BtnDISM" Style="{StaticResource Base}" Content="DISM RestoreHealth"/>
+              <Button x:Name="BtnNet" Style="{StaticResource Base}" Content="Reset de red completo"/>
+              <Button x:Name="BtnWU" Style="{StaticResource Base}" Content="Reparar Windows Update"/>
+            </WrapPanel>
+            <TextBlock Text="Cada una abre su ventana con el progreso." Foreground="#8A83A0" FontSize="12" Margin="0,8,0,0"/>
+          </StackPanel>
+        </Grid>
+      </TabItem>
+    </TabControl>
+  </Grid>
+</Window>
