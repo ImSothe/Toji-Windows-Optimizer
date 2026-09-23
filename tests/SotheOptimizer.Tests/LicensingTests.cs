@@ -106,6 +106,7 @@ namespace Sothe.Tests
             public ProviderResult Next = new ProviderResult { Outcome = ProviderOutcome.Valid };
             public ProviderResult Trial = new ProviderResult { Outcome = ProviderOutcome.Valid, IsTrial = true, Key = "TRIAL-KEY-0001" };
             public string Name => "Fake";
+            public bool SupportsSelfTrial => true;
             public Task<ProviderResult> ActivateAsync(string key, string fp, CancellationToken ct = default) => Task.FromResult(Next);
             public Task<ProviderResult> ValidateAsync(string key, string fp, CancellationToken ct = default) => Task.FromResult(Next);
             public Task<ProviderResult> StartTrialAsync(string fp, CancellationToken ct = default) => Task.FromResult(Trial);
@@ -210,16 +211,17 @@ namespace Sothe.Tests
         private static HttpResponseMessage Json(int status, string json) =>
             new HttpResponseMessage((HttpStatusCode)status) { Content = new StringContent(json, Encoding.UTF8, "application/vnd.api+json") };
 
-        private static string Validation(bool valid, string code, string expiry = null, bool trial = false) =>
+        private static string Validation(bool valid, string code, string expiry = null, bool trial = false, string policy = "pol-pro") =>
             "{\"meta\":{\"valid\":" + (valid ? "true" : "false") + ",\"code\":\"" + code + "\",\"detail\":\"" + code + "\"}," +
             "\"data\":{\"id\":\"lic-123\",\"type\":\"licenses\",\"attributes\":{\"expiry\":" + (expiry == null ? "null" : "\"" + expiry + "\"") +
-            ",\"metadata\":{\"trial\":" + (trial ? "true" : "false") + "}}}}";
+            ",\"metadata\":{\"trial\":" + (trial ? "true" : "false") + "}}," +
+            "\"relationships\":{\"policy\":{\"data\":{\"type\":\"policies\",\"id\":\"" + policy + "\"}}}}}";
 
         [Fact]
         public async Task ValidaConHuella()
         {
             var h = new Fake { Respond = (r, b) => Json(200, Validation(true, "VALID")) };
-            var r = await new KeygenLicenseProvider("acct", "https://w.test", h).ValidateAsync("KEY-1", "FP1");
+            var r = await new KeygenLicenseProvider("acct", "prod-1", "pol-trial", "https://w.test", h).ValidateAsync("KEY-1", "FP1");
             Assert.Equal(ProviderOutcome.Valid, r.Outcome);
             var call = Assert.Single(h.Calls);
             Assert.Equal("/v1/accounts/acct/licenses/actions/validate-key", call.path);
@@ -235,7 +237,7 @@ namespace Sothe.Tests
         public async Task CodigosDeKeygen(string code, ProviderOutcome expected)
         {
             var h = new Fake { Respond = (r, b) => Json(200, Validation(false, code)) };
-            Assert.Equal(expected, (await new KeygenLicenseProvider("acct", "https://w.test", h).ValidateAsync("KEY-1", "FP1")).Outcome);
+            Assert.Equal(expected, (await new KeygenLicenseProvider("acct", "prod-1", "pol-trial", "https://w.test", h).ValidateAsync("KEY-1", "FP1")).Outcome);
         }
 
         [Fact]
@@ -246,7 +248,7 @@ namespace Sothe.Tests
             h.Respond = (r, b) => r.RequestUri.AbsolutePath.EndsWith("/machines")
                 ? Json(201, "{\"data\":{\"id\":\"m-1\",\"type\":\"machines\"}}")
                 : Json(200, ++validations == 1 ? Validation(false, "NO_MACHINE") : Validation(true, "VALID"));
-            var r = await new KeygenLicenseProvider("acct", "https://w.test", h).ActivateAsync("KEY-1", "FP1");
+            var r = await new KeygenLicenseProvider("acct", "prod-1", "pol-trial", "https://w.test", h).ActivateAsync("KEY-1", "FP1");
             Assert.Equal(ProviderOutcome.Valid, r.Outcome);
             var machine = Assert.Single(h.Calls, c => c.path.EndsWith("/machines"));
             Assert.Equal("License KEY-1", machine.auth);
@@ -261,14 +263,14 @@ namespace Sothe.Tests
             h.Respond = (r, b) => r.RequestUri.AbsolutePath.EndsWith("/machines")
                 ? Json(422, "{\"errors\":[{\"code\":\"MACHINE_LIMIT_EXCEEDED\"}]}")
                 : Json(200, Validation(false, "NO_MACHINE"));
-            Assert.Equal(ProviderOutcome.TooManyMachines, (await new KeygenLicenseProvider("acct", "https://w.test", h).ActivateAsync("KEY-1", "FP1")).Outcome);
+            Assert.Equal(ProviderOutcome.TooManyMachines, (await new KeygenLicenseProvider("acct", "prod-1", "pol-trial", "https://w.test", h).ActivateAsync("KEY-1", "FP1")).Outcome);
         }
 
         [Fact]
         public async Task Prueba_ViaWorker()
         {
             var h = new Fake { Respond = (r, b) => Json(200, "{\"key\":\"TRIAL-ABC\",\"expiry\":\"2026-09-30T12:00:00Z\"}") };
-            var r = await new KeygenLicenseProvider("acct", "https://w.test/", h).StartTrialAsync("FP1");
+            var r = await new KeygenLicenseProvider("acct", "prod-1", "pol-trial", "https://w.test/", h).StartTrialAsync("FP1");
             Assert.Equal(ProviderOutcome.Valid, r.Outcome);
             Assert.True(r.IsTrial);
             Assert.Equal("TRIAL-ABC", r.Key);
@@ -280,14 +282,14 @@ namespace Sothe.Tests
         public async Task Prueba_YaUsada()
         {
             var h = new Fake { Respond = (r, b) => Json(409, "{\"error\":\"TRIAL_USED\"}") };
-            Assert.Equal(ProviderOutcome.TrialAlreadyUsed, (await new KeygenLicenseProvider("acct", "https://w.test", h).StartTrialAsync("FP1")).Outcome);
+            Assert.Equal(ProviderOutcome.TrialAlreadyUsed, (await new KeygenLicenseProvider("acct", "prod-1", "pol-trial", "https://w.test", h).StartTrialAsync("FP1")).Outcome);
         }
 
         [Fact]
         public async Task SinRed_EsErrorDeRed()
         {
             var h = new Fake { Respond = (r, b) => throw new HttpRequestException("sin conexión") };
-            Assert.Equal(ProviderOutcome.NetworkError, (await new KeygenLicenseProvider("acct", "https://w.test", h).ValidateAsync("KEY-1", "FP1")).Outcome);
+            Assert.Equal(ProviderOutcome.NetworkError, (await new KeygenLicenseProvider("acct", "prod-1", "pol-trial", "https://w.test", h).ValidateAsync("KEY-1", "FP1")).Outcome);
         }
     }
 }

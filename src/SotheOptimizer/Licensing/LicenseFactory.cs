@@ -13,14 +13,17 @@ namespace Sothe.Licensing
             catch { fingerprint = "UNIDENTIFIED"; }
 
             ILicenseProvider provider;
-            if (LicenseConfig.IsConfigured)
-                provider = new KeygenLicenseProvider(LicenseConfig.KeygenAccountId, LicenseConfig.TrialWorkerUrl);
-            else
 #if DEBUG
+            // Solo en Debug: SOTHE_LICENSE_DEMO=1 usa el proveedor DEMO aunque Keygen este configurado
+            if (!LicenseConfig.IsConfigured || System.Environment.GetEnvironmentVariable("SOTHE_LICENSE_DEMO") == "1")
                 provider = new DemoLicenseProvider(root);
-#else
-                provider = new UnconfiguredLicenseProvider();
+            else
 #endif
+            if (LicenseConfig.IsConfigured)
+                provider = new KeygenLicenseProvider(LicenseConfig.KeygenAccountId, LicenseConfig.KeygenProductId,
+                    LicenseConfig.KeygenTrialPolicyId, LicenseConfig.TrialWorkerUrl);
+            else
+                provider = new UnconfiguredLicenseProvider();
             return new LicenseService(provider, new LicenseStore(Path.Combine(root, "license.dat"), new DpapiProtector()), fingerprint);
         }
     }

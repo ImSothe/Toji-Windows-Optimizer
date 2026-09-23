@@ -11,6 +11,7 @@ namespace Sothe.Licensing
     {
         private static readonly ProviderResult NotConfigured = new ProviderResult { Outcome = ProviderOutcome.NotConfigured };
         public string Name => "Sin configurar";
+        public bool SupportsSelfTrial => false;
         public Task<ProviderResult> ActivateAsync(string key, string fingerprint, CancellationToken ct = default) => Task.FromResult(NotConfigured);
         public Task<ProviderResult> ValidateAsync(string key, string fingerprint, CancellationToken ct = default) => Task.FromResult(NotConfigured);
         public Task<ProviderResult> StartTrialAsync(string fingerprint, CancellationToken ct = default) => Task.FromResult(NotConfigured);
@@ -18,21 +19,37 @@ namespace Sothe.Licensing
 
 #if DEBUG
     // SOLO en compilaciones Debug: simula Keygen para probar el flujo completo sin cuenta.
-    //   SOTHE-DEMO-PRO... -> licencia permanente   |   SOTHE-DEMO-REVOKED -> revocada   |   otra -> no existe
-    //   La prueba se registra por huella en demo-trials.txt (una por PC, como UNIQUE_PER_POLICY)
+    //   SOTHE-DEMO-PRO...     -> licencia permanente        |   SOTHE-DEMO-REVOKED -> revocada
+    //   SOTHE-DEMO-PRUEBA     -> clave de prueba de 3 meses, contados desde la primera activacion en este PC
+    //   SOTHE-DEMO-CADUCADA   -> clave de prueba ya caducada |   otra -> no existe
+    //   Las pruebas se registran por huella en demo-trials.txt (una por PC, como UNIQUE_PER_POLICY)
     public sealed class DemoLicenseProvider : ILicenseProvider
     {
         private readonly string _trialsFile;
         public string Name => "Demo";
+        public bool SupportsSelfTrial => false;   // como en produccion: la prueba es una clave
         public DemoLicenseProvider(string root) { _trialsFile = Path.Combine(root, "demo-trials.txt"); }
 
-        public Task<ProviderResult> ActivateAsync(string key, string fingerprint, CancellationToken ct = default) => ValidateAsync(key, fingerprint, ct);
+        public async Task<ProviderResult> ActivateAsync(string key, string fingerprint, CancellationToken ct = default)
+        {
+            if ((key ?? "").Trim().ToUpperInvariant() == "SOTHE-DEMO-PRUEBA" && TrialStart(fingerprint) == null) RegisterTrial(fingerprint);
+            return await ValidateAsync(key, fingerprint, ct);
+        }
 
         public async Task<ProviderResult> ValidateAsync(string key, string fingerprint, CancellationToken ct = default)
         {
             await Task.Delay(400, ct);   // simula la red
             key = (key ?? "").Trim().ToUpperInvariant();
             if (key == "SOTHE-DEMO-REVOKED") return new ProviderResult { Outcome = ProviderOutcome.Suspended, Key = key };
+            if (key == "SOTHE-DEMO-CADUCADA")
+                return new ProviderResult { Outcome = ProviderOutcome.Expired, Key = key, IsTrial = true, ExpiresAtUtc = DateTime.UtcNow.AddDays(-1) };
+            if (key == "SOTHE-DEMO-PRUEBA")
+            {
+                var start = TrialStart(fingerprint);
+                if (start == null) return new ProviderResult { Outcome = ProviderOutcome.NotActivatedHere, Key = key, IsTrial = true };
+                var exp = start.Value.AddMonths(LicenseConfig.KeyTrialMonths);
+                return new ProviderResult { Outcome = exp > DateTime.UtcNow ? ProviderOutcome.Valid : ProviderOutcome.Expired, Key = key, IsTrial = true, ExpiresAtUtc = exp };
+            }
             if (key.StartsWith("SOTHE-DEMO-TRIAL-"))
             {
                 var start = TrialStart(fingerprint);
@@ -48,14 +65,20 @@ namespace Sothe.Licensing
         {
             await Task.Delay(400, ct);
             if (TrialStart(fingerprint) != null) return new ProviderResult { Outcome = ProviderOutcome.TrialAlreadyUsed };
-            var now = DateTime.UtcNow;
-            Directory.CreateDirectory(Path.GetDirectoryName(_trialsFile));
-            File.AppendAllText(_trialsFile, fingerprint + "|" + now.ToString("o") + Environment.NewLine);
+            var now = RegisterTrial(fingerprint);
             return new ProviderResult
             {
                 Outcome = ProviderOutcome.Valid, IsTrial = true, ExpiresAtUtc = now.AddDays(LicenseConfig.TrialDays),
                 Key = "SOTHE-DEMO-TRIAL-" + fingerprint.Substring(0, Math.Min(8, fingerprint.Length))
             };
+        }
+
+        private DateTime RegisterTrial(string fingerprint)
+        {
+            var now = DateTime.UtcNow;
+            Directory.CreateDirectory(Path.GetDirectoryName(_trialsFile));
+            File.AppendAllText(_trialsFile, fingerprint + "|" + now.ToString("o") + Environment.NewLine);
+            return now;
         }
 
         private DateTime? TrialStart(string fingerprint)

@@ -73,6 +73,11 @@ sequenceDiagram
 
 ### 4.2 Prueba gratuita ligada al PC
 
+> **Implementado (versión actual):** la prueba es una **clave de 3 meses** de la política de prueba
+> (`LicenseConfig.KeygenTrialPolicyId`) que el usuario pega en la app. Se activa en su PC con la propia clave
+> (node-locked, 1 máquina) y `UNIQUE_PER_POLICY` impide activar una segunda clave de prueba en el mismo PC.
+> El Worker de abajo queda como opción para pruebas de un clic (`LicenseConfig.TrialWorkerUrl`).
+
 1. En el primer arranque, o al pulsar "Empezar prueba de 7 días", la app envía `POST /trial { fingerprint }` al Worker.
 2. El Worker, con límite de peticiones por IP, crea una licencia de la política **Trial** (duración 7 días, `maxMachines = 1`, huella `UNIQUE_PER_POLICY`) y activa la máquina.
 3. Si esa huella ya consumió una prueba, Keygen rechaza la activación y la app muestra "Ya usaste la prueba en este PC" junto a **Comprar**.

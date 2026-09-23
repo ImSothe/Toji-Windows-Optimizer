@@ -66,9 +66,24 @@ Los perfiles que crea el usuario se guardan en `%ProgramData%\SotheOptimizer\pro
 `dotnet run --project tools/IconGen -- src/SotheOptimizer/Themes/SotheTheme.xaml src/SotheOptimizer/Assets/icon.ico`
 
 ## Licencias
-- Configura `Licensing/LicenseConfig.cs` (cuenta de Keygen, Worker de pruebas y enlace de compra).
-- Sin configurar: en **Debug** se usa el modo DEMO (claves `SOTHE-DEMO-PRO`, `SOTHE-DEMO-REVOKED`, prueba local de 7 dias);
-  en **Release** los ajustes PRO y Guardar perfil quedan bloqueados (nunca gratis por despiste).
+- `Licensing/LicenseConfig.cs` ya tiene la cuenta, el producto y la politica de prueba de Keygen (no son secretos).
+- **Node-locked:** cada clave se valida con la huella del PC (`validate-key` con `scope.fingerprint` + `scope.product`)
+  y se activa en la primera maquina (`POST /machines` con `Authorization: License <clave>`). Una clave = un PC.
+- **Clave de prueba de 3 meses:** el usuario la pega en el campo del dialogo de licencia (pulsa la insignia
+  "SIN LICENCIA" o salta el muro de pago). Las licencias de la politica de prueba salen como PRUEBA con los dias
+  restantes; las de cualquier otra politica del producto, como PRO.
+- **Al arrancar** se valida online en segundo plano. Sin red se usa la cache cifrada (la prueba vale hasta su fecha;
+  una licencia PRO, 14 dias sin validar). Si la clave caduca, se suspende o deja de estar activa en este PC, los ajustes
+  PRO se bloquean y la app lo avisa una sola vez. Lo gratuito y revertir siguen funcionando.
+- Politica de prueba en el panel de Keygen (compruebalo antes de repartir claves):
+  - Duration: 3 meses (7776000 s) y Expiration strategy: restringir acceso al caducar.
+  - Max machines: 1 y Floating: desactivado (node-locked).
+  - Authentication strategy: LICENSE (o MIXED). Sin esto la app no puede activar la maquina con la clave (error 403).
+  - Machine uniqueness: UNIQUE_PER_POLICY, para que cada PC solo pueda activar una clave de prueba.
+- **Debug:** `SOTHE_LICENSE_DEMO=1` usa el proveedor DEMO en vez de Keygen: claves `SOTHE-DEMO-PRUEBA` (3 meses),
+  `SOTHE-DEMO-CADUCADA`, `SOTHE-DEMO-PRO` y `SOTHE-DEMO-REVOKED`.
+- **Pruebas contra Keygen real** (no activan maquinas, no gastan claves):
+  `$env:SOTHE_KEYGEN_LIVE=1; $env:SOTHE_KEYGEN_TEST_KEY="<una clave de prueba>"; dotnet test tests/SotheOptimizer.Tests`
 - **Paywall inteligente:** cada tweak de `data\tweaks.json` lleva `"isPro"`. Sin licencia, APLICAR aplica lo gratuito
   (privacidad, telemetria, interfaz...) y, si hay algun ajuste PRO nuevo marcado, se para y abre el muro de pago.
   Sin la propiedad el ajuste es gratis. Como `data\` tiene que ir firmado, nadie puede cambiar precios editando el
@@ -109,6 +124,6 @@ data\*.json        tweaks, apps, features, perfiles (editables / OTA)
 ```
 
 ## Pendiente
-- Crear la cuenta de Keygen, el Worker (/trial, /webhooks, /transfer) y el producto de Lemon Squeezy; rellenar LicenseConfig.
+- Enlace de compra (`LicenseConfig.CheckoutUrl`) y, si se quieren pruebas de un clic sin clave, el Worker (`TrialWorkerUrl`).
 - Generar las claves OTA (`OtaSigner keygen ... --source`) y publicar los JSON firmados en una URL publica.
 - Firma de codigo del .exe (SmartScreen).

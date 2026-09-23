@@ -8,21 +8,28 @@ using System.Threading.Tasks;
 
 namespace Sothe.Licensing
 {
-    // Cliente de la API de Keygen (validar clave con huella y activar maquina) y del Worker de pruebas.
-    // Validar y activar con la propia clave no necesita secretos: el token de administrador vive solo en el Worker.
+    // Cliente de la API de Keygen: validar la clave con la huella del PC y activar la maquina (node-locked: la politica
+    // limita cada clave a 1 maquina). Todo con la propia clave, sin secretos: el token de administrador nunca va en la app.
+    // Requisitos de la politica en Keygen: Max machines = 1, Floating = no, Authentication strategy = LICENSE (o MIXED)
+    // para poder activar con "Authorization: License <clave>".
     public sealed class KeygenLicenseProvider : ILicenseProvider
     {
         private const string JsonApi = "application/vnd.api+json";
         private readonly string _accountUrl;
+        private readonly string _productId;
+        private readonly string _trialPolicyId;
         private readonly string _workerUrl;
         private readonly HttpClient _http;
 
         public string Name => "Keygen";
+        public bool SupportsSelfTrial => _workerUrl.Length > 0;
 
-        public KeygenLicenseProvider(string accountId, string trialWorkerUrl, HttpMessageHandler handler = null)
+        public KeygenLicenseProvider(string accountId, string productId, string trialPolicyId, string trialWorkerUrl = "", HttpMessageHandler handler = null)
         {
             _accountUrl = "https://api.keygen.sh/v1/accounts/" + accountId + "/";
-            _workerUrl = (trialWorkerUrl ?? "").TrimEnd('/') + "/";
+            _productId = productId ?? "";
+            _trialPolicyId = trialPolicyId ?? "";
+            _workerUrl = string.IsNullOrWhiteSpace(trialWorkerUrl) ? "" : trialWorkerUrl.TrimEnd('/') + "/";
             _http = handler != null ? new HttpClient(handler, false) : new HttpClient();
             _http.Timeout = TimeSpan.FromSeconds(20);
             _http.DefaultRequestHeaders.UserAgent.ParseAdd("Sothe-Optimizer");
@@ -33,10 +40,10 @@ namespace Sothe.Licensing
 
         public async Task<ProviderResult> ActivateAsync(string key, string fingerprint, CancellationToken ct = default)
         {
-            var (result, licenseId, code) = await ValidateRawAsync(key, fingerprint, ct);
+            var (result, licenseId) = await ValidateRawAsync(key, fingerprint, ct);
             if (result.Outcome != ProviderOutcome.NotActivatedHere || licenseId == null) return result;
 
-            // Licencia valida pero sin esta maquina: activarla (limite y unicidad los aplica la politica de Keygen)
+            // Clave valida pero sin esta maquina: se activa. El limite de 1 PC y la unicidad los aplica la politica de Keygen
             var body = new
             {
                 data = new
@@ -51,13 +58,24 @@ namespace Sothe.Licensing
                 using var req = JsonRequest(HttpMethod.Post, _accountUrl + "machines", body);
                 req.Headers.Authorization = new AuthenticationHeaderValue("License", key);
                 using var resp = await _http.SendAsync(req, ct);
-                if ((int)resp.StatusCode == 422)
+                int status = (int)resp.StatusCode;
+                if (status == 422)
                 {
-                    var err = await resp.Content.ReadAsStringAsync(ct);
-                    return new ProviderResult { Outcome = ProviderOutcome.TooManyMachines, Message = err };
+                    var code = FirstErrorCode(await resp.Content.ReadAsStringAsync(ct));
+                    // FINGERPRINT_TAKEN: este PC ya esta registrado en otra clave de la misma politica (una prueba por PC)
+                    if (code == "FINGERPRINT_TAKEN")
+                        return result.IsTrial
+                            ? new ProviderResult { Outcome = ProviderOutcome.TrialAlreadyUsed }
+                            : new ProviderResult { Outcome = ProviderOutcome.Error, Message = "Este PC ya está registrado con otra licencia." };
+                    return new ProviderResult { Outcome = ProviderOutcome.TooManyMachines, Message = code };
                 }
+                if (status == 401 || status == 403)
+                    return new ProviderResult { Outcome = ProviderOutcome.Error,
+                        Message = $"El servidor de licencias no permite activar con esta clave ({status}). Contacta con soporte." };
+                if (status >= 500)
+                    return new ProviderResult { Outcome = ProviderOutcome.NetworkError, Message = $"Servidor de licencias no disponible ({status})." };
                 if (!resp.IsSuccessStatusCode)
-                    return new ProviderResult { Outcome = ProviderOutcome.Error, Message = $"Activación rechazada ({(int)resp.StatusCode})." };
+                    return new ProviderResult { Outcome = ProviderOutcome.Error, Message = $"Activación rechazada ({status})." };
             }
             catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException && !ct.IsCancellationRequested)
             {
@@ -66,8 +84,10 @@ namespace Sothe.Licensing
             return (await ValidateRawAsync(key, fingerprint, ct)).result;
         }
 
+        // Prueba de un clic via Worker (opcional). Sin Worker, las pruebas son claves de la politica de prueba
         public async Task<ProviderResult> StartTrialAsync(string fingerprint, CancellationToken ct = default)
         {
+            if (!SupportsSelfTrial) return new ProviderResult { Outcome = ProviderOutcome.NotConfigured };
             try
             {
                 using var req = new HttpRequestMessage(HttpMethod.Post, _workerUrl + "trial")
@@ -93,22 +113,23 @@ namespace Sothe.Licensing
             }
         }
 
-        // POST licenses/actions/validate-key con scope de huella: comprueba clave, caducidad, suspension y maquina
-        private async Task<(ProviderResult result, string licenseId, string code)> ValidateRawAsync(string key, string fingerprint, CancellationToken ct)
+        // POST licenses/actions/validate-key acotado a este producto y a la huella de este PC: comprueba que la clave
+        // existe y es de Sothe Optimizer, caducidad, suspension y que la maquina activada es esta
+        private async Task<(ProviderResult result, string licenseId)> ValidateRawAsync(string key, string fingerprint, CancellationToken ct)
         {
             try
             {
-                var body = new { meta = new { key, scope = new { fingerprint } } };
-                using var req = JsonRequest(HttpMethod.Post, _accountUrl + "licenses/actions/validate-key", body);
+                object scope = _productId.Length > 0 ? new { fingerprint, product = _productId } : new { fingerprint };
+                using var req = JsonRequest(HttpMethod.Post, _accountUrl + "licenses/actions/validate-key", new { meta = new { key, scope } });
                 using var resp = await _http.SendAsync(req, ct);
                 var text = await resp.Content.ReadAsStringAsync(ct);
                 if ((int)resp.StatusCode >= 500)
-                    return (new ProviderResult { Outcome = ProviderOutcome.NetworkError, Message = $"Servidor de licencias no disponible ({(int)resp.StatusCode})." }, null, null);
+                    return (new ProviderResult { Outcome = ProviderOutcome.NetworkError, Message = $"Servidor de licencias no disponible ({(int)resp.StatusCode})." }, null);
 
                 using var doc = JsonDocument.Parse(text);
                 var root = doc.RootElement;
                 if (!root.TryGetProperty("meta", out var meta))
-                    return (new ProviderResult { Outcome = ProviderOutcome.Error, Message = "Respuesta de licencias no válida." }, null, null);
+                    return (new ProviderResult { Outcome = ProviderOutcome.Error, Message = "Respuesta de licencias no válida." }, null);
                 var code = meta.TryGetProperty("code", out var c) ? c.GetString() : null;
                 bool valid = meta.TryGetProperty("valid", out var v) && v.ValueKind == JsonValueKind.True;
 
@@ -119,10 +140,12 @@ namespace Sothe.Licensing
                     if (data.TryGetProperty("attributes", out var attrs))
                     {
                         expiry = ReadDate(attrs, "expiry");
-                        // El Worker marca las licencias de prueba con metadata.trial = true
+                        // Pruebas del Worker: metadata.trial = true
                         trial = attrs.TryGetProperty("metadata", out var md) && md.ValueKind == JsonValueKind.Object
                                 && md.TryGetProperty("trial", out var t) && t.ValueKind == JsonValueKind.True;
                     }
+                    // Claves de prueba de 3 meses: su politica es la de prueba
+                    trial |= _trialPolicyId.Length > 0 && string.Equals(PolicyId(data), _trialPolicyId, StringComparison.OrdinalIgnoreCase);
                 }
 
                 var outcome = valid ? ProviderOutcome.Valid : code switch
@@ -130,21 +153,42 @@ namespace Sothe.Licensing
                     "EXPIRED" => ProviderOutcome.Expired,
                     "SUSPENDED" or "BANNED" => ProviderOutcome.Suspended,
                     "NOT_FOUND" => ProviderOutcome.NotFound,
+                    "PRODUCT_SCOPE_MISMATCH" or "POLICY_SCOPE_MISMATCH" => ProviderOutcome.WrongProduct,
                     "NO_MACHINE" or "NO_MACHINES" or "FINGERPRINT_SCOPE_MISMATCH" => ProviderOutcome.NotActivatedHere,
                     "TOO_MANY_MACHINES" => ProviderOutcome.TooManyMachines,
                     _ => ProviderOutcome.Error
                 };
                 var detail = meta.TryGetProperty("detail", out var d) ? d.GetString() : code;
-                return (new ProviderResult { Outcome = outcome, Key = key, IsTrial = trial, ExpiresAtUtc = expiry, Message = detail }, id, code);
+                return (new ProviderResult { Outcome = outcome, Key = key, IsTrial = trial, ExpiresAtUtc = expiry, Message = detail }, id);
             }
             catch (Exception ex) when (ex is HttpRequestException || ex is TaskCanceledException && !ct.IsCancellationRequested)
             {
-                return (new ProviderResult { Outcome = ProviderOutcome.NetworkError, Message = ex.Message }, null, null);
+                return (new ProviderResult { Outcome = ProviderOutcome.NetworkError, Message = ex.Message }, null);
             }
             catch (JsonException)
             {
-                return (new ProviderResult { Outcome = ProviderOutcome.Error, Message = "Respuesta de licencias no válida." }, null, null);
+                return (new ProviderResult { Outcome = ProviderOutcome.Error, Message = "Respuesta de licencias no válida." }, null);
             }
+        }
+
+        // data.relationships.policy.data.id de una licencia
+        private static string PolicyId(JsonElement license) =>
+            license.TryGetProperty("relationships", out var rel) && rel.TryGetProperty("policy", out var pol)
+            && pol.TryGetProperty("data", out var pd) && pd.ValueKind == JsonValueKind.Object && pd.TryGetProperty("id", out var pid)
+                ? pid.GetString() : null;
+
+        // errors[0].code de una respuesta de error JSON:API
+        private static string FirstErrorCode(string json)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("errors", out var errs) && errs.ValueKind == JsonValueKind.Array)
+                    foreach (var e in errs.EnumerateArray())
+                        if (e.TryGetProperty("code", out var c) && c.ValueKind == JsonValueKind.String) return c.GetString();
+            }
+            catch (JsonException) { }
+            return null;
         }
 
         private static HttpRequestMessage JsonRequest(HttpMethod method, string url, object body)

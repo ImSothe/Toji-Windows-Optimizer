@@ -36,9 +36,11 @@ namespace Sothe.Licensing
         public DateTime? ExpiresAtUtc { get; set; }
         public DateTime LastValidatedUtc { get; set; }
         public DateTime LastSeenUtc { get; set; }       // para detectar un reloj atrasado
+        public string PendingNotice { get; set; }       // aviso pendiente de mostrar (licencia perdida en este PC)
+        public string NoticeShown { get; set; }         // ultimo bloqueo ya avisado: cada caducidad se avisa una sola vez
     }
 
-    public enum ProviderOutcome { Valid, Expired, Suspended, NotFound, NotActivatedHere, TooManyMachines, TrialAlreadyUsed, NotConfigured, NetworkError, Error }
+    public enum ProviderOutcome { Valid, Expired, Suspended, NotFound, WrongProduct, NotActivatedHere, TooManyMachines, TrialAlreadyUsed, NotConfigured, NetworkError, Error }
 
     public sealed class ProviderResult
     {
@@ -53,6 +55,7 @@ namespace Sothe.Licensing
     public interface ILicenseProvider
     {
         string Name { get; }
+        bool SupportsSelfTrial { get; }   // prueba de un clic sin clave (Worker); si no, la prueba es una clave
         Task<ProviderResult> ActivateAsync(string key, string fingerprint, CancellationToken ct = default);
         Task<ProviderResult> ValidateAsync(string key, string fingerprint, CancellationToken ct = default);
         Task<ProviderResult> StartTrialAsync(string fingerprint, CancellationToken ct = default);

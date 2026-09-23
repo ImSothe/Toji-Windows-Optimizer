@@ -69,13 +69,13 @@
         </Border>
 
         <!-- Activar clave -->
-        <TextBlock Text="¿YA TIENES LICENCIA?" FontSize="12.5" FontWeight="Bold" Foreground="{StaticResource TextDim}" Margin="0,22,0,8"/>
+        <TextBlock Text="¿TIENES UNA CLAVE? · PRUEBA DE 3 MESES O LICENCIA PRO" FontSize="12.5" FontWeight="Bold" Foreground="{StaticResource TextDim}" Margin="0,22,0,8"/>
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
           </Grid.ColumnDefinitions>
-          <TextBox x:Name="KeyBox" Tag="Pega aquí tu clave" FontFamily="Cascadia Mono, Consolas" Margin="0,0,10,0"/>
+          <TextBox x:Name="KeyBox" Tag="Pega aquí tu clave (se vincula a este PC)" FontFamily="Cascadia Mono, Consolas" Margin="0,0,10,0"/>
           <Button x:Name="BtnActivate" Grid.Column="1" Style="{StaticResource Btn}" Content="Activar" Margin="0" MinWidth="120" IsDefault="True"/>
         </Grid>
         <TextBlock x:Name="ErrorText" Foreground="{StaticResource Extreme}" FontSize="13.5" Margin="2,10,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>

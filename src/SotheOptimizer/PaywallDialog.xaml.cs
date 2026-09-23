@@ -17,7 +17,8 @@ namespace Sothe
         private readonly LicenseService _lic;
         private bool _busy;
 
-        private PaywallDialog(Window owner, LicenseService lic, string action, IReadOnlyList<string> proTweaks)
+        // activate = abierto desde la insignia de licencia: el foco esta en introducir la clave (p. ej. la de prueba de 3 meses)
+        private PaywallDialog(Window owner, LicenseService lic, string action, IReadOnlyList<string> proTweaks, bool activate = false)
         {
             InitializeComponent();
             _lic = lic;
@@ -29,13 +30,19 @@ namespace Sothe
             if (s.State == LicenseState.TrialExpired) TitleText.Text = "Tu prueba ha terminado";
             if (s.State == LicenseState.Revoked) TitleText.Text = "Licencia desactivada";
             if (s.State == LicenseState.ValidationRequired) TitleText.Text = "Valida tu licencia";
+            if (activate && s.State == LicenseState.Unlicensed)
+            {
+                TitleText.Text = "Activa Sothe Optimizer";
+                ReasonText.Text = (string.IsNullOrEmpty(s.Message) ? "" : s.Message + " ") +
+                    $"Introduce tu clave de prueba de {LicenseConfig.KeyTrialMonths} meses o tu licencia PRO. Cada clave vale para un solo PC.";
+            }
 
             bool validate = s.State == LicenseState.ValidationRequired && lic.HasKey;
             BtnRetry.Visibility = validate ? Visibility.Visible : Visibility.Collapsed;
-            BtnTrial.Visibility = !validate && s.TrialAvailable ? Visibility.Visible : Visibility.Collapsed;
+            BtnTrial.Visibility = !validate && s.TrialAvailable && lic.CanStartTrial ? Visibility.Visible : Visibility.Collapsed;
             if (BtnTrial.Visibility != Visibility.Visible && !validate) Grid.SetColumnSpan(BtnBuy, 2);
             if (lic.ProviderName == "Demo")
-                FootText.Text = "MODO DEMO (Debug): prueba con la clave SOTHE-DEMO-PRO o SOTHE-DEMO-REVOKED. Revertir cambios es siempre gratis.";
+                FootText.Text = "MODO DEMO (Debug): claves SOTHE-DEMO-PRUEBA (3 meses), SOTHE-DEMO-CADUCADA, SOTHE-DEMO-PRO o SOTHE-DEMO-REVOKED.";
             if (!string.IsNullOrEmpty(LicenseConfig.SupportEmail))
                 FootText.Text += "  ·  Soporte: " + LicenseConfig.SupportEmail;
 
@@ -74,7 +81,7 @@ namespace Sothe
             return lic.Status.CanModify;
         }
 
-        public static void Show(Window owner, LicenseService lic) => new PaywallDialog(owner, lic, "aplicar ajustes PRO", null).ShowDialog();
+        public static void Show(Window owner, LicenseService lic) => new PaywallDialog(owner, lic, "aplicar ajustes PRO", null, activate: true).ShowDialog();
 
         public const string ProSelectedMessage = "Has seleccionado ajustes avanzados. Necesitas una licencia Sothe PRO para aplicarlos.";
 

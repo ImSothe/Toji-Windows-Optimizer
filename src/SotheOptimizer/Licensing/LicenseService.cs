@@ -16,6 +16,7 @@ namespace Sothe.Licensing
         public string ProviderName => _provider.Name;
         public LicenseStatus Status { get; private set; }
         public bool HasKey => !string.IsNullOrEmpty(_cache?.Key);
+        public bool CanStartTrial => _provider.SupportsSelfTrial;
         public event Action<LicenseStatus> StatusChanged;
 
         public LicenseService(ILicenseProvider provider, LicenseStore store, string fingerprint, Func<DateTime> utcNow = null)
@@ -46,7 +47,10 @@ namespace Sothe.Licensing
 
             if (c.IsTrial)
             {
-                if (c.ExpiresAtUtc == null || c.ExpiresAtUtc <= now)
+                if (c.ExpiresAtUtc == null)
+                    return new LicenseStatus { State = LicenseState.TrialExpired, MaskedKey = masked,
+                        Message = "La clave de prueba no tiene fecha de caducidad: la política de prueba en Keygen necesita una duración." };
+                if (c.ExpiresAtUtc <= now)
                     return new LicenseStatus { State = LicenseState.TrialExpired, MaskedKey = masked, ExpiresAtUtc = c.ExpiresAtUtc, Message = "Tu prueba gratuita ha terminado." };
                 return new LicenseStatus
                 {
@@ -91,7 +95,7 @@ namespace Sothe.Licensing
                 LastValidatedUtc = now, LastSeenUtc = now, TrialUsed = (_cache?.TrialUsed ?? false) || r.IsTrial
             };
             Save();
-            return (Status.CanModify, Status.CanModify ? null : Describe(r));
+            return (Status.CanModify, Status.CanModify ? null : Status.Message ?? Describe(r));
         }
 
         public async Task<(bool ok, string message)> StartTrialAsync(CancellationToken ct = default)
@@ -133,10 +137,16 @@ namespace Sothe.Licensing
                     _cache.Revoked = true;
                     break;
                 case ProviderOutcome.NotFound:
+                case ProviderOutcome.WrongProduct:
                 case ProviderOutcome.NotActivatedHere:
                 case ProviderOutcome.TooManyMachines:
-                    // La clave ya no vale en este PC (borrada o movida a otro equipo): se olvida, pero no la prueba usada
-                    _cache = new LicenseCache { Fingerprint = Fingerprint, TrialUsed = _cache.TrialUsed || _cache.IsTrial, LastSeenUtc = _cache.LastSeenUtc };
+                    // La clave ya no vale en este PC (borrada o movida a otro equipo): se olvida, pero no la prueba usada,
+                    // y se deja un aviso para explicarlo al arrancar
+                    _cache = new LicenseCache
+                    {
+                        Fingerprint = Fingerprint, TrialUsed = _cache.TrialUsed || _cache.IsTrial, LastSeenUtc = _cache.LastSeenUtc,
+                        PendingNotice = $"La licencia {Mask(_cache.Key)} ya no está activa en este PC. {Describe(r)}"
+                    };
                     break;
                 default:
                     return;   // sin red / sin configurar: se mantiene el estado offline
@@ -150,13 +160,47 @@ namespace Sothe.Licensing
             ProviderOutcome.Expired => "Esta licencia ha caducado.",
             ProviderOutcome.Suspended => "Esta licencia está desactivada. Si crees que es un error, contacta con soporte.",
             ProviderOutcome.NotFound => "La clave no existe. Revisa que la has copiado completa.",
+            ProviderOutcome.WrongProduct => "Esta clave no es de Sothe Optimizer.",
             ProviderOutcome.NotActivatedHere => "La licencia no está activada en este equipo.",
             ProviderOutcome.TooManyMachines => "Esta licencia ya está en uso en otro PC. Cada licencia vale para un equipo a la vez.",
-            ProviderOutcome.TrialAlreadyUsed => "Este PC ya usó su prueba gratuita.",
+            ProviderOutcome.TrialAlreadyUsed => "Este PC ya usó su prueba gratuita: cada equipo puede activar una sola clave de prueba.",
             ProviderOutcome.NotConfigured => "Las licencias aún no están configuradas en esta versión de Sothe Optimizer.",
             ProviderOutcome.NetworkError => "No hay conexión con el servidor de licencias. Revisa tu Internet e inténtalo de nuevo.",
             _ => string.IsNullOrEmpty(r.Message) ? "No se pudo completar la operación." : r.Message
         };
+
+        // ---------------- Aviso de bloqueo al arrancar ----------------
+        // Mensaje que la app muestra UNA vez cuando la licencia deja de permitir los ajustes PRO: prueba terminada,
+        // licencia caducada o desactivada, o clave que ya no vale en este PC. null si no hay nada nuevo que avisar.
+        public const string FreeStillWorks = "Los ajustes gratuitos siguen funcionando y revertir cambios es siempre gratis.";
+
+        public string TakeNotice()
+        {
+            if (_cache == null) return null;
+            string msg;
+            if (!string.IsNullOrEmpty(_cache.PendingNotice))
+            {
+                msg = _cache.PendingNotice;
+                _cache.PendingNotice = null;
+            }
+            else
+            {
+                var st = Status;
+                msg = st.State switch
+                {
+                    LicenseState.TrialExpired => (st.Message ?? "Tu prueba gratuita ha terminado.") + " Para seguir usando los ajustes PRO necesitas Sothe PRO.",
+                    LicenseState.Revoked => st.Message,
+                    LicenseState.Unlicensed when HasKey && !string.IsNullOrEmpty(st.Message) => st.Message,
+                    _ => null
+                };
+                if (msg == null) return null;
+                var tag = $"{st.State}|{st.MaskedKey}|{st.ExpiresAtUtc:o}";
+                if (_cache.NoticeShown == tag) return null;
+                _cache.NoticeShown = tag;
+            }
+            Save();
+            return msg + "\n\n" + FreeStillWorks;
+        }
 
         private void Save()
         {

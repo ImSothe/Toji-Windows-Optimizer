@@ -134,7 +134,9 @@ namespace Sothe
                 UpdateItemWidth();
                 if (_loadError != null)
                     SotheDialog.Info(this, "Error al cargar datos", "No se pudieron cargar los datos (tweaks.json).\n\n" + _loadError);
+                // Al arrancar: validacion online de la licencia (sin red se mantiene el estado guardado) y aviso de bloqueo
                 try { await _license.RefreshOnlineAsync(); } catch (Exception ex) { _eng.Log("Licencia: " + ex.Message); }
+                ShowLicenseNotice();
                 await CheckOtaAsync();
             };
 
@@ -683,9 +685,18 @@ namespace Sothe
                 case LicenseState.ValidationRequired: text = "VALIDAR LICENCIA"; accent = R("High"); break;
                 default: text = "SIN LICENCIA"; LicenseBadge.Foreground = R("TextSub"); break;
             }
+            LicenseBadge.ToolTip = st.CanModify ? "Estado de tu licencia" : "Pulsa para introducir tu clave (prueba de 3 meses o licencia PRO)";
             if (accent != null) { LicenseBadge.Foreground = accent; LicenseBadge.BorderBrush = accent; LicenseBadge.Background = Tint(accent, 0x1E); }
             if (_license?.ProviderName == "Demo") text += " · DEMO";
             LicenseBadge.Content = text;
+        }
+
+        // Una sola vez por bloqueo: prueba terminada, licencia caducada o desactivada, o clave que ya no vale en este PC
+        private void ShowLicenseNotice()
+        {
+            var notice = _license.TakeNotice();
+            if (notice != null && SotheDialog.Confirm(this, "Tu licencia", notice, "Introducir clave"))
+                PaywallDialog.Show(this, _license);
         }
 
         private void ShowLicenseInfo()
