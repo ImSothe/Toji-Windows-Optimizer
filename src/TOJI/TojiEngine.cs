@@ -14,7 +14,8 @@ namespace Toji
         public readonly string Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TOJI");
         public readonly string BackupDir;
         public readonly string BaseDir;               // carpeta del .exe (donde estan los JSON)
-        private readonly JsonSerializerOptions _json = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, WriteIndented = true };
+        // camelCase al escribir: mismo formato que los JSON de data\ (y que las versiones PowerShell/web)
+        private readonly JsonSerializerOptions _json = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
         public TojiEngine()
         {
