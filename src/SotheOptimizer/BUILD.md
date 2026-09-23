@@ -61,6 +61,27 @@ y usa la copia incrustada. `tools/OtaSigner` es solo para ti: no va dentro del e
 
 Los perfiles que crea el usuario se guardan en `%ProgramData%\SotheOptimizer\profiles.user.json`: la OTA y reinstalar la app no los tocan.
 
+## Auto-actualizacion del .exe (opcional)
+Actualiza la app entera, no solo los JSON. **Regla de oro: la app NUNCA ejecuta un binario descargado sin verificar
+antes la firma del autor y el SHA-256.** Un GitHub secuestrado o un ataque de red no pueden colar un binario que la
+app llegue a ejecutar: sin la clave privada (que solo tienes tu) no se puede firmar una release.
+
+1. Activa la funcion: en `src/SotheOptimizer/AppUpdater.cs`, `GitHubRepo = "ImSothe/TojiCelestialOptimizer"`.
+   Reutiliza la misma clave de firma que la OTA (`SignedData.PublicKey`); si aun no la tienes, generala con
+   `OtaSigner keygen ... --source`.
+2. En cada version: compila el .exe Release y firmalo:
+   `dotnet run --project tools/OtaSigner -- sign-app <ruta>\SotheOptimizer.exe 1.1.0 C:\claves-sothe\ota-private.pem "notas"`
+   Deja `release.json` (version + SHA-256 del exe) y `release.sig` junto al .exe.
+3. Crea una **release publica** en GitHub con la etiqueta `v1.1.0` y sube 3 assets: `SotheOptimizer.exe`,
+   `release.json` y `release.sig`. (El repo es privado, pero una release puede publicarse; sus assets se descargan sin
+   token. Con el repo 100% privado la app no podria descargar: haz la release publica o hospeda los assets aparte.)
+4. Sube el `<Version>` en `SotheOptimizer.csproj` antes de compilar, o la app no vera la nueva como "mas nueva".
+
+Como funciona en el cliente: al arrancar comprueba en silencio la ultima release; si la firma valida y hay version
+mayor, descarga el .exe, comprueba su SHA-256 contra el manifiesto firmado y lo deja preparado (avisa con un toast).
+**Se instala al reiniciar la app**, nunca a mitad de sesion (para no interrumpir un APLICAR sobre el registro): un
+script temporal espera a que se cierre, reemplaza el .exe y lo relanza. Sin `GitHubRepo`, no hace ninguna llamada.
+
 ## Icono de la app
 `Assets\icon.ico` sale del logo vectorial (`SotheLogo` en `Themes\SotheTheme.xaml`). Si cambias el logo, regeneralo:
 `dotnet run --project tools/IconGen -- src/SotheOptimizer/Themes/SotheTheme.xaml src/SotheOptimizer/Assets/icon.ico`
@@ -91,6 +112,10 @@ Los perfiles que crea el usuario se guardan en `%ProgramData%\SotheOptimizer\pro
 - Revertir, Revertir TODO, Simular, exportar/importar y Reparaciones funcionan siempre sin licencia.
 
 ## Notas
+- **Ajustes "PROHIBIDO":** los 8 tweaks de alto riesgo (desactivar Defender, Firewall, UAC, mitigaciones
+  Spectre/Meltdown, Hypervisor, HPET, bcdedit de temporizadores, idle de CPU) siguen en el motor y en
+  `data\tweaks.json`. En la interfaz estan ocultos hasta activar el switch **"Modo avanzado"** (con confirmacion),
+  como pide el EULA. No estan borrados: el filtro `hiddenByAdv` en `MainWindow` solo los oculta con el modo apagado.
 - El manifiesto ya pide administrador (UAC) al abrir: no necesitas lanzador .vbs/.bat.
 - Si el primer `dotnet build` se queja de `Microsoft.Win32.Registry`, ejecuta:
   `dotnet add package Microsoft.Win32.Registry` y vuelve a compilar.
@@ -117,6 +142,7 @@ Models.cs          mapeo de los JSON
 PowerShellRunner.cs  ejecuta PowerShell oculto y detecta fallos (codigo de salida y stderr)
 DataUpdater.cs     OTA de data\*.json firmada (ECDSA) con fusion de perfiles
 SignedData.cs      clave publica + verificacion de firma de data\ en cada carga (si no cuadra, JSON incrustado)
+AppUpdater.cs      auto-actualizacion del .exe: descarga solo firmada (ECDSA)+SHA-256, se instala al reiniciar
 Licensing\         huella HWID, cache cifrada (DPAPI), estados y proveedores (Keygen / Demo)
 PaywallDialog.*    muro de pago (APLICAR con algun ajuste PRO nuevo, y Guardar perfil)
 SotheEngine.cs      motor: aplicar/revertir/backup/codigo/restaurar

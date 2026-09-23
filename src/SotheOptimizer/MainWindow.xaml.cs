@@ -138,6 +138,7 @@ namespace Sothe
                 try { await _license.RefreshOnlineAsync(); } catch (Exception ex) { _eng.Log("Licencia: " + ex.Message); }
                 ShowLicenseNotice();
                 await CheckOtaAsync();
+                await CheckAppUpdateAsync();
             };
 
             ApplyFilter();
@@ -642,6 +643,29 @@ namespace Sothe
             var r = await new DataUpdater(_eng).CheckAndUpdateAsync();
             if (r.Status == OtaStatus.Updated)
                 ShowToast($"Base de ajustes actualizada (v{r.Version}). Reinicia Sothe para verla.");
+        }
+
+        // Comprobacion silenciosa de nueva version de la app. Solo descarga si la firma del autor es valida y el
+        // SHA-256 coincide; se instala al reiniciar (nunca a mitad de sesion). Sin GitHubRepo configurado, no hace nada.
+        private async Task CheckAppUpdateAsync()
+        {
+            try
+            {
+                var updater = new AppUpdater(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+                if (!updater.IsConfigured) return;
+                var check = await updater.CheckAsync();
+                if (check.Status != UpdateStatus.Available)
+                {
+                    if (check.Status == UpdateStatus.Failed) _eng.Log("Auto-update: " + check.Message);
+                    return;
+                }
+                var staged = await updater.DownloadAndStageAsync(check, System.IO.Path.Combine(_eng.Root, "update"));
+                if (staged.Status == UpdateStatus.Staged)
+                    ShowToast($"Actualización v{staged.Version} lista: se instalará al reiniciar Sothe.");
+                else if (staged.Status == UpdateStatus.Failed)
+                    _eng.Log("Auto-update: " + staged.Message);
+            }
+            catch (Exception ex) { _eng.Log("Auto-update: " + ex.Message); }
         }
 
         private async Task SaveProfile()

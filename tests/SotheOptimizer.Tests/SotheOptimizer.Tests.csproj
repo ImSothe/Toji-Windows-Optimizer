@@ -16,6 +16,7 @@
     <Compile Include="..\..\src\SotheOptimizer\PowerShellRunner.cs" Link="App\PowerShellRunner.cs" />
     <Compile Include="..\..\src\SotheOptimizer\DataUpdater.cs" Link="App\DataUpdater.cs" />
     <Compile Include="..\..\src\SotheOptimizer\SignedData.cs" Link="App\SignedData.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\AppUpdater.cs" Link="App\AppUpdater.cs" />
     <!-- El firmador del autor (tools/OtaSigner): asi los tests firman exactamente como el -->
     <Compile Include="..\..\tools\OtaSigner\ManifestSigner.cs" Link="Tools\ManifestSigner.cs" />
     <Compile Include="..\..\src\SotheOptimizer\TextUtil.cs" Link="App\TextUtil.cs" />

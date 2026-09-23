@@ -21,9 +21,12 @@ internal static class Program
                 return KeyGen(args[1], args.Length == 4 && args[2] == "--source" ? args[3] : null);
             if (args.Length == 4 && args[0] == "sign") return Sign(args[1], args[2], int.Parse(args[3]));
             if (args.Length == 3 && args[0] == "verify") return Verify(args[1], args[2]);
+            if ((args.Length == 4 || args.Length == 5) && args[0] == "sign-app")
+                return SignApp(args[1], args[2], args[3], args.Length == 5 ? args[4] : "");
             Console.Error.WriteLine("Uso:\n  OtaSigner keygen <carpeta> [--source src/SotheOptimizer/SignedData.cs]\n" +
                                     "  OtaSigner sign <carpeta-data> <ota-private.pem> <version>\n" +
-                                    "  OtaSigner verify <carpeta-data> <clave-publica | src/SotheOptimizer/SignedData.cs>");
+                                    "  OtaSigner verify <carpeta-data> <clave-publica | src/SotheOptimizer/SignedData.cs>\n" +
+                                    "  OtaSigner sign-app <SotheOptimizer.exe> <version> <ota-private.pem> [notas]");
             return 2;
         }
         catch (Exception ex)
@@ -63,6 +66,26 @@ internal static class Program
         var files = ManifestSigner.SignDirectory(dataDir, ecdsa, version);
         Console.WriteLine($"Firmada la version {version}: {string.Join(", ", files)}");
         Console.WriteLine("Clave publica de esta firma: " + ManifestSigner.PublicKeyBase64(ecdsa));
+        return 0;
+    }
+
+    // Firma una release de la app: deja release.json (version + SHA-256 del exe) y release.sig junto al .exe.
+    // Se suben los tres a la release de GitHub; la app solo instala un binario cuya firma valide con la clave publica.
+    private static int SignApp(string exePath, string version, string pemPath, string notes)
+    {
+        if (!System.Version.TryParse(version.TrimStart('v', 'V'), out _))
+            throw new InvalidDataException($"Version invalida: '{version}' (usa algo como 1.1.0).");
+        var sha = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(exePath)));
+        var manifest = new { version, file = Path.GetFileName(exePath), sha256 = sha, notes };
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(manifest, new JsonSerializerOptions { WriteIndented = true });
+        using var ecdsa = ECDsa.Create();
+        ecdsa.ImportFromPem(File.ReadAllText(pemPath));
+        var sig = ecdsa.SignData(bytes, HashAlgorithmName.SHA256);
+        var dir = Path.GetDirectoryName(Path.GetFullPath(exePath));
+        File.WriteAllBytes(Path.Combine(dir, "release.json"), bytes);
+        File.WriteAllText(Path.Combine(dir, "release.sig"), Convert.ToBase64String(sig));
+        Console.WriteLine($"Firmada la release {version}: {Path.GetFileName(exePath)} (SHA-256 {sha[..16]}...)");
+        Console.WriteLine("Sube a la release de GitHub: " + Path.GetFileName(exePath) + ", release.json y release.sig");
         return 0;
     }
 

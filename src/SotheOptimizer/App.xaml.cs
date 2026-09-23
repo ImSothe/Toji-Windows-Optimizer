@@ -22,12 +22,28 @@ namespace Sothe
                 return;
             }
 
-            string flag = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "SotheOptimizer", "eula.accepted");
+            string root = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "SotheOptimizer");
 
             // Sin esto, al cerrarse el EULA (unica ventana abierta) WPF da la app por terminada
             // y el primer arranque se cierra justo despues de aceptar.
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            // Si hay una actualizacion ya descargada y VERIFICADA (firma del autor + SHA-256), se instala ahora, antes
+            // de abrir nada: reemplaza el .exe y relanza. Nunca a mitad de sesion. Sin auto-update configurado, no hace nada.
+            try
+            {
+                var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                if (OperatingSystem.IsWindows() && !string.IsNullOrEmpty(Environment.ProcessPath)
+                    && AppUpdater.TryApplyStaged(Environment.ProcessPath, Path.Combine(root, "update"), ver, out _))
+                {
+                    Shutdown();
+                    return;
+                }
+            }
+            catch { }
+
+            string flag = Path.Combine(root, "eula.accepted");
 
             if (!File.Exists(flag))
             {
