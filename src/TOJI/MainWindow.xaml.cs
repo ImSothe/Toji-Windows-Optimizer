@@ -554,7 +554,7 @@ namespace Toji
 
         private async Task RevertAll()
         {
-            if (!TojiDialog.Confirm(this, "Revertir TODO", "Se deshará todo lo aplicado por TOJI y Windows volverá a los valores que tenía antes.", "Revertir TODO", danger: true)) return;
+            if (!TojiDialog.Confirm(this, "Revertir TODO", "Se deshará todo lo aplicado por Sothe y Windows volverá a los valores que tenía antes.", "Revertir TODO", danger: true)) return;
             var applied = _eng.GetApplied().ToList();
             var errs = new List<string>();
             SetBusy(true);
@@ -619,7 +619,7 @@ namespace Toji
         {
             var r = await new DataUpdater(_eng).CheckAndUpdateAsync();
             if (r.Status == OtaStatus.Updated)
-                ShowToast($"Base de ajustes actualizada (v{r.Version}). Reinicia TOJI para verla.");
+                ShowToast($"Base de ajustes actualizada (v{r.Version}). Reinicia Sothe para verla.");
         }
 
         private async Task SaveProfile()
@@ -628,13 +628,13 @@ namespace Toji
             if (ids.Count == 0) { ShowToast("Marca primero los ajustes que quieras en el perfil.", ToastKind.Warn); return; }
             if (!await PaywallDialog.EnsureCanModifyAsync(this, _license, "guardar perfiles propios", msg => ShowToast(msg))) return;
             var name = TojiDialog.Prompt(this, "Guardar perfil",
-                $"Guarda los {ids.Count} ajustes marcados como un perfil propio. Aparecerá junto a los perfiles de TOJI.",
+                $"Guarda los {ids.Count} ajustes marcados como un perfil propio. Aparecerá junto a los perfiles de Sothe.",
                 "Mi setup", "Guardar", "Nombre del perfil",
                 validate: s =>
                 {
                     if (string.IsNullOrWhiteSpace(s)) return "Escribe un nombre para el perfil.";
                     if (_eng.IsReservedProfileName(s, out var suggestion))
-                        return $"«{s.Trim()}» es un perfil oficial de TOJI y no se puede sobrescribir. Elige otro nombre, por ejemplo «{suggestion}».";
+                        return $"«{s.Trim()}» es un perfil oficial de Sothe y no se puede sobrescribir. Elige otro nombre, por ejemplo «{suggestion}».";
                     return null;
                 });
             if (name == null) return;
@@ -674,7 +674,7 @@ namespace Toji
             if (!st.CanModify) { PaywallDialog.Show(this, _license); return; }
             var detail = st.State == LicenseState.Trial
                 ? $"Prueba gratuita activa: te quedan {st.DaysLeft} días (hasta el {st.ExpiresAtUtc?.ToLocalTime():d})."
-                : "TOJI PRO activado en este equipo.";
+                : "Sothe PRO activado en este equipo.";
             TojiDialog.Info(this, "Tu licencia", $"{detail}\n\nClave: {st.MaskedKey}\nEquipo: {_license.Fingerprint.Substring(0, Math.Min(12, _license.Fingerprint.Length))}…");
         }
 
@@ -706,11 +706,11 @@ namespace Toji
 
             List<string> ids = null;
             var code = TojiDialog.Prompt(this, "Importar configuración",
-                "Pega el código TOJI que te han compartido. Se marcarán sus ajustes; nada se aplica hasta que pulses APLICAR.",
+                "Pega el código de Sothe que te han compartido. Se marcarán sus ajustes; nada se aplica hasta que pulses APLICAR.",
                 prefill, "Importar", "TOJI-1-…", code: true,
                 validate: text =>
                 {
-                    if (string.IsNullOrWhiteSpace(text)) return "Pega un código TOJI.";
+                    if (string.IsNullOrWhiteSpace(text)) return "Pega un código de Sothe.";
                     try { ids = _eng.ImportCode(text); }
                     catch { return "Código no válido. Comprueba que lo has copiado completo."; }
                     if (!ids.Any(id => id != null && _boxes.ContainsKey(id))) return "El código no contiene ajustes compatibles con esta versión.";

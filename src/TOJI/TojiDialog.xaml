@@ -1,7 +1,7 @@
 <Window x:Class="Toji.TojiDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="TOJI" Width="580" SizeToContent="Height"
+        Title="Sothe" Width="580" SizeToContent="Height"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         Foreground="{StaticResource Text}" FontFamily="Segoe UI" FontSize="14" UseLayoutRounding="True">

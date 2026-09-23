@@ -76,10 +76,10 @@ namespace Toji
             var extra = string.IsNullOrEmpty(s.Message) ? "" : s.Message + " ";
             return s.State switch
             {
-                LicenseState.TrialExpired => $"Hazte con TOJI PRO para seguir pudiendo {action}. Todo lo que ya aplicaste se puede revertir gratis.",
+                LicenseState.TrialExpired => $"Hazte con Sothe PRO para seguir pudiendo {action}. Todo lo que ya aplicaste se puede revertir gratis.",
                 LicenseState.Revoked => extra + "Si crees que es un error, contacta con soporte.",
                 LicenseState.ValidationRequired => extra + "Conéctate a Internet y pulsa «Validar ahora».",
-                _ => extra + $"Para {action} necesitas una licencia de TOJI. Puedes seguir explorando todos los ajustes sin límites."
+                _ => extra + $"Para {action} necesitas una licencia de Sothe. Puedes seguir explorando todos los ajustes sin límites."
             };
         }
 

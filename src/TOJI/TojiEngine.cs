@@ -152,6 +152,16 @@ namespace Toji
         // ---------------- PowerShell (command / appx / restore) ----------------
         // Lanza una excepcion si el comando falla: ApplyTweak/RevertTweak la registran como error de ese ajuste
         public void RunPowerShellHidden(string command) => PowerShellRunner.Run(command);
+
+        // Ejecuta un comando de tweak. Los sentinelas de Timer Resolution se enrutan a codigo C# (ntdll +
+        // tarea programada) en vez de a PowerShell; el resto son comandos normales.
+        private void RunCommand(string command)
+        {
+            if (string.IsNullOrEmpty(command)) return;
+            if (command == TimerResolution.InstallSentinel) { if (OperatingSystem.IsWindows()) TimerResolution.InstallResident(); return; }
+            if (command == TimerResolution.UninstallSentinel) { if (OperatingSystem.IsWindows()) TimerResolution.UninstallResident(); return; }
+            RunPowerShellHidden(command);
+        }
         public void RunPowerShellVisible(string title, string command)
         {
             var full = "$host.UI.RawUI.WindowTitle='" + title + "'; Write-Host '=== " + title + " ===' -ForegroundColor Green; " + command + "; Write-Host ''; Write-Host 'Terminado. Puedes cerrar esta ventana.' -ForegroundColor Green";
@@ -189,7 +199,7 @@ namespace Toji
                         }
                         case "command":
                             backup.Add(new OpBackup { Type = "command", Revert = op.Revert });
-                            if (!string.IsNullOrEmpty(op.Apply)) RunPowerShellHidden(op.Apply);
+                            RunCommand(op.Apply);
                             break;
                         case "appx":
                             backup.Add(new OpBackup { Type = "appx" });
@@ -221,7 +231,7 @@ namespace Toji
                         if (b.PriorExists) RegSet(b.Path, b.Name, ConvertStored(b.PriorValue, ParseKind(b.PriorKind)), ParseKind(b.PriorKind));
                         else RegDelete(b.Path, b.Name);
                     }
-                    else if (b.Type == "command" && !string.IsNullOrEmpty(b.Revert)) RunPowerShellHidden(b.Revert);
+                    else if (b.Type == "command" && !string.IsNullOrEmpty(b.Revert)) RunCommand(b.Revert);
                     else if (b.Type == "appx") res.Errors.Add("appx: reinstalar desde la Store (no auto-reversible)");
                 }
                 catch (Exception ex) { res.Errors.Add(b.Type + ": " + ex.Message); res.Ok = false; }
@@ -308,7 +318,7 @@ namespace Toji
         {
             name = (name ?? "").Trim();
             if (IsReservedProfileName(name, out var suggestion))
-                throw new InvalidOperationException($"«{name}» es un perfil oficial de TOJI. Elige otro nombre, por ejemplo «{suggestion}».");
+                throw new InvalidOperationException($"«{name}» es un perfil oficial de Sothe. Elige otro nombre, por ejemplo «{suggestion}».");
             string id = ProfileId(name);
             var doc = ReadProfilesFile(UserProfilesPath);
             doc.Profiles.RemoveAll(p => p.Id == id);

@@ -17,6 +17,7 @@
     <Compile Include="..\..\src\TOJI\DataUpdater.cs" Link="App\DataUpdater.cs" />
     <Compile Include="..\..\src\TOJI\TextUtil.cs" Link="App\TextUtil.cs" />
     <Compile Include="..\..\src\TOJI\WindowsTools.cs" Link="App\WindowsTools.cs" />
+    <Compile Include="..\..\src\TOJI\TimerResolution.cs" Link="App\TimerResolution.cs" />
     <Compile Include="..\..\src\TOJI\Licensing\LicenseModels.cs" Link="App\Licensing\LicenseModels.cs" />
     <Compile Include="..\..\src\TOJI\Licensing\LicenseConfig.cs" Link="App\Licensing\LicenseConfig.cs" />
     <Compile Include="..\..\src\TOJI\Licensing\HardwareId.cs" Link="App\Licensing\HardwareId.cs" />

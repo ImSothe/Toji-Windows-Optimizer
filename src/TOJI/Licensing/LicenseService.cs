@@ -42,7 +42,7 @@ namespace Toji.Licensing
                 return new LicenseStatus { State = LicenseState.Revoked, MaskedKey = masked, Message = "Esta licencia se ha desactivado." };
             if (now < c.LastSeenUtc.AddHours(-1))
                 return new LicenseStatus { State = LicenseState.ValidationRequired, MaskedKey = masked, TrialAvailable = trialAvailable,
-                    Message = "El reloj del sistema va por detrás de la última vez que se usó TOJI." };
+                    Message = "El reloj del sistema va por detrás de la última vez que se usó Sothe." };
 
             if (c.IsTrial)
             {
@@ -153,7 +153,7 @@ namespace Toji.Licensing
             ProviderOutcome.NotActivatedHere => "La licencia no está activada en este equipo.",
             ProviderOutcome.TooManyMachines => "Esta licencia ya está en uso en otro PC. Cada licencia vale para un equipo a la vez.",
             ProviderOutcome.TrialAlreadyUsed => "Este PC ya usó su prueba gratuita.",
-            ProviderOutcome.NotConfigured => "Las licencias aún no están configuradas en esta versión de TOJI.",
+            ProviderOutcome.NotConfigured => "Las licencias aún no están configuradas en esta versión de Sothe Celestial Optimizer.",
             ProviderOutcome.NetworkError => "No hay conexión con el servidor de licencias. Revisa tu Internet e inténtalo de nuevo.",
             _ => string.IsNullOrEmpty(r.Message) ? "No se pudo completar la operación." : r.Message
         };

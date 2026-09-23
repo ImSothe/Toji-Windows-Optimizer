@@ -1,7 +1,7 @@
 <Window x:Class="Toji.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="TOJI Celestial Optimizer" Height="900" Width="1280" MinHeight="680" MinWidth="1000"
+        Title="Sothe Celestial Optimizer" Height="900" Width="1280" MinHeight="680" MinWidth="1000"
         WindowStartupLocation="CenterScreen" Style="{StaticResource TojiWindow}">
   <Grid>
     <!-- Aura morada de fondo -->
@@ -64,7 +64,7 @@
           </Viewbox>
           <StackPanel Margin="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-              <TextBlock Text="TOJI" FontSize="32" FontWeight="Black" Foreground="{StaticResource BrandGradient}">
+              <TextBlock Text="SOTHE" FontSize="32" FontWeight="Black" Foreground="{StaticResource BrandGradient}">
                 <TextBlock.Effect>
                   <DropShadowEffect Color="#8B5CF6" BlurRadius="18" ShadowDepth="0" Opacity="0.6"/>
                 </TextBlock.Effect>
@@ -121,7 +121,7 @@
                   <Button x:Name="BtnExport" Style="{StaticResource BtnSubtle}" Content="Exportar código" Margin="0,0,6,0"
                           ToolTip="Copia tu configuración al portapapeles para compartirla"/>
                   <Button x:Name="BtnImport" Style="{StaticResource BtnSubtle}" Content="Importar código" Margin="0"
-                          ToolTip="Pega un código TOJI para marcar sus ajustes"/>
+                          ToolTip="Pega un código de Sothe para marcar sus ajustes"/>
                 </StackPanel>
               </Grid>
             </Border>

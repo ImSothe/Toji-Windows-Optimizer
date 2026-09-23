@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 
 namespace Toji
@@ -9,6 +10,18 @@ namespace Toji
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Modo residente de Timer Resolution: sin interfaz, solo fija 0.5 ms y mantiene el proceso vivo.
+            if (e.Args.Contains(TimerResolution.ResidentArg))
+            {
+                ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                var worker = new System.Threading.Thread(() => { if (OperatingSystem.IsWindows()) TimerResolution.RunResident(); })
+                { IsBackground = false, Name = "TimerResolutionResident" };
+                worker.SetApartmentState(System.Threading.ApartmentState.MTA);
+                worker.Start();
+                return;
+            }
+
             string flag = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TOJI", "eula.accepted");
 

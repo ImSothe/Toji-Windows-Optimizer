@@ -10,7 +10,7 @@
     <RootNamespace>Toji</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Version>1.0.0</Version>
-    <Product>TOJI Celestial Optimizer</Product>
+    <Product>Sothe Celestial Optimizer</Product>
     <Company>Sothe</Company>
     <Authors>Sothe</Authors>
   </PropertyGroup>
