@@ -15,6 +15,12 @@
     <Authors>Sothe</Authors>
   </PropertyGroup>
 
+  <!-- Licencias: huella del PC por WMI y cache cifrada con DPAPI -->
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+
   <!-- Los JSON viven junto al .exe para poder actualizarlos (OTA) sin recompilar -->
   <ItemGroup>
     <None Include="data\**\*.json" CopyToOutputDirectory="PreserveNewest" />

@@ -16,6 +16,13 @@
     <Compile Include="..\..\src\TOJI\PowerShellRunner.cs" Link="App\PowerShellRunner.cs" />
     <Compile Include="..\..\src\TOJI\DataUpdater.cs" Link="App\DataUpdater.cs" />
     <Compile Include="..\..\src\TOJI\TextUtil.cs" Link="App\TextUtil.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\LicenseModels.cs" Link="App\Licensing\LicenseModels.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\LicenseConfig.cs" Link="App\Licensing\LicenseConfig.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\HardwareId.cs" Link="App\Licensing\HardwareId.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\LicenseStore.cs" Link="App\Licensing\LicenseStore.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\LicenseService.cs" Link="App\Licensing\LicenseService.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\KeygenLicenseProvider.cs" Link="App\Licensing\KeygenLicenseProvider.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\OtherProviders.cs" Link="App\Licensing\OtherProviders.cs" />
     <None Include="..\..\src\TOJI\data\*.json" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

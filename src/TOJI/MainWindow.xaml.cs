@@ -9,12 +9,14 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
+using Toji.Licensing;
 
 namespace Toji
 {
     public partial class MainWindow : Window
     {
         private readonly TojiEngine _eng = new TojiEngine();
+        private readonly LicenseService _license;
         private List<Tweak> _tweaks;
         private List<Profile> _profiles;
         private string _loadError;
@@ -74,6 +76,11 @@ namespace Toji
                 _tweaks = new List<Tweak>(); _profiles = new List<Profile>();
             }
 
+            _license = LicenseFactory.CreateDefault(_eng.Root);
+            _license.StatusChanged += st => Dispatcher.Invoke(() => UpdateLicenseBadge(st));
+            UpdateLicenseBadge(_license.Status);
+            LicenseBadge.Click += (s, e) => ShowLicenseInfo();
+
             BuildList();
             BuildProfileBar();
             BuildRiskChips();
@@ -100,7 +107,7 @@ namespace Toji
 
             BtnApply.Click += async (s, e) => await ApplyOrDry(false);
             BtnDry.Click += async (s, e) => await ApplyOrDry(true);
-            BtnSaveProfile.Click += (s, e) => SaveProfile();
+            BtnSaveProfile.Click += async (s, e) => await SaveProfile();
             BtnRevertAll.Click += async (s, e) => await RevertAll();
             BtnRestore.Click += async (s, e) => await CreateRestorePoint();
             BtnExport.Click += (s, e) => ExportCode();
@@ -120,6 +127,7 @@ namespace Toji
                 UpdateItemWidth();
                 if (_loadError != null)
                     TojiDialog.Info(this, "Error al cargar datos", "No se pudieron cargar los datos (tweaks.json).\n\n" + _loadError);
+                try { await _license.RefreshOnlineAsync(); } catch (Exception ex) { _eng.Log("Licencia: " + ex.Message); }
                 await CheckOtaAsync();
             };
 
@@ -492,6 +500,9 @@ namespace Toji
                 return;
             }
 
+            if (toApply.Count > 0 && !await PaywallDialog.EnsureCanModifyAsync(this, _license, "aplicar cambios", msg => ShowToast(msg)))
+                return;
+
             var newExtreme = _tweaks.Where(t => toApply.Contains(t.Id) && t.Danger == "extreme").ToList();
             if (newExtreme.Count > 0)
             {
@@ -605,10 +616,11 @@ namespace Toji
                 ShowToast($"Base de ajustes actualizada (v{r.Version}). Reinicia TOJI para verla.");
         }
 
-        private void SaveProfile()
+        private async Task SaveProfile()
         {
             var ids = CheckedIds().ToList();
             if (ids.Count == 0) { ShowToast("Marca primero los ajustes que quieras en el perfil.", ToastKind.Warn); return; }
+            if (!await PaywallDialog.EnsureCanModifyAsync(this, _license, "guardar perfiles propios", msg => ShowToast(msg))) return;
             var name = TojiDialog.Prompt(this, "Guardar perfil",
                 $"Guarda los {ids.Count} ajustes marcados como un perfil propio. Aparecerá junto a los perfiles de TOJI.",
                 "Mi setup", "Guardar", "Nombre del perfil",
@@ -625,6 +637,39 @@ namespace Toji
             catch (Exception ex) { TojiDialog.Info(this, "No se pudo guardar", "No se pudo guardar el perfil.\n\n" + ex.Message); return; }
             BuildProfileBar();
             ShowToast($"Perfil «{name}» guardado");
+        }
+
+        // ---------------- Licencia ----------------
+        private void UpdateLicenseBadge(LicenseStatus st)
+        {
+            ResetStyled(LicenseBadge);
+            string text; Brush accent = null;
+            switch (st.State)
+            {
+                case LicenseState.Licensed:
+                    text = "PRO";
+                    LicenseBadge.Background = R("AccentGradient"); LicenseBadge.BorderBrush = R("AccentHi");
+                    LicenseBadge.Foreground = Brushes.White; LicenseBadge.Effect = (Effect)FindResource("GlowAccent");
+                    break;
+                case LicenseState.Trial: text = $"PRUEBA · {st.DaysLeft} {(st.DaysLeft == 1 ? "día" : "días")}"; accent = R("High"); break;
+                case LicenseState.TrialExpired: text = "PRUEBA TERMINADA"; accent = R("High"); break;
+                case LicenseState.Revoked: text = "LICENCIA DESACTIVADA"; accent = R("Extreme"); break;
+                case LicenseState.ValidationRequired: text = "VALIDAR LICENCIA"; accent = R("High"); break;
+                default: text = "SIN LICENCIA"; LicenseBadge.Foreground = R("TextSub"); break;
+            }
+            if (accent != null) { LicenseBadge.Foreground = accent; LicenseBadge.BorderBrush = accent; LicenseBadge.Background = Tint(accent, 0x1E); }
+            if (_license?.ProviderName == "Demo") text += " · DEMO";
+            LicenseBadge.Content = text;
+        }
+
+        private void ShowLicenseInfo()
+        {
+            var st = _license.Status;
+            if (!st.CanModify) { PaywallDialog.Show(this, _license); return; }
+            var detail = st.State == LicenseState.Trial
+                ? $"Prueba gratuita activa: te quedan {st.DaysLeft} días (hasta el {st.ExpiresAtUtc?.ToLocalTime():d})."
+                : "TOJI PRO activado en este equipo.";
+            TojiDialog.Info(this, "Tu licencia", $"{detail}\n\nClave: {st.MaskedKey}\nEquipo: {_license.Fingerprint.Substring(0, Math.Min(12, _license.Fingerprint.Length))}…");
         }
 
         // Un clic: copia el codigo al portapapeles y avisa con un toast

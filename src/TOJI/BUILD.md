@@ -48,6 +48,12 @@ Los tweaks ejecutan comandos como administrador, asi que TOJI solo acepta datos 
 
 Los perfiles que crea el usuario se guardan en `%ProgramData%\TOJI\profiles.user.json`: la OTA y reinstalar TOJI no los tocan.
 
+## Licencias
+- Configura `Licensing/LicenseConfig.cs` (cuenta de Keygen, Worker de pruebas y enlace de compra).
+- Sin configurar: en **Debug** se usa el modo DEMO (claves `TOJI-DEMO-PRO`, `TOJI-DEMO-REVOKED`, prueba local de 7 dias);
+  en **Release** APLICAR y Guardar perfil quedan bloqueados (nunca gratis por despiste).
+- Revertir, Revertir TODO, Simular, exportar/importar y Reparaciones funcionan siempre sin licencia.
+
 ## Notas
 - El manifiesto ya pide administrador (UAC) al abrir: no necesitas lanzador .vbs/.bat.
 - Si el primer `dotnet build` se queja de `Microsoft.Win32.Registry`, ejecuta:
@@ -69,6 +75,8 @@ Ui.cs              CornerRadius adjunto para botones + barra de titulo oscura (D
 Models.cs          mapeo de los JSON
 PowerShellRunner.cs  ejecuta PowerShell oculto y detecta fallos (codigo de salida y stderr)
 DataUpdater.cs     OTA de data\*.json firmada (ECDSA) con fusion de perfiles
+Licensing\         huella HWID, cache cifrada (DPAPI), estados y proveedores (Keygen / Demo)
+PaywallDialog.*    muro de pago (solo en APLICAR con cambios nuevos y Guardar perfil)
 TojiEngine.cs      motor: aplicar/revertir/backup/codigo/restaurar
 data\*.json        tweaks, apps, features, perfiles (editables / OTA)
 ```

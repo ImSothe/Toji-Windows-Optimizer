@@ -37,13 +37,17 @@
             <TextBlock Text="Restricción Celestial · sin límites, todo reversible" FontSize="13.5" Foreground="{StaticResource TextDim}"/>
           </StackPanel>
         </StackPanel>
-        <Border Grid.Column="1" VerticalAlignment="Center" CornerRadius="18" Background="{StaticResource Surface}"
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+        <Button x:Name="LicenseBadge" Style="{StaticResource Pill}" Margin="0,0,10,0" Padding="14,7" FontSize="12.5" FontWeight="Bold"
+                ToolTip="Estado de tu licencia" Content="SIN LICENCIA"/>
+        <Border VerticalAlignment="Center" CornerRadius="18" Background="{StaticResource Surface}"
                 BorderBrush="{StaticResource Stroke2}" BorderThickness="1" Padding="16,8">
           <StackPanel Orientation="Horizontal">
             <Ellipse Width="8" Height="8" Fill="{StaticResource Accent}" Effect="{StaticResource GlowAccent}" VerticalAlignment="Center" Margin="0,0,10,0"/>
             <TextBlock x:Name="CountText" Text="0 seleccionados · 0 aplicados" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextSub}"/>
           </StackPanel>
         </Border>
+        </StackPanel>
       </Grid>
 
       <TabControl Grid.Row="1">
