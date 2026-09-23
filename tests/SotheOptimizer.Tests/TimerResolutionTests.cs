@@ -36,6 +36,17 @@ namespace Sothe.Tests
         }
 
         [Fact]
+        public void ScriptDeDesinstalacion_NoSeMataASiMismo()
+        {
+            // PowerShell recibe el script por -Command, asi que su propia linea de comandos contiene "--timer-resident":
+            // el filtro por $PID tiene que ir antes de Stop-Process
+            var s = TimerResolution.BuildUninstallScript();
+            int exclude = s.IndexOf("Where-Object { $_.ProcessId -ne $PID }", StringComparison.Ordinal);
+            Assert.True(exclude > 0, "falta excluir el propio proceso de PowerShell");
+            Assert.True(exclude < s.IndexOf("Stop-Process", StringComparison.Ordinal));
+        }
+
+        [Fact]
         public void CurrentMs_EsCeroFueraDeWindows()
         {
             if (!OperatingSystem.IsWindows()) Assert.Equal(0, TimerResolution.CurrentMs());

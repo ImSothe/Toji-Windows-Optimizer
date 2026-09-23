@@ -75,6 +75,9 @@ namespace Sothe
             $"Unregister-ScheduledTask -TaskName '{TaskName}' -Confirm:$false -ErrorAction SilentlyContinue; " +
             "Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel' -Name GlobalTimerResolutionRequests -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue; " +
             $"Get-CimInstance Win32_Process -Filter \"CommandLine LIKE '%{ResidentArg}%'\" -ErrorAction SilentlyContinue | " +
+            // Este mismo PowerShell lleva el script (y por tanto el texto buscado) en su linea de comandos: sin excluirlo
+            // se mataria a si mismo, el revertido constaria como fallido y el ajuste seguiria marcado como aplicado
+            "Where-Object { $_.ProcessId -ne $PID } | " +
             "ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }";
 
         [SupportedOSPlatform("windows")]
