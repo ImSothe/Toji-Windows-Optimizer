@@ -50,7 +50,7 @@
         </StackPanel>
       </Grid>
 
-      <TabControl Grid.Row="1">
+      <TabControl x:Name="Tabs" Grid.Row="1">
         <!-- ================= Optimizaciones ================= -->
         <TabItem Header="Optimizaciones">
           <Grid Margin="0,18,0,0">
@@ -189,6 +189,85 @@
           </Grid>
         </TabItem>
 
+        <!-- ================= Apps (Winget) ================= -->
+        <TabItem x:Name="TabApps" Header="Apps (Winget)">
+          <Grid Margin="0,18,0,0">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <StackPanel>
+                <TextBlock Text="Apps" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="Instala tus programas de un clic con winget. Cada operación abre una ventana con su progreso."
+                           Foreground="{StaticResource TextSub}" FontSize="14.5" Margin="0,4,0,0" TextWrapping="Wrap"/>
+              </StackPanel>
+              <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border x:Name="WingetPill" CornerRadius="16" Background="{StaticResource Surface}" BorderBrush="{StaticResource Stroke2}"
+                        BorderThickness="1" Padding="14,7" VerticalAlignment="Center">
+                  <StackPanel Orientation="Horizontal">
+                    <Ellipse x:Name="WingetDot" Width="8" Height="8" Fill="{StaticResource TextDim}" VerticalAlignment="Center" Margin="0,0,9,0"/>
+                    <TextBlock x:Name="WingetText" Text="winget: comprobando…" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSub}"/>
+                  </StackPanel>
+                </Border>
+                <Button x:Name="BtnAppsRefresh" Style="{StaticResource BtnSubtle}" Content="Detectar instaladas" Margin="8,0,0,0"
+                        ToolTip="Vuelve a comprobar qué apps tienes instaladas"/>
+              </StackPanel>
+            </Grid>
+
+            <Grid Grid.Row="1" Margin="0,16,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*" MaxWidth="480"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <Grid Margin="0,0,14,0">
+                <TextBox x:Name="AppSearch" Padding="38,9,12,9" Tag="Buscar apps… (ej. steam, discord, nmap)"/>
+                <Path Data="M 0,6.5 A 6.5,6.5 0 1 1 13,6.5 A 6.5,6.5 0 1 1 0,6.5 Z M 11.2,11.2 L 16,16" Stroke="{StaticResource TextDim}"
+                      StrokeThickness="1.8" StrokeEndLineCap="Round" HorizontalAlignment="Left" VerticalAlignment="Center"
+                      Margin="14,0,0,0" IsHitTestVisible="False"/>
+              </Grid>
+              <TextBlock x:Name="AppCountText" Grid.Column="2" Text="0 seleccionadas" FontSize="14" FontWeight="SemiBold"
+                         Foreground="{StaticResource AccentHi}" VerticalAlignment="Center"/>
+            </Grid>
+
+            <Grid Grid.Row="2" Margin="0,16,0,0">
+              <Border Style="{StaticResource CardShadow}"/>
+              <Border Style="{StaticResource Card}" Padding="0">
+                <ScrollViewer x:Name="AppScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,6,6,6">
+                  <StackPanel x:Name="AppList" Margin="18,0,12,10"/>
+                </ScrollViewer>
+              </Border>
+            </Grid>
+
+            <TextBlock x:Name="AppStatus" Grid.Row="3" Margin="4,14,4,0" Foreground="{StaticResource TextSub}" TextWrapping="Wrap"
+                       Text="Marca las apps y pulsa Instalar. winget no instala drivers de GPU: usa «Drivers de GPU»."/>
+
+            <Border Grid.Row="4" Margin="0,14,0,0" Padding="0,16,0,0" BorderBrush="{StaticResource Stroke}" BorderThickness="0,1,0,0">
+              <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                  <Button x:Name="BtnUpgrade" Style="{StaticResource Btn}" Content="Actualizar todo" Margin="0,0,8,0"
+                          ToolTip="winget upgrade --all"/>
+                  <Button x:Name="BtnGpu" Style="{StaticResource Btn}" Content="Drivers de GPU" Margin="0"
+                          ToolTip="Detecta tu tarjeta gráfica y abre la web oficial de drivers"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                  <Button x:Name="BtnInstall" Style="{StaticResource BtnPrimary}" Content="Instalar seleccionadas" Margin="0,0,10,0" Padding="26,12"/>
+                  <Button x:Name="BtnUninstall" Style="{StaticResource BtnDanger}" Content="Desinstalar seleccionadas" Margin="0" Padding="18,12"/>
+                </StackPanel>
+              </DockPanel>
+            </Border>
+          </Grid>
+        </TabItem>
+
         <!-- ================= Reparaciones ================= -->
         <TabItem Header="Reparaciones">
           <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,18,0,0">
@@ -247,13 +326,53 @@
                 <Button x:Name="BtnWU" Style="{StaticResource Tile}">
                   <StackPanel>
                     <TextBlock Text="Reparar Windows Update" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBlock Text="Reinicia sus servicios y regenera la caché SoftwareDistribution." Foreground="{StaticResource TextSub}"
+                    <TextBlock Text="Reinicia sus servicios y regenera las cachés SoftwareDistribution y catroot2." Foreground="{StaticResource TextSub}"
+                               FontSize="13.5" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                  </StackPanel>
+                </Button>
+                <Button x:Name="BtnChkdsk" Style="{StaticResource Tile}">
+                  <StackPanel>
+                    <TextBlock Text="Escanear disco (CHKDSK)" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="Busca errores en el disco del sistema sin desmontarlo (chkdsk /scan)." Foreground="{StaticResource TextSub}"
                                FontSize="13.5" TextWrapping="Wrap" Margin="0,6,0,0"/>
                   </StackPanel>
                 </Button>
               </WrapPanel>
             </StackPanel>
           </ScrollViewer>
+        </TabItem>
+
+        <!-- ================= Caracteristicas de Windows ================= -->
+        <TabItem x:Name="TabFeatures" Header="Características de Windows">
+          <Grid Margin="0,18,0,0">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto"/>
+              <RowDefinition Height="*"/>
+              <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <StackPanel>
+                <TextBlock Text="Características de Windows" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="Activa o desactiva componentes opcionales de Windows. Casi todos piden reiniciar para completarse."
+                           Foreground="{StaticResource TextSub}" FontSize="14.5" Margin="0,4,0,0" TextWrapping="Wrap"/>
+              </StackPanel>
+              <Button x:Name="BtnFeatRefresh" Grid.Column="1" Style="{StaticResource Btn}" Content="Refrescar estado" Margin="0" VerticalAlignment="Center"/>
+            </Grid>
+            <Grid Grid.Row="1" Margin="0,18,0,0">
+              <Border Style="{StaticResource CardShadow}"/>
+              <Border Style="{StaticResource Card}" Padding="0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,6,6,6">
+                  <StackPanel x:Name="FeatureList" Margin="18,12,12,10"/>
+                </ScrollViewer>
+              </Border>
+            </Grid>
+            <TextBlock x:Name="FeatStatus" Grid.Row="2" Margin="4,14,4,0" Foreground="{StaticResource TextSub}" TextWrapping="Wrap"
+                       Text="Consultando el estado de las características…"/>
+          </Grid>
         </TabItem>
       </TabControl>
 

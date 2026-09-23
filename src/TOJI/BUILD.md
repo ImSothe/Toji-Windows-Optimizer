@@ -69,7 +69,9 @@ app.manifest       requiere administrador
 App.xaml(.cs)      arranque + EULA (carga el tema)
 Themes\TojiTheme.xaml  tema "Restriccion Celestial": colores, botones, casillas, combos, scroll...
 EulaWindow.*       aviso legal (aceptar/rechazar)
-MainWindow.*       interfaz (Optimizaciones + Reparaciones), vista Lista/Cuadricula, toasts
+MainWindow.*       interfaz: Optimizaciones, Apps (Winget), Reparaciones, Caracteristicas de Windows
+MainWindow.Tabs.cs pestanas Apps (winget + drivers GPU) y Caracteristicas (WMI, con PowerShell de respaldo)
+WindowsTools*.cs   winget, caracteristicas opcionales y deteccion de GPU (validan ids antes de usarlos)
 TojiDialog.*       dialogos modales con el tema (avisos, confirmaciones, pedir texto)
 Ui.cs              CornerRadius adjunto para botones + barra de titulo oscura (DWM)
 Models.cs          mapeo de los JSON
@@ -81,6 +83,7 @@ TojiEngine.cs      motor: aplicar/revertir/backup/codigo/restaurar
 data\*.json        tweaks, apps, features, perfiles (editables / OTA)
 ```
 
-## Pendiente para la siguiente iteracion
-- Pestanas Apps (Winget) y Caracteristicas de Windows (portar desde la version PowerShell).
-- Descarga OTA de los JSON al arrancar (HttpClient -> tu repo de GitHub).
+## Pendiente
+- Crear la cuenta de Keygen, el Worker (/trial, /webhooks, /transfer) y el producto de Lemon Squeezy; rellenar LicenseConfig.
+- Generar las claves OTA (tools/OtaSigner) y publicar los JSON firmados en una URL publica.
+- Firma de codigo del .exe (SmartScreen).

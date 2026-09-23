@@ -44,6 +44,25 @@ namespace Toji
     }
     public class ProfilesFile { public List<Profile> Profiles { get; set; } = new List<Profile>(); }
 
+    // apps.json (pestana Apps / winget)
+    public class AppItem
+    {
+        public string Id { get; set; }            // id de winget, p. ej. "Valve.Steam"
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public string Desc { get; set; }
+    }
+    public class AppsFile { public List<AppItem> Apps { get; set; } = new List<AppItem>(); }
+
+    // features.json (pestana Caracteristicas de Windows)
+    public class FeatureItem
+    {
+        public string Name { get; set; }
+        public string Feature { get; set; }       // nombre DISM, p. ej. "Microsoft-Hyper-V-All"
+        public string Desc { get; set; }
+    }
+    public class FeaturesFile { public List<FeatureItem> Features { get; set; } = new List<FeatureItem>(); }
+
     // Backup por-tweak para poder revertir al estado exacto anterior
     public class OpBackup
     {

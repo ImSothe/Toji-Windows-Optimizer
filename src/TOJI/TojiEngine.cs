@@ -49,6 +49,19 @@ namespace Toji
             var f = JsonSerializer.Deserialize<TweaksFile>(File.ReadAllText(DataPath("tweaks.json")), _json);
             return f?.Tweaks ?? new List<Tweak>();
         }
+        public List<AppItem> LoadApps()
+        {
+            var path = DataPath("apps.json");
+            if (!File.Exists(path)) return new List<AppItem>();
+            return JsonSerializer.Deserialize<AppsFile>(File.ReadAllText(path), _json)?.Apps ?? new List<AppItem>();
+        }
+        public List<FeatureItem> LoadFeatures()
+        {
+            var path = DataPath("features.json");
+            if (!File.Exists(path)) return new List<FeatureItem>();
+            return JsonSerializer.Deserialize<FeaturesFile>(File.ReadAllText(path), _json)?.Features ?? new List<FeatureItem>();
+        }
+
         // Perfiles oficiales (data\profiles.json, actualizables por OTA) + perfiles propios del usuario
         public List<Profile> LoadProfiles()
         {

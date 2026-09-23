@@ -43,7 +43,7 @@ namespace Toji
         private static readonly Dictionary<string, string> ProfColor = new Dictionary<string, string>
         { { "competitivo", "#8B5CF6" }, { "ciber", "#38BDF8" }, { "limpio", "#A7A0BD" } };
         private static readonly Dictionary<string, string> CatDisplay = new Dictionary<string, string>
-        { { "Energia", "Energía" }, { "Activacion", "Activación" } };
+        { { "Energia", "Energía" }, { "Activacion", "Activación" }, { "Comunicacion", "Comunicación" } };
 
         private class Item { public Tweak Tweak; public CheckBox Box; public Border Card; public string Text; public string Danger; public string Cat; }
         private class Section { public FrameworkElement Header; public WrapPanel Panel; public string Cat; }
@@ -85,6 +85,7 @@ namespace Toji
             BuildProfileBar();
             BuildRiskChips();
             BuildCatCombo();
+            InitTabs();
 
             foreach (var id in _eng.GetApplied()) if (_boxes.ContainsKey(id)) _boxes[id].IsChecked = true;
             RefreshApplied();
@@ -119,8 +120,13 @@ namespace Toji
             BtnFlushDns.Click += async (s, e) => await RunQuiet("ipconfig /flushdns", "Caché DNS vaciada");
             BtnSFC.Click += (s, e) => _eng.RunPowerShellVisible("SFC", "sfc /scannow");
             BtnDISM.Click += (s, e) => _eng.RunPowerShellVisible("DISM", "DISM /Online /Cleanup-Image /RestoreHealth");
-            BtnNet.Click += (s, e) => _eng.RunPowerShellVisible("Reset de red", "netsh winsock reset; netsh int ip reset; ipconfig /flushdns; Write-Host 'Reinicia el PC.' -ForegroundColor Yellow");
-            BtnWU.Click += (s, e) => _eng.RunPowerShellVisible("Reparar Windows Update", "net stop wuauserv; net stop bits; Rename-Item \"$env:SystemRoot\\SoftwareDistribution\" SoftwareDistribution.old -ErrorAction SilentlyContinue; net start wuauserv; net start bits");
+            BtnNet.Click += (s, e) =>
+            {
+                if (!TojiDialog.Confirm(this, "Reset de red", "Se reiniciarán Winsock, TCP/IP y DNS y se renovará la IP. Perderás la conexión unos segundos y tendrás que reiniciar el PC.", "Resetear red")) return;
+                _eng.RunPowerShellVisible("Reset de red", "netsh winsock reset; netsh int ip reset; ipconfig /flushdns; ipconfig /release; ipconfig /renew; Write-Host 'Reinicia el PC para completar el reset.' -ForegroundColor Yellow");
+            };
+            BtnWU.Click += (s, e) => _eng.RunPowerShellVisible("Reparar Windows Update", "net stop wuauserv; net stop bits; net stop cryptsvc; Rename-Item \"$env:SystemRoot\\SoftwareDistribution\" SoftwareDistribution.old -ErrorAction SilentlyContinue; Rename-Item \"$env:SystemRoot\\System32\\catroot2\" catroot2.old -ErrorAction SilentlyContinue; net start wuauserv; net start bits; net start cryptsvc; Write-Host 'Cache de Windows Update reiniciada.' -ForegroundColor Green");
+            BtnChkdsk.Click += (s, e) => _eng.RunPowerShellVisible("CHKDSK", "chkdsk $env:SystemDrive /scan");
 
             Loaded += async (s, e) =>
             {

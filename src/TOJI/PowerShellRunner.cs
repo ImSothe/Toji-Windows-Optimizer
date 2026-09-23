@@ -17,7 +17,10 @@ namespace Toji
         public static string Executable = "powershell.exe";   // los tests lo cambian a "pwsh"
         public const int DefaultTimeoutMs = 5 * 60 * 1000;
 
-        public static void Run(string command, int timeoutMs = DefaultTimeoutMs)
+        public static void Run(string command, int timeoutMs = DefaultTimeoutMs) => RunCapture(command, timeoutMs);
+
+        // Igual que Run, pero devuelve la salida estandar
+        public static string RunCapture(string command, int timeoutMs = DefaultTimeoutMs)
         {
             var psi = new ProcessStartInfo(Executable)
             {
@@ -46,6 +49,7 @@ namespace Toji
                 var err = CleanStdErr(stderr.Result);
                 if (p.ExitCode != 0 || err.Length > 0)
                     throw new InvalidOperationException($"PowerShell falló (código {p.ExitCode})" + (err.Length > 0 ? ": " + Truncate(err, 400) : "."));
+                return stdout.Result ?? "";
             }
         }
 
