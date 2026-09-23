@@ -21,44 +21,47 @@
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal">
           <!-- Logo: Lanza Inversa del Cielo (daga de Toji) -->
-          <Grid Width="48" Height="48" Margin="0,0,15,0">
-              <!-- Rotación de -45 grados para alinear el mango arriba a la izquierda y la punta abajo a la derecha -->
-              <Grid.RenderTransform>
-                  <RotateTransform Angle="-45" CenterX="24" CenterY="24"/>
-              </Grid.RenderTransform>
-    
-              <Viewbox Stretch="Uniform">
-                  <Canvas Width="100" Height="100">
-                      <!-- Resplandor maldito sutil -->
-                      <Path Fill="#A78BFA" Opacity="0.15" Data="M 35,45 L 55,45 L 55,80 L 42,95 L 35,88 L 35,70 L 48,70 L 48,55 L 25,55 L 25,70 L 32,77 L 32,62 L 35,62 Z">
-                          <Path.Effect>
-                              <BlurEffect Radius="12"/>
-                          </Path.Effect>
-                      </Path>
+          <Viewbox Width="58" Height="58" Margin="0,0,15,0" VerticalAlignment="Center">
+            <Viewbox.Effect>
+              <DropShadowEffect Color="#8B5CF6" BlurRadius="12" ShadowDepth="0" Opacity="0.85"/>
+            </Viewbox.Effect>
+            <!-- Arma dibujada en vertical (pomo arriba) y girada -45 grados: mango arriba a la izquierda, punta abajo a la derecha -->
+            <Canvas Width="116" Height="421">
+              <Canvas.LayoutTransform>
+                <RotateTransform Angle="-45"/>
+              </Canvas.LayoutTransform>
+              <Canvas>
+                <Canvas.RenderTransform>
+                  <TranslateTransform X="-10" Y="-13"/>
+                </Canvas.RenderTransform>
 
-                      <!-- Hoja principal gris mate y gancho asimétrico -->
-                      <Path Fill="#4A4E54" Data="M 35,45 L 55,45 L 55,80 L 42,95 L 35,88 L 35,70 L 48,70 L 48,55 L 25,55 L 25,70 L 32,77 L 32,62 L 35,62 Z"/>
-            
-                      <!-- Brillo del filo para darle volumen -->
-                      <Path Stroke="#7A808A" StrokeThickness="1" Data="M 55,45 L 55,80 L 42,95"/>
-            
-                      <!-- Agujero rectangular en la base de la hoja -->
-                      <Path Fill="#050505" Data="M 43,50 L 47,50 L 47,57 L 43,57 Z"/>
-            
-                      <!-- Guardia negra con el saliente lateral hacia la hoja -->
-                      <Path Fill="#252628" Data="M 28,40 L 60,40 L 67,49 L 55,45 L 28,45 Z"/>
-            
-                      <!-- Mango encintado en tono granate/vino -->
-                      <Path Fill="#4A1D2D" Data="M 38,15 L 52,15 L 52,40 L 38,40 Z"/>
-            
-                      <!-- Detalle del encintado del mango -->
-                      <Path Stroke="#1A0A0F" StrokeThickness="1.5" Data="M 38,18 L 52,22 M 38,24 L 52,28 M 38,30 L 52,34 M 38,36 L 52,40 M 38,15 L 52,19"/>
-            
-                      <!-- Anilla trasera (Pommel) -->
-                      <Ellipse Canvas.Left="40" Canvas.Top="5" Width="10" Height="10" Stroke="#8B8361" StrokeThickness="2.5" Fill="Transparent"/>
-                  </Canvas>
-              </Viewbox>
-          </Grid>
+                <!-- Anilla del pomo -->
+                <Path Stroke="#A89A5E" StrokeThickness="4">
+                  <Path.Data>
+                    <EllipseGeometry Center="56,27" RadiusX="9" RadiusY="11"/>
+                  </Path.Data>
+                </Path>
+
+                <!-- Mango encintado granate: base, brillo cilindrico, vueltas de cinta y remate -->
+                <Path Fill="#5A1E2E" Data="M 42,40 L 72,40 L 73,172 L 42,172 Z"/>
+                <Path Fill="#7A2C40" Opacity="0.8" Data="M 48,40 L 54,40 L 54,172 L 48,172 Z"/>
+                <Path Stroke="#2A0A12" StrokeThickness="3"
+                      Data="M 42,48 L 73,54 M 42,60 L 73,66 M 42,72 L 73,78 M 42,84 L 73,90 M 42,96 L 73,102 M 42,108 L 73,114 M 42,120 L 73,126 M 42,132 L 73,138 M 42,144 L 73,150 M 42,156 L 73,162"/>
+                <Path Fill="#2A0A12" Data="M 42,40 L 72,40 L 72,45 L 42,45 Z"/>
+
+                <!-- Guardia negra en forma de sombrero con el ala en punta -->
+                <Path Fill="#2B2B2F" Stroke="#6B6E75" StrokeThickness="2"
+                      Data="M 22,205 L 22,194 Q 26,179 42,172 L 74,172 Q 86,184 124,197 L 118,204 Z"/>
+
+                <!-- Hoja gris mate: bloque con bisel, pua lateral separada por la ranura y punta diagonal.
+                     La segunda figura es la ventana rectangular, calada (EvenOdd): deja ver el fondo -->
+                <Path Fill="#4B4D53" Stroke="#8C9098" StrokeThickness="2.5" StrokeLineJoin="Round"
+                      Data="M 33,210 L 94,210 L 95,213 L 95,252 L 88,259 L 88,318 L 80,328 L 80,398 L 47,431 L 46,332 L 55,324 L 55,258 L 44,258 L 44,316 L 30,326 L 11,309 L 11,271 L 20,258 L 20,223 Z M 53,219 L 70,219 L 70,245 L 53,245 Z"/>
+                <!-- Muescas de la ventana -->
+                <Path Stroke="#2B2B2F" StrokeThickness="2" Data="M 50,229 L 53,229 M 70,229 L 73,229 M 50,236 L 53,236 M 70,236 L 73,236"/>
+              </Canvas>
+            </Canvas>
+          </Viewbox>
           <StackPanel Margin="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="TOJI" FontSize="32" FontWeight="Black" Foreground="{StaticResource BrandGradient}">
