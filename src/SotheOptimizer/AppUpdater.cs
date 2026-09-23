@@ -39,8 +39,9 @@ namespace Sothe
     // o un ataque de red no pueden colar un binario que la app llegue a ejecutar: sin firma valida, se ignora.
     public sealed class AppUpdater
     {
-        // "owner/repo" de las releases publicas. Vacio = auto-actualizacion desactivada. La firma va aparte de GitHub:
-        // aunque la cuenta de GitHub se viera comprometida, sin la clave privada del autor no se puede firmar una release.
+        // "owner/repo" de las releases PUBLICAS (p. ej. un repo aparte solo para descargas, ver BUILD.md). Vacio =
+        // auto-actualizacion desactivada. La firma va aparte de GitHub: aunque la cuenta de GitHub se viera comprometida,
+        // sin la clave privada del autor no se puede firmar una release, y sin firma valida la app no instala nada.
         public const string GitHubRepo = "";
         public const string DefaultApiBase = "https://api.github.com";
 

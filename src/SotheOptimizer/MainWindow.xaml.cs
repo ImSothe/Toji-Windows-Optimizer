@@ -31,6 +31,8 @@ namespace Sothe
         private ViewMode _view = ViewMode.List;
         private int _appliedCount;
         private Border _pressedCard;
+        private bool _busy;                // hay una operacion (aplicar/revertir/limpiar) en curso
+        private bool _sessionDirty;        // el usuario ya ha aplicado o revertido algo en esta sesion
 
         private enum ViewMode { List, Grid }
         private enum ToastKind { Ok, Warn, Error }
@@ -137,8 +139,8 @@ namespace Sothe
                 // Al arrancar: validacion online de la licencia (sin red se mantiene el estado guardado) y aviso de bloqueo
                 try { await _license.RefreshOnlineAsync(); } catch (Exception ex) { _eng.Log("Licencia: " + ex.Message); }
                 ShowLicenseNotice();
+                await CheckAppUpdateAsync();   // puede reiniciar la app; si lo hace, no sigue
                 await CheckOtaAsync();
-                await CheckAppUpdateAsync();
             };
 
             ApplyFilter();
@@ -492,6 +494,7 @@ namespace Sothe
         // ---------------- Acciones ----------------
         private void SetBusy(bool busy)
         {
+            _busy = busy;
             foreach (var b in new[] { BtnApply, BtnDry, BtnRevertAll, BtnRestore, BtnExport, BtnImport, BtnClean, BtnSaveProfile, BtnClean2, BtnFlushDns })
                 b.IsEnabled = !busy;
             ProfileBar.IsEnabled = !busy;
@@ -540,6 +543,7 @@ namespace Sothe
                 if (!SotheDialog.Confirm(this, "Peligro", msg, "Aplicar igualmente", danger: true)) return;
             }
 
+            _sessionDirty = true;   // no auto-reiniciar por una actualizacion mientras se toca el sistema
             SetBusy(true);
             var errs = new List<string>(); bool reboot = false;
             var progress = new Progress<Tuple<int, string>>(p => { Progress.Value = p.Item1; StatusText.Text = p.Item2; });
@@ -580,6 +584,7 @@ namespace Sothe
             if (!SotheDialog.Confirm(this, "Revertir TODO", "Se deshará todo lo aplicado por Sothe y Windows volverá a los valores que tenía antes.", "Revertir TODO", danger: true)) return;
             var applied = _eng.GetApplied().ToList();
             var errs = new List<string>();
+            _sessionDirty = true;
             SetBusy(true);
             var progress = new Progress<Tuple<int, string>>(p => { Progress.Value = p.Item1; StatusText.Text = p.Item2; });
             var rep = (IProgress<Tuple<int, string>>)progress;
@@ -659,11 +664,28 @@ namespace Sothe
                     if (check.Status == UpdateStatus.Failed) _eng.Log("Auto-update: " + check.Message);
                     return;
                 }
-                var staged = await updater.DownloadAndStageAsync(check, System.IO.Path.Combine(_eng.Root, "update"));
-                if (staged.Status == UpdateStatus.Staged)
-                    ShowToast($"Actualización v{staged.Version} lista: se instalará al reiniciar Sothe.");
-                else if (staged.Status == UpdateStatus.Failed)
-                    _eng.Log("Auto-update: " + staged.Message);
+                var stageDir = System.IO.Path.Combine(_eng.Root, "update");
+                var staged = await updater.DownloadAndStageAsync(check, stageDir);
+                if (staged.Status != UpdateStatus.Staged)
+                {
+                    if (staged.Status == UpdateStatus.Failed) _eng.Log("Auto-update: " + staged.Message);
+                    return;
+                }
+
+                // 100% automatico: si el usuario aun no ha tocado el sistema y no hay nada en curso, se instala y
+                // reinicia sola ahora mismo (un solo reinicio, sin clics). Si ya estaba aplicando/revirtiendo algo,
+                // se pospone al proximo arranque para no interrumpir un cambio a medias.
+                var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                if (!_busy && !_sessionDirty && OperatingSystem.IsWindows() && !string.IsNullOrEmpty(Environment.ProcessPath)
+                    && AppUpdater.TryApplyStaged(Environment.ProcessPath, stageDir, ver, out _))
+                {
+                    _eng.Log($"Auto-update: instalando v{staged.Version} y reiniciando");
+                    ShowToast($"Actualizando a v{staged.Version}…");
+                    await Task.Delay(1200);   // deja ver el aviso antes de reiniciar
+                    Application.Current.Shutdown();
+                    return;
+                }
+                ShowToast($"Actualización v{staged.Version} lista: se instalará al reiniciar Sothe.");
             }
             catch (Exception ex) { _eng.Log("Auto-update: " + ex.Message); }
         }

@@ -66,21 +66,29 @@ Actualiza la app entera, no solo los JSON. **Regla de oro: la app NUNCA ejecuta 
 antes la firma del autor y el SHA-256.** Un GitHub secuestrado o un ataque de red no pueden colar un binario que la
 app llegue a ejecutar: sin la clave privada (que solo tienes tu) no se puede firmar una release.
 
-1. Activa la funcion: en `src/SotheOptimizer/AppUpdater.cs`, `GitHubRepo = "ImSothe/TojiCelestialOptimizer"`.
-   Reutiliza la misma clave de firma que la OTA (`SignedData.PublicKey`); si aun no la tienes, generala con
-   `OtaSigner keygen ... --source`.
-2. En cada version: compila el .exe Release y firmalo:
-   `dotnet run --project tools/OtaSigner -- sign-app <ruta>\SotheOptimizer.exe 1.1.0 C:\claves-sothe\ota-private.pem "notas"`
-   Deja `release.json` (version + SHA-256 del exe) y `release.sig` junto al .exe.
-3. Crea una **release publica** en GitHub con la etiqueta `v1.1.0` y sube 3 assets: `SotheOptimizer.exe`,
-   `release.json` y `release.sig`. (El repo es privado, pero una release puede publicarse; sus assets se descargan sin
-   token. Con el repo 100% privado la app no podria descargar: haz la release publica o hospeda los assets aparte.)
-4. Sube el `<Version>` en `SotheOptimizer.csproj` antes de compilar, o la app no vera la nueva como "mas nueva".
+### Donde alojar las descargas (repo privado)
+El codigo puede seguir en un repo privado. Las **releases** (el .exe y las firmas) tienen que estar en un sitio
+**publico** para que la app las descargue sin pedir credenciales. Lo mas sencillo y gratis: un **segundo repo publico
+solo para descargas**, p. ej. `ImSothe/sothe-optimizer-releases` (vacio de codigo, solo releases). GitHub lo hospeda
+gratis y la app usa su API de releases tal cual. (Alternativas validas: GitHub Pages o Cloudflare R2; con el repo de
+codigo 100% privado, la app NO puede descargar de el.)
 
-Como funciona en el cliente: al arrancar comprueba en silencio la ultima release; si la firma valida y hay version
-mayor, descarga el .exe, comprueba su SHA-256 contra el manifiesto firmado y lo deja preparado (avisa con un toast).
-**Se instala al reiniciar la app**, nunca a mitad de sesion (para no interrumpir un APLICAR sobre el registro): un
-script temporal espera a que se cierre, reemplaza el .exe y lo relanza. Sin `GitHubRepo`, no hace ninguna llamada.
+### Pasos por version
+1. Una sola vez: en `src/SotheOptimizer/AppUpdater.cs`, `GitHubRepo = "ImSothe/sothe-optimizer-releases"` (tu repo
+   PUBLICO de descargas). Reutiliza la misma clave de firma que la OTA (`SignedData.PublicKey`); si aun no la tienes,
+   generala con `OtaSigner keygen ... --source`.
+2. Sube el `<Version>` en `SotheOptimizer.csproj` (p. ej. a `1.1.0`), o la app no vera la nueva como "mas nueva".
+3. Compila y firma de un tiron con el script (deja los 3 ficheros en la carpeta `actualizacion\`):
+   `.\construir_actualizacion.ps1 -Version 1.1.0 -Pem C:\claves-sothe\ota-private.pem -Notes "Novedades"`
+4. Crea una **release** en el repo publico con la etiqueta `v1.1.0` y sube los 3 assets de `actualizacion\`:
+   `SotheOptimizer.exe`, `release.json` y `release.sig`.
+
+Como funciona en el cliente: **con solo abrir la app**, al arrancar comprueba en silencio la ultima release; si la
+firma valida y hay version mayor, descarga el .exe y comprueba su SHA-256 contra el manifiesto firmado. Si el usuario
+aun no ha tocado el sistema, **se instala y reinicia sola** (un solo reinicio, sin clics): un script temporal espera a
+que la app se cierre, reemplaza el .exe y la relanza ya actualizada. Si en esos segundos el usuario ya estaba
+aplicando o revirtiendo algo, la instalacion se pospone al siguiente arranque para no cortar un cambio a medias (avisa
+con un toast). Sin `GitHubRepo`, no hace ninguna llamada de red.
 
 ## Icono de la app
 `Assets\icon.ico` sale del logo vectorial (`SotheLogo` en `Themes\SotheTheme.xaml`). Si cambias el logo, regeneralo:
