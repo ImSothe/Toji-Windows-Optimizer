@@ -13,39 +13,43 @@
       </Grid.RowDefinitions>
       <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,18">
         <!-- Logo: Lanza Inversa del Cielo (daga de Toji) -->
-        <Grid Width="44" Height="54" Margin="0,0,15,0">
+        <Grid Width="48" Height="48" Margin="0,0,15,0">
+            <!-- Rotación de -45 grados para alinear el mango arriba a la izquierda y la punta abajo a la derecha -->
             <Grid.RenderTransform>
-                <!-- Inclinación característica de 45 grados -->
-                <RotateTransform Angle="-45" CenterX="22" CenterY="27"/>
+                <RotateTransform Angle="-45" CenterX="24" CenterY="24"/>
             </Grid.RenderTransform>
-
-            <!-- Resplandor maldito de fondo -->
-            <Path Data="M 23,2 L 29,8 L 29,26 L 11,26 L 11,16 L 17,10 L 17,20 L 23,20 Z" Fill="#A78BFA" Opacity="0.3">
-                <Path.Effect>
-                    <BlurEffect Radius="8"/>
-                </Path.Effect>
-            </Path>
-
-            <!-- Hoja asimétrica principal (Filo de acero) -->
-            <Path Data="M 23,2 L 29,8 L 29,26 L 11,26 L 11,16 L 17,10 L 17,20 L 23,20 Z" Fill="#E9E6F0"/>
     
-            <!-- Grabado sutil en el centro de la hoja -->
-            <Path Data="M 17,21 L 23,21 L 23,23 L 17,23 Z" Fill="#050505" Opacity="0.5"/>
+            <Viewbox Stretch="Uniform">
+                <Canvas Width="100" Height="100">
+                    <!-- Resplandor maldito sutil -->
+                    <Path Fill="#A78BFA" Opacity="0.15" Data="M 35,45 L 55,45 L 55,80 L 42,95 L 35,88 L 35,70 L 48,70 L 48,55 L 25,55 L 25,70 L 32,77 L 32,62 L 35,62 Z">
+                        <Path.Effect>
+                            <BlurEffect Radius="12"/>
+                        </Path.Effect>
+                    </Path>
 
-            <!-- Tsuba (Guardia cruzada) -->
-            <Path Data="M 7,26 L 33,26 L 33,29 L 7,29 Z" Fill="#2E1065"/>
-    
-            <!-- Mango (Tsuka) -->
-            <Path Data="M 16,29 L 24,29 L 24,38 L 16,38 Z" Fill="#8B5CF6"/>
-    
-            <!-- Detalle visual del vendaje cruzado en el mango -->
-            <Path Data="M 16,31 L 24,33 M 16,34 L 24,36" Stroke="#4C1D95" StrokeThickness="1.5"/>
-
-            <!-- Argolla del pomo -->
-            <Path Data="M 17,41 A 3,3 0 1 0 23,41 A 3,3 0 1 0 17,41" Stroke="#A78BFA" StrokeThickness="2" Fill="Transparent"/>
-
-            <!-- Primer eslabón de la Cadena de los Mil Kilómetros -->
-            <Path Data="M 18,46 A 2,3 0 1 0 22,46 A 2,3 0 1 0 18,46" Stroke="#8B5CF6" StrokeThickness="1.5" Fill="Transparent"/>
+                    <!-- Hoja principal gris mate y gancho asimétrico -->
+                    <Path Fill="#4A4E54" Data="M 35,45 L 55,45 L 55,80 L 42,95 L 35,88 L 35,70 L 48,70 L 48,55 L 25,55 L 25,70 L 32,77 L 32,62 L 35,62 Z"/>
+            
+                    <!-- Brillo del filo para darle volumen -->
+                    <Path Stroke="#7A808A" StrokeThickness="1" Data="M 55,45 L 55,80 L 42,95"/>
+            
+                    <!-- Agujero rectangular en la base de la hoja -->
+                    <Path Fill="#050505" Data="M 43,50 L 47,50 L 47,57 L 43,57 Z"/>
+            
+                    <!-- Guardia negra con el saliente lateral hacia la hoja -->
+                    <Path Fill="#252628" Data="M 28,40 L 60,40 L 67,49 L 55,45 L 28,45 Z"/>
+            
+                    <!-- Mango encintado en tono granate/vino -->
+                    <Path Fill="#4A1D2D" Data="M 38,15 L 52,15 L 52,40 L 38,40 Z"/>
+            
+                    <!-- Detalle del encintado del mango -->
+                    <Path Stroke="#1A0A0F" StrokeThickness="1.5" Data="M 38,18 L 52,22 M 38,24 L 52,28 M 38,30 L 52,34 M 38,36 L 52,40 M 38,15 L 52,19"/>
+            
+                    <!-- Anilla trasera (Pommel) -->
+                    <Ellipse Canvas.Left="40" Canvas.Top="5" Width="10" Height="10" Stroke="#8B8361" StrokeThickness="2.5" Fill="Transparent"/>
+                </Canvas>
+            </Viewbox>
         </Grid>
         <StackPanel Margin="0" VerticalAlignment="Center">
           <TextBlock Text="TOJI" FontSize="28" FontWeight="Black" Foreground="{StaticResource BrandGradient}"/>
