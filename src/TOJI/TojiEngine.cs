@@ -37,6 +37,19 @@ namespace Toji
             return Path.Combine(BaseDir, file);
         }
 
+        // Texto de un JSON de datos: el de disco si existe (data\, donde escribe la OTA) y, si no, la copia que va
+        // incrustada en el ensamblado. Asi el .exe de un unico archivo funciona solo. null si no hay ninguno.
+        public string ReadDataText(string file)
+        {
+            var path = DataPath(file);
+            if (File.Exists(path)) return File.ReadAllText(path);
+            using var s = typeof(TojiEngine).Assembly.GetManifestResourceStream(EmbeddedDataPrefix + file);
+            if (s == null) return null;
+            using var r = new StreamReader(s);
+            return r.ReadToEnd();
+        }
+        public const string EmbeddedDataPrefix = "data/";
+
         public void Log(string msg)
         {
             try { File.AppendAllText(Path.Combine(Root, "toji.log"), $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {msg}{Environment.NewLine}"); }
@@ -46,26 +59,26 @@ namespace Toji
         // ---------------- Carga de datos ----------------
         public List<Tweak> LoadTweaks()
         {
-            var f = JsonSerializer.Deserialize<TweaksFile>(File.ReadAllText(DataPath("tweaks.json")), _json);
-            return f?.Tweaks ?? new List<Tweak>();
+            var text = ReadDataText("tweaks.json") ?? throw new FileNotFoundException("No se encuentra tweaks.json", DataPath("tweaks.json"));
+            return JsonSerializer.Deserialize<TweaksFile>(text, _json)?.Tweaks ?? new List<Tweak>();
         }
         public List<AppItem> LoadApps()
         {
-            var path = DataPath("apps.json");
-            if (!File.Exists(path)) return new List<AppItem>();
-            return JsonSerializer.Deserialize<AppsFile>(File.ReadAllText(path), _json)?.Apps ?? new List<AppItem>();
+            var text = ReadDataText("apps.json");
+            if (text == null) return new List<AppItem>();
+            return JsonSerializer.Deserialize<AppsFile>(text, _json)?.Apps ?? new List<AppItem>();
         }
         public List<FeatureItem> LoadFeatures()
         {
-            var path = DataPath("features.json");
-            if (!File.Exists(path)) return new List<FeatureItem>();
-            return JsonSerializer.Deserialize<FeaturesFile>(File.ReadAllText(path), _json)?.Features ?? new List<FeatureItem>();
+            var text = ReadDataText("features.json");
+            if (text == null) return new List<FeatureItem>();
+            return JsonSerializer.Deserialize<FeaturesFile>(text, _json)?.Features ?? new List<FeatureItem>();
         }
 
         // Perfiles oficiales (data\profiles.json, actualizables por OTA) + perfiles propios del usuario
         public List<Profile> LoadProfiles()
         {
-            var official = ReadProfilesFile(DataPath("profiles.json")).Profiles;
+            var official = ReadOfficialProfiles().Profiles;
             var ids = new HashSet<string>(official.Select(p => p.Id));
             var user = ReadProfilesFile(UserProfilesPath).Profiles.Where(p => !ids.Contains(p.Id)).ToList();
             foreach (var p in user) p.IsCustom = true;
@@ -304,7 +317,7 @@ namespace Toji
         public bool IsReservedProfileName(string name, out string suggestion)
         {
             var reserved = new HashSet<string>(BuiltInProfileKeys);
-            foreach (var p in ReadProfilesFile(DataPath("profiles.json")).Profiles.Where(p => p.Desc != CustomProfileDesc))
+            foreach (var p in ReadOfficialProfiles().Profiles.Where(p => p.Desc != CustomProfileDesc))
             {
                 reserved.Add(TextUtil.Fold(p.Id ?? ""));
                 reserved.Add(TextUtil.Fold(ProfileId(p.Name)));
@@ -347,10 +360,11 @@ namespace Toji
             return custom.Count;
         }
 
-        private ProfilesFile ReadProfilesFile(string path)
+        private ProfilesFile ReadProfilesFile(string path) => ParseProfiles(File.Exists(path) ? File.ReadAllText(path) : null);
+        private ProfilesFile ReadOfficialProfiles() => ParseProfiles(ReadDataText("profiles.json"));
+        private ProfilesFile ParseProfiles(string text)
         {
-            if (!File.Exists(path)) return new ProfilesFile();
-            var doc = JsonSerializer.Deserialize<ProfilesFile>(File.ReadAllText(path), _json) ?? new ProfilesFile();
+            var doc = (text == null ? null : JsonSerializer.Deserialize<ProfilesFile>(text, _json)) ?? new ProfilesFile();
             doc.Profiles ??= new List<Profile>();
             return doc;
         }

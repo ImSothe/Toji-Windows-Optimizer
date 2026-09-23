@@ -12,16 +12,19 @@ dotnet build
 dotnet run
 ```
 
-## Generar el .exe final (limpio, para distribuir)
+## Generar el .exe final (un unico archivo, para distribuir)
 ```powershell
-dotnet publish -c Release -r win-x64 --self-contained true `
-  -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+dotnet publish -c Release
 ```
-El ejecutable queda en:
-`bin\Release\net8.0-windows\win-x64\publish\TOJI.exe`
+El proyecto ya trae la configuracion (PublishSingleFile, win-x64, self-contained). Resultado: **un solo archivo**,
+`bin\Release\net8.0-windows\win-x64\publish\TOJI.exe` (~155 MB), sin DLLs ni carpetas al lado.
 
 - **Self-contained** = no hace falta instalar .NET en el PC del usuario.
-- Junto al exe debe ir la carpeta **`data\`** con los JSON (se copian solos al compilar). Ahi es donde luego haras la actualizacion OTA.
+- Los JSON de `data\` van **incrustados** en el exe. La OTA crea `data\` junto al exe al actualizar y esa copia
+  tiene prioridad sobre la incrustada.
+- Para descargar, comprime el exe en un .zip (~63 MB). Existe `-p:EnableCompressionInSingleFile=true` (~69 MB), pero
+  descomprime en cada arranque: mas lento y mas RAM, tambien en el proceso residente de Timer Resolution.
+- Wine no puede abrir estos exe (error 0x8007046C). En Windows funcionan con normalidad.
 
 ## Compilar desde Linux/macOS (CI)
 WPF solo se ejecuta en Windows, pero se puede compilar en otros sistemas con el SDK oficial de Microsoft:

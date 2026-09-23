@@ -26,6 +26,8 @@
     <Compile Include="..\..\src\TOJI\Licensing\KeygenLicenseProvider.cs" Link="App\Licensing\KeygenLicenseProvider.cs" />
     <Compile Include="..\..\src\TOJI\Licensing\OtherProviders.cs" Link="App\Licensing\OtherProviders.cs" />
     <None Include="..\..\src\TOJI\data\*.json" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Igual que en la app: los JSON incrustados son la copia por defecto si falta data\ -->
+    <EmbeddedResource Include="..\..\src\TOJI\data\*.json" LogicalName="data/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

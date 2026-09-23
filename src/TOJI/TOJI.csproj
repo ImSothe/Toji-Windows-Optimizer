@@ -14,6 +14,13 @@
     <Product>Sothe Celestial Optimizer</Product>
     <Company>Sothe</Company>
     <Authors>Sothe</Authors>
+    <!-- Distribucion en un unico .exe: `dotnet publish -c Release` deja solo TOJI.exe, con el runtime de .NET
+         dentro (no hay que instalar nada) y las librerias nativas de WPF incluidas en el propio ejecutable -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <!-- Licencias: huella del PC por WMI y cache cifrada con DPAPI -->
@@ -28,9 +35,12 @@
     <Resource Include="Assets\icon.ico" />
   </ItemGroup>
 
-  <!-- Los JSON viven junto al .exe para poder actualizarlos (OTA) sin recompilar -->
+  <!-- Los JSON van incrustados en el .exe como valores por defecto. Si existe data\ junto al .exe (la crea la
+       OTA al actualizar) se usa esa copia. En desarrollo tambien se copian a bin\ para poder editarlos sin
+       recompilar; al publicar no se copian, para que el resultado sea un unico archivo -->
   <ItemGroup>
-    <None Include="data\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="data\*.json" LogicalName="data/%(Filename)%(Extension)" />
+    <None Include="data\**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
 </Project>
