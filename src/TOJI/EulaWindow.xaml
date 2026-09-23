@@ -12,11 +12,33 @@
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
       <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,18">
-        <Border Width="42" Height="42" CornerRadius="11" Background="{StaticResource AccentGradient}"
-                Effect="{StaticResource GlowAccent}" VerticalAlignment="Center">
-          <TextBlock Text="T" FontSize="24" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </Border>
-        <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+        <!-- Logo: Lanza Inversa del Cielo (daga de Toji) -->
+        <Grid Width="40" Height="40" Margin="0,0,15,0">
+            <Grid.RenderTransform>
+                <RotateTransform Angle="-40" CenterX="20" CenterY="20"/>
+            </Grid.RenderTransform>
+    
+            <!-- Resplandor del filo -->
+            <Path Data="M 20,2 L 36,4 L 30,22 L 24,28 L 16,28 L 16,14 Z" Fill="#A78BFA" Opacity="0.2">
+                <Path.Effect>
+                    <BlurEffect Radius="10"/>
+                </Path.Effect>
+            </Path>
+
+            <!-- Hoja principal -->
+            <Path Data="M 20,2 L 24,14 L 24,28 L 16,28 L 16,14 Z" Fill="#E9E6F0"/>
+    
+            <!-- Gancho característico -->
+            <Path Data="M 24,16 L 36,4 L 30,22 L 24,24 Z" Fill="#A78BFA"/>
+    
+            <!-- Guardia y mango -->
+            <Path Data="M 12,28 L 28,28 L 28,31 L 12,31 Z" Fill="#8B5CF6"/>
+            <Path Data="M 17,31 L 23,31 L 23,38 L 17,38 Z" Fill="#4C1D95"/>
+    
+            <!-- Eslabón de la Cadena -->
+            <Path Data="M 18,38 A 3,4 0 1 0 22,38 A 3,4 0 1 0 18,38" Stroke="#A78BFA" StrokeThickness="2" Fill="Transparent"/>
+        </Grid>
+        <StackPanel Margin="0" VerticalAlignment="Center">
           <TextBlock Text="TOJI" FontSize="28" FontWeight="Black" Foreground="{StaticResource BrandGradient}"/>
           <TextBlock Text="Aviso legal · léelo antes de continuar" FontSize="13.5" Foreground="{StaticResource TextDim}"/>
         </StackPanel>

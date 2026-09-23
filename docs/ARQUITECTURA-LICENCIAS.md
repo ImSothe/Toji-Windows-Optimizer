@@ -1,6 +1,8 @@
 # TOJI Celestial Optimizer — Arquitectura de licencias y freemium
 
-> Estado: **propuesta de diseño** (sin implementar). Precios y funciones verificados en septiembre de 2026; revísalos antes de contratar.
+> Estado: **cliente implementado** en `src/TOJI/Licensing/` + `PaywallDialog` (modo DEMO en Debug). Pendiente: cuenta de Keygen,
+> Worker de Cloudflare, producto de Lemon Squeezy y verificación Ed25519 de las respuestas de Keygen (se activa al probar con la cuenta real).
+> Precios y funciones verificados en septiembre de 2026; revísalos antes de contratar.
 
 ## 1. Requisitos de negocio
 
@@ -37,10 +39,10 @@ SinLicencia ──(Empezar prueba)──► Prueba(días restantes) ──(caduc
                                                    (reembolso / revocación) ◄─────┘──► Revocada
 ```
 
-| Estado | Navegar, filtrar, leer, marcar | Simular, exportar/importar código | APLICAR con cambios nuevos | Guardar perfil | Revertir / Revertir TODO / Reparaciones |
-|---|---|---|---|---|---|
-| SinLicencia / PruebaCaducada / Revocada | ✅ | ✅ | 🔒 muro de pago | 🔒 muro de pago | ✅ **siempre** |
-| Prueba / Licenciada | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Estado | Navegar, filtrar, leer, marcar | Simular, exportar/importar código | APLICAR con cambios nuevos | Guardar perfil | Revertir / Revertir TODO / Reparaciones | Apps (Winget) y Características de Windows |
+|---|---|---|---|---|---|---|
+| SinLicencia / PruebaCaducada / Revocada | ✅ | ✅ | 🔒 muro de pago | 🔒 muro de pago | ✅ **siempre** | ✅ **siempre (decisión: 100 % gratis)** |
+| Prueba / Licenciada | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 > **Regla de oro:** revertir nunca se bloquea. Si la prueba caduca con ajustes aplicados, el usuario debe poder dejar Windows como estaba (y APLICAR se permite cuando solo revierte). Tenerle el sistema "secuestrado" generaría reembolsos, disputas y mala fama.
 
@@ -95,7 +97,7 @@ src/TOJI/Licensing/
   HardwareId.cs            Huella del PC (ver 5.2)
   LicenseStatus.cs         enum LicenseState + record LicenseStatus(State, DaysLeft, Email, ExpiresAt)
   ILicenseProvider.cs      ActivateAsync / ValidateAsync / StartTrialAsync / TransferAsync
-  KeygenLicenseProvider.cs HttpClient -> api.keygen.sh y Worker; verifica la firma Ed25519 de las respuestas
+  KeygenLicenseProvider.cs HttpClient -> api.keygen.sh y Worker (verificar la firma Ed25519: pendiente de la cuenta real)
   LicenseStore.cs          %ProgramData%\TOJI\license.dat cifrado con DPAPI (ProtectedData, LocalMachine)
   LicenseService.cs        Estado actual, caché offline, periodo de gracia, evento StatusChanged
 src/TOJI/PaywallDialog.xaml(.cs)  Modal con la estética TOJI: clave, Comprar, Probar 7 días
