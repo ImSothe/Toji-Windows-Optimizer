@@ -35,12 +35,10 @@
     <Resource Include="Assets\icon.ico" />
   </ItemGroup>
 
-  <!-- Los JSON van incrustados en el .exe como valores por defecto. Si existe data\ junto al .exe (la crea la
-       OTA al actualizar) se usa esa copia. En desarrollo tambien se copian a bin\ para poder editarlos sin
-       recompilar; al publicar no se copian, para que el resultado sea un unico archivo -->
+  <!-- Los JSON (y el manifest.json que deja "OtaSigner sign") van incrustados en el .exe: son la copia segura.
+       data\ junto al .exe solo lo escribe la OTA, y el motor solo lo usa si esta firmado (SignedData.cs) -->
   <ItemGroup>
     <EmbeddedResource Include="data\*.json" LogicalName="data/%(Filename)%(Extension)" />
-    <None Include="data\**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
 </Project>

@@ -15,6 +15,9 @@
     <Compile Include="..\..\src\TOJI\Models.cs" Link="App\Models.cs" />
     <Compile Include="..\..\src\TOJI\PowerShellRunner.cs" Link="App\PowerShellRunner.cs" />
     <Compile Include="..\..\src\TOJI\DataUpdater.cs" Link="App\DataUpdater.cs" />
+    <Compile Include="..\..\src\TOJI\SignedData.cs" Link="App\SignedData.cs" />
+    <!-- El firmador del autor (tools/OtaSigner): asi los tests firman exactamente como el -->
+    <Compile Include="..\..\tools\OtaSigner\ManifestSigner.cs" Link="Tools\ManifestSigner.cs" />
     <Compile Include="..\..\src\TOJI\TextUtil.cs" Link="App\TextUtil.cs" />
     <Compile Include="..\..\src\TOJI\WindowsTools.cs" Link="App\WindowsTools.cs" />
     <Compile Include="..\..\src\TOJI\TimerResolution.cs" Link="App\TimerResolution.cs" />

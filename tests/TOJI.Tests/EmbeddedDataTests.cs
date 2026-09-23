@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Toji.Tests
 {
-    // Distribucion en un unico .exe: sin carpeta data\ el motor usa los JSON incrustados; si la hay (OTA), manda el disco
+    // Distribucion en un unico .exe: sin carpeta data\ el motor usa los JSON incrustados; si la hay y esta firmada (OTA), manda el disco
     public class EmbeddedDataTests
     {
         private static TestDirs WithoutDataFolder()
@@ -43,10 +43,11 @@ namespace Toji.Tests
         }
 
         [Fact]
-        public void DataEnDisco_TienePrioridadSobreLoIncrustado()
+        public void DataFirmadaEnDisco_TienePrioridadSobreLoIncrustado()
         {
             using var d = new TestDirs();
             File.WriteAllText(Path.Combine(d.Data, "tweaks.json"), "{ \"tweaks\": [ { \"id\": \"solo_disco\", \"name\": \"Solo disco\" } ] }");
+            d.Sign();
 
             var t = Assert.Single(d.Engine().LoadTweaks());
             Assert.Equal("solo_disco", t.Id);

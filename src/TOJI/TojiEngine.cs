@@ -13,37 +13,55 @@ namespace Toji
     {
         public readonly string Root;                  // %ProgramData%\TOJI (backups, log, perfiles del usuario)
         public readonly string BackupDir;
-        public readonly string BaseDir;               // carpeta del .exe (donde estan los JSON)
+        public readonly string BaseDir;               // carpeta del .exe (data\ con los JSON de la OTA)
+        public readonly string DataPublicKey;         // clave con la que deben estar firmados los JSON de data\
         // camelCase al escribir: mismo formato que los JSON de data\ (y que las versiones PowerShell/web)
         private readonly JsonSerializerOptions _json = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
         public TojiEngine() : this(AppDomain.CurrentDomain.BaseDirectory,
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TOJI")) { }
 
-        public TojiEngine(string baseDir, string root)
+        public TojiEngine(string baseDir, string root, string dataPublicKey = SignedData.PublicKey)
         {
             BaseDir = baseDir;
             Root = root;
+            DataPublicKey = dataPublicKey;
             BackupDir = Path.Combine(Root, "backups");
             Directory.CreateDirectory(BackupDir);
             try { MigrateLegacyCustomProfiles(); } catch (Exception ex) { Log("Migracion de perfiles: " + ex.Message); }
         }
 
-        public string DataPath(string file)
-        {
-            // Busca los JSON en \data\ y, si no, junto al exe (compatibilidad)
-            var p1 = Path.Combine(BaseDir, "data", file);
-            if (File.Exists(p1)) return p1;
-            return Path.Combine(BaseDir, file);
-        }
+        public string DataDir => Path.Combine(BaseDir, "data");
+        public string DataPath(string file) => Path.Combine(DataDir, file);
 
-        // Texto de un JSON de datos: el de disco si existe (data\, donde escribe la OTA) y, si no, la copia que va
-        // incrustada en el ensamblado. Asi el .exe de un unico archivo funciona solo. null si no hay ninguno.
+        // Texto de un JSON de datos. El de data\ (lo escribe la OTA) solo se usa si esta firmado con la clave del autor,
+        // nadie lo ha tocado y es mas nuevo que la copia incrustada en el .exe. Si falta la firma, no cuadra o alguien lo
+        // ha puesto o editado a mano, se ignora y manda la copia incrustada. null si no hay ninguno.
         public string ReadDataText(string file)
         {
-            var path = DataPath(file);
-            return File.Exists(path) ? File.ReadAllText(path) : ReadEmbeddedText(file);
+            var bytes = SignedData.ReadVerifiedFile(DataDir, file, DataPublicKey, out int version, out string reason);
+            if (bytes != null && version > EmbeddedDataVersion)
+            {
+                using var r = new StreamReader(new MemoryStream(bytes), Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+                return r.ReadToEnd();
+            }
+            if (reason != null && _rejected.Add(file)) Log($"data\\{file} ignorado ({reason}): se usa la copia incrustada en el .exe");
+            return ReadEmbeddedText(file);
         }
+        private readonly HashSet<string> _rejected = new HashSet<string>();
+
+        // Version de los JSON incrustados: la del manifest.json que "OtaSigner sign" deja en src\TOJI\data (0 si no hay).
+        // Una OTA solo sustituye a lo incrustado si es mas nueva, asi un .exe nuevo no se queda con datos viejos de disco
+        public static int EmbeddedDataVersion => _embeddedVersion.Value;
+        private static readonly Lazy<int> _embeddedVersion = new Lazy<int>(() =>
+        {
+            try
+            {
+                var text = ReadEmbeddedText(SignedData.ManifestFile);
+                return text == null ? 0 : SignedData.ParseManifest(Encoding.UTF8.GetBytes(text))?.Version ?? 0;
+            }
+            catch (JsonException) { return 0; }
+        });
 
         private static string ReadEmbeddedText(string file)
         {
@@ -64,19 +82,7 @@ namespace Toji
         public List<Tweak> LoadTweaks()
         {
             var text = ReadDataText("tweaks.json") ?? throw new FileNotFoundException("No se encuentra tweaks.json", DataPath("tweaks.json"));
-            var tweaks = JsonSerializer.Deserialize<TweaksFile>(text, _json)?.Tweaks ?? new List<Tweak>();
-            // El precio no se rebaja editando data\tweaks.json: lo que el catalogo incrustado en el .exe marca como PRO
-            // sigue siendolo. La copia de disco (OTA) solo puede anadir ajustes PRO, nunca quitarlos
-            var embeddedPro = EmbeddedProIds();
-            foreach (var t in tweaks) if (embeddedPro.Contains(t.Id)) t.IsPro = true;
-            return tweaks;
-        }
-
-        private HashSet<string> EmbeddedProIds()
-        {
-            var text = ReadEmbeddedText("tweaks.json");
-            var tweaks = text == null ? null : JsonSerializer.Deserialize<TweaksFile>(text, _json)?.Tweaks;
-            return new HashSet<string>((tweaks ?? new List<Tweak>()).Where(t => t.IsPro).Select(t => t.Id));
+            return JsonSerializer.Deserialize<TweaksFile>(text, _json)?.Tweaks ?? new List<Tweak>();
         }
         public List<AppItem> LoadApps()
         {

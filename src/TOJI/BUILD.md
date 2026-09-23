@@ -41,13 +41,23 @@ Cubren: deteccion de fallos de PowerShell, perfiles propios/oficiales, nombres r
 
 ## Actualizaciones OTA de los JSON
 Los tweaks ejecutan comandos como administrador, asi que TOJI solo acepta datos **firmados** con tu clave.
-1. Una sola vez: `dotnet run --project tools/OtaSigner -- keygen C:\claves-toji`
-   - Guarda `ota-private.pem` FUERA del repo (y haz copia). Nunca se sube (`*.pem` esta en .gitignore).
-   - Pega la clave publica que imprime en `DataUpdater.DefaultPublicKey` y tu URL publica en `DataUpdater.DefaultBaseUrl`.
-2. Cada actualizacion: edita los JSON, sube la version y firma:
-   `dotnet run --project tools/OtaSigner -- sign src/TOJI/data C:\claves-toji\ota-private.pem 2`
-3. Publica en la URL: `manifest.json`, `manifest.sig` y los JSON (GitHub Pages de un repo publico, Cloudflare R2...).
+La app solo usa un `data\*.json` de disco si `manifest.sig` es una firma valida (ECDSA P-256) de `manifest.json`
+con TU clave, el SHA-256 del fichero coincide con el del manifiesto y su version es mayor que la de los datos
+incrustados en el exe. Si no (puesto a mano, editado, otra clave, sin firma...), lo ignora, lo apunta en `toji.log`
+y usa la copia incrustada. `tools/OtaSigner` es solo para ti: no va dentro del exe.
+
+1. Una sola vez, en TU PC (nunca en la nube ni en el repo):
+   `dotnet run --project tools/OtaSigner -- keygen C:\claves-sothe --source src/TOJI/SignedData.cs`
+   - Crea `C:\claves-sothe\ota-private.pem`: guardalo fuera del repo y haz copia (`*.pem` esta en .gitignore).
+     Si lo pierdes no podras firmar mas actualizaciones para los exe ya distribuidos.
+   - Escribe la clave publica en `SignedData.PublicKey`. Pon tu URL publica en `DataUpdater.DefaultBaseUrl`.
+     Recompila y haz commit.
+2. Cada actualizacion: edita `src/TOJI/data/*.json` y firma con una version mayor que la anterior:
+   `dotnet run --project tools/OtaSigner -- sign src/TOJI/data C:\claves-sothe\ota-private.pem 2`
+3. Comprueba antes de publicar: `dotnet run --project tools/OtaSigner -- verify src/TOJI/data src/TOJI/SignedData.cs`
+4. Sube a la URL los 4 JSON + `manifest.json` + `manifest.sig` (GitHub Pages de un repo publico, Cloudflare R2...).
    El repo privado NO sirve como origen: los clientes no pueden descargar de el.
+5. Haz commit de `src/TOJI/data` (manifest incluido): el siguiente exe lleva esa version incrustada.
 
 Los perfiles que crea el usuario se guardan en `%ProgramData%\TOJI\profiles.user.json`: la OTA y reinstalar TOJI no los tocan.
 
@@ -61,9 +71,8 @@ Los perfiles que crea el usuario se guardan en `%ProgramData%\TOJI\profiles.user
   en **Release** los ajustes PRO y Guardar perfil quedan bloqueados (nunca gratis por despiste).
 - **Paywall inteligente:** cada tweak de `data\tweaks.json` lleva `"isPro"`. Sin licencia, APLICAR aplica lo gratuito
   (privacidad, telemetria, interfaz...) y, si hay algun ajuste PRO nuevo marcado, se para y abre el muro de pago.
-  Sin la propiedad el ajuste es gratis. Lo que el exe trae como PRO sigue siendolo aunque se edite `data\`
-  (asi no se desbloquea con el Bloc de notas): la OTA puede marcar mas ajustes como PRO, pero para liberar uno
-  hay que sacar version nueva.
+  Sin la propiedad el ajuste es gratis. Como `data\` tiene que ir firmado, nadie puede cambiar precios editando el
+  JSON; tu si puedes hacerlo con una OTA firmada (marcar o liberar ajustes PRO).
 - Revertir, Revertir TODO, Simular, exportar/importar y Reparaciones funcionan siempre sin licencia.
 
 ## Notas
@@ -92,6 +101,7 @@ Assets\icon.ico    icono del .exe y de la barra de tareas (tools/IconGen)
 Models.cs          mapeo de los JSON
 PowerShellRunner.cs  ejecuta PowerShell oculto y detecta fallos (codigo de salida y stderr)
 DataUpdater.cs     OTA de data\*.json firmada (ECDSA) con fusion de perfiles
+SignedData.cs      clave publica + verificacion de firma de data\ en cada carga (si no cuadra, JSON incrustado)
 Licensing\         huella HWID, cache cifrada (DPAPI), estados y proveedores (Keygen / Demo)
 PaywallDialog.*    muro de pago (APLICAR con algun ajuste PRO nuevo, y Guardar perfil)
 TojiEngine.cs      motor: aplicar/revertir/backup/codigo/restaurar
@@ -100,5 +110,5 @@ data\*.json        tweaks, apps, features, perfiles (editables / OTA)
 
 ## Pendiente
 - Crear la cuenta de Keygen, el Worker (/trial, /webhooks, /transfer) y el producto de Lemon Squeezy; rellenar LicenseConfig.
-- Generar las claves OTA (tools/OtaSigner) y publicar los JSON firmados en una URL publica.
+- Generar las claves OTA (`OtaSigner keygen ... --source`) y publicar los JSON firmados en una URL publica.
 - Firma de codigo del .exe (SmartScreen).

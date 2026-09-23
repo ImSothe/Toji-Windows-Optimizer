@@ -77,20 +77,33 @@ namespace Toji.Tests
         public void EditarDataEnDisco_NoConvierteEnGratisUnAjustePro()
         {
             using var d = new TestDirs();
-            // Alguien edita data\tweaks.json junto al .exe para marcar como gratis un ajuste PRO
+            // Alguien edita data\tweaks.json junto al .exe para marcar como gratis un ajuste PRO: sin firma se ignora
             File.WriteAllText(Path.Combine(d.Data, "tweaks.json"),
                 "{ \"tweaks\": [ { \"id\": \"game_mode\", \"name\": \"Activar Game Mode\", \"isPro\": false } ] }");
-            var t = Assert.Single(d.Engine().LoadTweaks());
+            var tweaks = d.Engine().LoadTweaks();
+            Assert.True(tweaks.Count > 1);   // manda la copia incrustada
+            var t = tweaks.Single(x => x.Id == "game_mode");
             Assert.True(t.IsPro);
-            Assert.Single(TojiEngine.ProTweaksToApply(new[] { t }, new[] { "game_mode" }));
+            Assert.Single(TojiEngine.ProTweaksToApply(tweaks, new[] { "game_mode" }));
         }
 
         [Fact]
-        public void DataEnDisco_PuedeMarcarComoProUnAjusteGratis()
+        public void DataFirmadaPorElAutor_PuedeLiberarUnAjustePro()
+        {
+            using var d = new TestDirs();
+            File.WriteAllText(Path.Combine(d.Data, "tweaks.json"),
+                "{ \"tweaks\": [ { \"id\": \"game_mode\", \"name\": \"Activar Game Mode\", \"isPro\": false } ] }");
+            d.Sign();
+            Assert.False(Assert.Single(d.Engine().LoadTweaks()).IsPro);
+        }
+
+        [Fact]
+        public void DataFirmada_PuedeMarcarComoProUnAjusteGratis()
         {
             using var d = new TestDirs();
             File.WriteAllText(Path.Combine(d.Data, "tweaks.json"),
                 "{ \"tweaks\": [ { \"id\": \"telemetry_off\", \"name\": \"Desactivar telemetria\", \"isPro\": true } ] }");
+            d.Sign();
             Assert.True(Assert.Single(d.Engine().LoadTweaks()).IsPro);
         }
 
@@ -99,6 +112,7 @@ namespace Toji.Tests
         {
             using var d = new TestDirs();
             File.WriteAllText(Path.Combine(d.Data, "tweaks.json"), "{ \"tweaks\": [ { \"id\": \"nuevo\", \"name\": \"Nuevo\" } ] }");
+            d.Sign();
             Assert.False(Assert.Single(d.Engine().LoadTweaks()).IsPro);
         }
     }

@@ -19,22 +19,15 @@ namespace Toji
         public string Message { get; set; }
     }
 
-    public class OtaManifest
-    {
-        public int Version { get; set; }
-        public Dictionary<string, string> Files { get; set; } = new Dictionary<string, string>();   // nombre -> SHA-256 hex
-    }
-
     // Actualizacion OTA de data\*.json. Los tweaks contienen comandos que se ejecutan como administrador,
     // asi que SOLO se acepta un manifest.json firmado (ECDSA P-256) con la clave privada del autor y cuyos
-    // hashes SHA-256 coincidan con cada fichero descargado. Genera las claves y firma con tools/OtaSigner.
+    // hashes SHA-256 coincidan con cada fichero descargado. La firma (manifest.sig) se guarda junto a los datos:
+    // el motor la vuelve a comprobar en cada carga (SignedData). Genera las claves y firma con tools/OtaSigner.
     public class DataUpdater
     {
         // URL publica donde se publican manifest.json, manifest.sig y los JSON (p. ej. GitHub Pages o Cloudflare R2).
         // Vacia = OTA desactivada.
         public const string DefaultBaseUrl = "";
-        // Clave publica (SubjectPublicKeyInfo en base64) que imprime "OtaSigner keygen". Vacia = OTA desactivada.
-        public const string DefaultPublicKey = "";
 
         public static readonly string[] AllowedFiles = { "tweaks.json", "apps.json", "features.json", "profiles.json" };
 
@@ -44,22 +37,21 @@ namespace Toji
         private readonly HttpMessageHandler _handler;
         private readonly JsonSerializerOptions _json = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        public DataUpdater(TojiEngine eng, string baseUrl = DefaultBaseUrl, string publicKey = DefaultPublicKey, HttpMessageHandler handler = null)
+        // publicKey null = la del motor (SignedData.PublicKey en la app)
+        public DataUpdater(TojiEngine eng, string baseUrl = DefaultBaseUrl, string publicKey = null, HttpMessageHandler handler = null)
         {
             _eng = eng;
             _baseUrl = string.IsNullOrWhiteSpace(baseUrl) ? "" : baseUrl.TrimEnd('/') + "/";
-            _publicKey = publicKey;
+            _publicKey = publicKey ?? eng.DataPublicKey;
             _handler = handler;
         }
 
-        private string DataDir => Path.Combine(_eng.BaseDir, "data");
-        private string LocalManifestPath => Path.Combine(DataDir, "manifest.json");
+        private string DataDir => _eng.DataDir;
 
-        public int LocalVersion()
-        {
-            try { return File.Exists(LocalManifestPath) ? JsonSerializer.Deserialize<OtaManifest>(File.ReadAllText(LocalManifestPath), _json)?.Version ?? 0 : 0; }
-            catch { return 0; }
-        }
+        // Version que ya tiene el cliente: la de los datos incrustados en el .exe o la de data\ si su manifiesto esta
+        // bien firmado. Un manifest.json sin firma (p. ej. con version 9999) no cuenta: no puede bloquear las OTA
+        public int LocalVersion() =>
+            Math.Max(TojiEngine.EmbeddedDataVersion, SignedData.ReadVerifiedManifest(DataDir, _publicKey, out _)?.Version ?? 0);
 
         public async Task<OtaResult> CheckAndUpdateAsync(CancellationToken ct = default)
         {
@@ -76,7 +68,7 @@ namespace Toji
                 if (!VerifySignature(manifestBytes, signature, _publicKey))
                     throw new InvalidDataException("La firma del manifiesto no es válida: actualización rechazada.");
 
-                var manifest = JsonSerializer.Deserialize<OtaManifest>(manifestBytes, _json) ?? throw new InvalidDataException("Manifiesto vacío.");
+                var manifest = SignedData.ParseManifest(manifestBytes) ?? throw new InvalidDataException("Manifiesto vacío.");
                 if (manifest.Version <= LocalVersion())
                     return new OtaResult { Status = OtaStatus.UpToDate, Version = manifest.Version };
                 if (manifest.Files.Keys.Any(f => !AllowedFiles.Contains(f)))
@@ -104,7 +96,8 @@ namespace Toji
                 Directory.CreateDirectory(DataDir);
                 foreach (var file in manifest.Files.Keys)
                     File.Move(Path.Combine(staging, file), Path.Combine(DataDir, file), true);
-                File.WriteAllBytes(LocalManifestPath, manifestBytes);
+                File.WriteAllBytes(Path.Combine(DataDir, SignedData.ManifestFile), manifestBytes);
+                File.WriteAllText(Path.Combine(DataDir, SignedData.SignatureFile), Convert.ToBase64String(signature));
                 Directory.Delete(staging, true);
 
                 _eng.Log($"OTA: datos actualizados a la versión {manifest.Version}");
@@ -117,12 +110,8 @@ namespace Toji
             }
         }
 
-        public static bool VerifySignature(byte[] data, byte[] signature, string publicKeyBase64)
-        {
-            using var ecdsa = ECDsa.Create();
-            ecdsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKeyBase64), out _);
-            return ecdsa.VerifyData(data, signature, HashAlgorithmName.SHA256);
-        }
+        public static bool VerifySignature(byte[] data, byte[] signature, string publicKeyBase64) =>
+            SignedData.VerifySignature(data, signature, publicKeyBase64);
 
         // Un JSON roto o vacio nunca debe sustituir a uno bueno
         private void ValidateJson(string file, byte[] bytes)

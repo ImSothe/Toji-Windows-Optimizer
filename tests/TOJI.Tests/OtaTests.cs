@@ -58,7 +58,7 @@ namespace Toji.Tests
             {
                 ["tweaks.json"] = tweaks,
                 ["profiles.json"] = OfficialProfiles("Competitivo", "Ciberseguridad", "Limpio", "Streaming"),
-            });
+            }, d.Key);
 
             var r = await new DataUpdater(eng, Url, pub, server).CheckAndUpdateAsync();
 
@@ -80,7 +80,7 @@ namespace Toji.Tests
             doc.Profiles.Add(new Profile { Id = "legacy", Name = "Legacy", Desc = TojiEngine.CustomProfileDesc, Tweaks = new List<string>() });
             File.WriteAllText(official, JsonSerializer.Serialize(doc));
 
-            var (server, pub) = Publish(2, new Dictionary<string, byte[]> { ["profiles.json"] = OfficialProfiles("Competitivo") });
+            var (server, pub) = Publish(2, new Dictionary<string, byte[]> { ["profiles.json"] = OfficialProfiles("Competitivo") }, d.Key);
             var r = await new DataUpdater(eng, Url, pub, server).CheckAndUpdateAsync();
 
             Assert.Equal(OtaStatus.Updated, r.Status);
@@ -126,6 +126,32 @@ namespace Toji.Tests
             var (server, pub) = Publish(1, new Dictionary<string, byte[]> { ["profiles.json"] = OfficialProfiles("Competitivo") });
             Assert.Equal(OtaStatus.Updated, (await new DataUpdater(eng, Url, pub, server).CheckAndUpdateAsync()).Status);
             Assert.Equal(OtaStatus.UpToDate, (await new DataUpdater(eng, Url, pub, server).CheckAndUpdateAsync()).Status);
+        }
+
+        [Fact]
+        public async Task ActualizacionDescargada_GuardaLaFirma_YElMotorLaAcepta()
+        {
+            using var d = new TestDirs();
+            var eng = d.Engine();
+            var (server, _) = Publish(4, new Dictionary<string, byte[]> { ["profiles.json"] = OfficialProfiles("Streaming") }, d.Key);
+
+            Assert.Equal(OtaStatus.Updated, (await new DataUpdater(eng, Url, null, server).CheckAndUpdateAsync()).Status);
+
+            Assert.True(File.Exists(Path.Combine(d.Data, "manifest.sig")));
+            Assert.Contains(eng.LoadProfiles(), p => p.Id == "streaming" && !p.IsCustom);
+        }
+
+        [Fact]
+        public async Task ManifiestoLocalSinFirma_NoBloqueaLasActualizaciones()
+        {
+            using var d = new TestDirs();
+            var eng = d.Engine();
+            // Un manifest.json puesto a mano con version enorme no debe hacer creer que ya esta al dia
+            File.WriteAllText(Path.Combine(d.Data, "manifest.json"), "{ \"version\": 9999, \"files\": {} }");
+            var (server, pub) = Publish(2, new Dictionary<string, byte[]> { ["profiles.json"] = OfficialProfiles("Competitivo") }, d.Key);
+
+            Assert.Equal(0, new DataUpdater(eng, Url, pub, server).LocalVersion());
+            Assert.Equal(OtaStatus.Updated, (await new DataUpdater(eng, Url, pub, server).CheckAndUpdateAsync()).Status);
         }
 
         [Fact]
