@@ -1,0 +1,75 @@
+{
+  "profiles": [
+    {
+      "id": "competitivo",
+      "name": "Competitivo",
+      "desc": "Maximo rendimiento para shooters. Baja algo de seguridad del host.",
+      "tweaks": [
+        "bg_apps_off",
+        "bing_search_off",
+        "consumer_features_off",
+        "copilot_off",
+        "core_parking_off",
+        "cpu_max_state",
+        "debloat_appx",
+        "fullscreen_optim_off",
+        "gamebar_dvr_off",
+        "game_mode",
+        "gaming_gpu_priority",
+        "gpu_hw_scheduling",
+        "hibernate_off",
+        "menu_delay_off",
+        "mouse_accel_off",
+        "nagle_off",
+        "network_latency",
+        "power_high_performance",
+        "recall_off",
+        "smartscreen_off",
+        "sysmain_off",
+        "telemetry_off",
+        "uac_noprompt",
+        "vbs_off",
+        "vfx_performance",
+        "widgets_off"
+      ]
+    },
+    {
+      "id": "ciber",
+      "name": "Ciberseguridad",
+      "desc": "Rendimiento alto pero manteniendo la seguridad del host (Defender, SmartScreen, UAC y VBS activos). Para labs con VMs.",
+      "tweaks": [
+        "game_mode",
+        "gamebar_dvr_off",
+        "mouse_accel_off",
+        "menu_delay_off",
+        "bing_search_off",
+        "transparency_off",
+        "vfx_performance",
+        "telemetry_off",
+        "consumer_features_off",
+        "widgets_off",
+        "bg_apps_off",
+        "power_high_performance",
+        "cpu_max_state",
+        "core_parking_off",
+        "network_latency",
+        "nagle_off",
+        "gaming_gpu_priority",
+        "fullscreen_optim_off",
+        "sysmain_off",
+        "hibernate_off",
+        "camera_off",
+        "update_defer_features",
+        "recall_off",
+        "copilot_off",
+        "debloat_appx"
+      ]
+    },
+    {
+      "id": "limpio",
+      "name": "Limpio",
+      "desc": "Revierte todo y deja Windows por defecto.",
+      "tweaks": []
+    }
+  ]
+}

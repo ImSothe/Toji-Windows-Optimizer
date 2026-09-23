@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>TOJI</AssemblyName>
+    <RootNamespace>Toji</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.0.0</Version>
+    <Product>Sothe Celestial Optimizer</Product>
+    <Company>Sothe</Company>
+    <Authors>Sothe</Authors>
+  </PropertyGroup>
+
+  <!-- Licencias: huella del PC por WMI y cache cifrada con DPAPI -->
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- Los JSON viven junto al .exe para poder actualizarlos (OTA) sin recompilar -->
+  <ItemGroup>
+    <None Include="data\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1476F2C5-884D-444E-9C32-392AA5B0DB26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TOJI", "src\TOJI\TOJI.csproj", "{D25676C7-F151-4086-A688-50C08D03EFD2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3611D7D0-E0EE-4867-9C8E-51ADF7C5CBE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TOJI.Tests", "tests\TOJI.Tests\TOJI.Tests.csproj", "{18D44350-5ED6-4132-B9D8-A6C703BAB954}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{D9C13ADB-50D9-462F-AF87-F7BC22735CB1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OtaSigner", "tools\OtaSigner\OtaSigner.csproj", "{196A7ECF-6BC5-4C9B-8D92-B9F88112A9F3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D25676C7-F151-4086-A688-50C08D03EFD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D25676C7-F151-4086-A688-50C08D03EFD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D25676C7-F151-4086-A688-50C08D03EFD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D25676C7-F151-4086-A688-50C08D03EFD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18D44350-5ED6-4132-B9D8-A6C703BAB954}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18D44350-5ED6-4132-B9D8-A6C703BAB954}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18D44350-5ED6-4132-B9D8-A6C703BAB954}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18D44350-5ED6-4132-B9D8-A6C703BAB954}.Release|Any CPU.Build.0 = Release|Any CPU
+		{196A7ECF-6BC5-4C9B-8D92-B9F88112A9F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{196A7ECF-6BC5-4C9B-8D92-B9F88112A9F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{196A7ECF-6BC5-4C9B-8D92-B9F88112A9F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{196A7ECF-6BC5-4C9B-8D92-B9F88112A9F3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D25676C7-F151-4086-A688-50C08D03EFD2} = {1476F2C5-884D-444E-9C32-392AA5B0DB26}
+		{18D44350-5ED6-4132-B9D8-A6C703BAB954} = {3611D7D0-E0EE-4867-9C8E-51ADF7C5CBE2}
+		{196A7ECF-6BC5-4C9B-8D92-B9F88112A9F3} = {D9C13ADB-50D9-462F-AF87-F7BC22735CB1}
+	EndGlobalSection
+EndGlobal

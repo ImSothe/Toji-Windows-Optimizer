@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <!-- El motor usa el registro de Windows; en estos tests solo se prueban partes multiplataforma -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <!-- Mismo codigo que la app (enlazado, no copiado): solo las partes sin WPF -->
+  <ItemGroup>
+    <Compile Include="..\..\src\TOJI\TojiEngine.cs" Link="App\TojiEngine.cs" />
+    <Compile Include="..\..\src\TOJI\Models.cs" Link="App\Models.cs" />
+    <Compile Include="..\..\src\TOJI\PowerShellRunner.cs" Link="App\PowerShellRunner.cs" />
+    <Compile Include="..\..\src\TOJI\DataUpdater.cs" Link="App\DataUpdater.cs" />
+    <Compile Include="..\..\src\TOJI\TextUtil.cs" Link="App\TextUtil.cs" />
+    <Compile Include="..\..\src\TOJI\WindowsTools.cs" Link="App\WindowsTools.cs" />
+    <Compile Include="..\..\src\TOJI\TimerResolution.cs" Link="App\TimerResolution.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\LicenseModels.cs" Link="App\Licensing\LicenseModels.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\LicenseConfig.cs" Link="App\Licensing\LicenseConfig.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\HardwareId.cs" Link="App\Licensing\HardwareId.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\LicenseStore.cs" Link="App\Licensing\LicenseStore.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\LicenseService.cs" Link="App\Licensing\LicenseService.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\KeygenLicenseProvider.cs" Link="App\Licensing\KeygenLicenseProvider.cs" />
+    <Compile Include="..\..\src\TOJI\Licensing\OtherProviders.cs" Link="App\Licensing\OtherProviders.cs" />
+    <None Include="..\..\src\TOJI\data\*.json" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>
