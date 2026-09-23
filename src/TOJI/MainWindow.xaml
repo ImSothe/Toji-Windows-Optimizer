@@ -1,7 +1,7 @@
 <Window x:Class="Toji.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="TOJI - Suite de sistema" Height="860" Width="1000"
+        Title="TOJI Celestial Optimizer" Height="860" Width="1000"
         WindowStartupLocation="CenterScreen" Background="#0A0810" FontFamily="Segoe UI">
   <Window.Resources>
     <Style TargetType="TextBlock"><Setter Property="Foreground" Value="#E9E6F0"/></Style>

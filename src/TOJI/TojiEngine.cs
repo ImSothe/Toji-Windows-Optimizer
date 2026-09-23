@@ -259,5 +259,22 @@ namespace Toji
         {
             RunPowerShellHidden("Remove-Item \"$env:TEMP\\*\",\"$env:SystemRoot\\Temp\\*\" -Recurse -Force -ErrorAction SilentlyContinue; Clear-RecycleBin -Force -ErrorAction SilentlyContinue");
         }
+
+        // ---------------- Perfiles propios ----------------
+        public void SaveProfile(string name, List<string> ids)
+        {
+            var path = DataPath("profiles.json");
+            ProfilesFile doc = File.Exists(path)
+                ? JsonSerializer.Deserialize<ProfilesFile>(File.ReadAllText(path), _json)
+                : new ProfilesFile();
+            if (doc == null) doc = new ProfilesFile();
+            string id = new string((name ?? "perfil").ToLowerInvariant()
+                .Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray()).Trim('_');
+            if (string.IsNullOrEmpty(id)) id = "perfil";
+            doc.Profiles.RemoveAll(p => p.Id == id);
+            doc.Profiles.Add(new Profile { Id = id, Name = name, Desc = "Perfil personalizado", Tweaks = ids });
+            File.WriteAllText(path, JsonSerializer.Serialize(doc, _json));
+            Log("Perfil guardado: " + name);
+        }
     }
 }
