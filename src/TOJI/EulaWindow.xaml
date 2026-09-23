@@ -27,10 +27,17 @@
             Text="TOJI es una herramienta para usuarios avanzados que modifica ajustes profundos de Windows (registro, servicios, seguridad).&#10;&#10;AL ACEPTAR, ENTIENDES Y ASUMES QUE:&#10;&#10;- Usas TOJI bajo tu propia responsabilidad y riesgo.&#10;- Algunos ajustes desactivan protecciones de seguridad o pueden causar inestabilidad, pérdida de datos o que Windows deje de arrancar.&#10;- Debes crear un punto de restauración antes de aplicar cambios.&#10;- Los ajustes marcados como PROHIBIDO están ocultos tras el Modo Avanzado y solo deben usarlos personas que sepan lo que hacen.&#10;- El autor de TOJI NO se hace responsable de ningún daño, pérdida de datos, inestabilidad ni de cualquier consecuencia derivada del uso del programa.&#10;- El software se ofrece 'TAL CUAL', sin garantía de ningún tipo.&#10;&#10;Si no estás de acuerdo, cierra el programa."/>
         </ScrollViewer>
       </Border>
-      <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-        <Button x:Name="BtnDecline" Style="{StaticResource Btn}" Content="No acepto" MinWidth="130" Margin="0,0,10,0"/>
-        <Button x:Name="BtnAccept" Style="{StaticResource BtnPrimary}" Content="Acepto y continúo" MinWidth="170" Margin="0"/>
-      </StackPanel>
+      <Grid Grid.Row="2" Margin="0,20,0,0">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <TextBlock Text="© 2026 " FontSize="12.5" Foreground="{StaticResource TextDim}"/>
+          <TextBlock Text="Sothe" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource AccentHi}"/>
+          <TextBlock Text=" · TOJI Celestial Optimizer" FontSize="12.5" Foreground="{StaticResource TextDim}"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+          <Button x:Name="BtnDecline" Style="{StaticResource Btn}" Content="No acepto" MinWidth="130" Margin="0,0,10,0"/>
+          <Button x:Name="BtnAccept" Style="{StaticResource BtnPrimary}" Content="Acepto y continúo" MinWidth="170" Margin="0"/>
+        </StackPanel>
+      </Grid>
     </Grid>
   </Grid>
 </Window>

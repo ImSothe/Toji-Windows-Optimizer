@@ -79,6 +79,7 @@ coverage*.info
 *.snk
 *.cer
 *.key
+*.pem
 .env
 .env.*
 secrets.json

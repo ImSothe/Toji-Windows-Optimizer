@@ -252,6 +252,13 @@
           </ScrollViewer>
         </TabItem>
       </TabControl>
+
+      <!-- Firma del autor: discreta, a la derecha de las pestanas -->
+      <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,14,4,0">
+        <TextBlock x:Name="VersionText" Text="v1.0" FontSize="12.5" Foreground="{StaticResource TextDim}" VerticalAlignment="Center"/>
+        <TextBlock Text="  ·  Creado por " FontSize="12.5" Foreground="{StaticResource TextDim}" VerticalAlignment="Center"/>
+        <TextBlock Text="Sothe" FontSize="12.5" FontWeight="SemiBold" Foreground="{StaticResource AccentHi}" VerticalAlignment="Center"/>
+      </StackPanel>
     </Grid>
 
     <!-- Notificacion flotante (toast) -->

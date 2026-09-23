@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Toji
 {
@@ -39,6 +40,7 @@ namespace Toji
         public string Name { get; set; }
         public string Desc { get; set; }
         public List<string> Tweaks { get; set; } = new List<string>();
+        [JsonIgnore] public bool IsCustom { get; set; }   // creado por el usuario (profiles.user.json)
     }
     public class ProfilesFile { public List<Profile> Profiles { get; set; } = new List<Profile>(); }
 

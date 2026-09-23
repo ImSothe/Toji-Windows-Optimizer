@@ -29,6 +29,25 @@ WPF solo se ejecuta en Windows, pero se puede compilar en otros sistemas con el 
 dotnet build -p:EnableWindowsTargeting=true
 ```
 
+## Tests automaticos
+Desde la raiz del repo (en Windows usan powershell.exe; en Linux necesitan PowerShell 7, `pwsh`):
+```bash
+dotnet test tests/TOJI.Tests
+```
+Cubren: deteccion de fallos de PowerShell, perfiles propios/oficiales, nombres reservados y OTA (firma, hashes, fusion de perfiles).
+
+## Actualizaciones OTA de los JSON
+Los tweaks ejecutan comandos como administrador, asi que TOJI solo acepta datos **firmados** con tu clave.
+1. Una sola vez: `dotnet run --project tools/OtaSigner -- keygen C:\claves-toji`
+   - Guarda `ota-private.pem` FUERA del repo (y haz copia). Nunca se sube (`*.pem` esta en .gitignore).
+   - Pega la clave publica que imprime en `DataUpdater.DefaultPublicKey` y tu URL publica en `DataUpdater.DefaultBaseUrl`.
+2. Cada actualizacion: edita los JSON, sube la version y firma:
+   `dotnet run --project tools/OtaSigner -- sign src/TOJI/data C:\claves-toji\ota-private.pem 2`
+3. Publica en la URL: `manifest.json`, `manifest.sig` y los JSON (GitHub Pages de un repo publico, Cloudflare R2...).
+   El repo privado NO sirve como origen: los clientes no pueden descargar de el.
+
+Los perfiles que crea el usuario se guardan en `%ProgramData%\TOJI\profiles.user.json`: la OTA y reinstalar TOJI no los tocan.
+
 ## Notas
 - El manifiesto ya pide administrador (UAC) al abrir: no necesitas lanzador .vbs/.bat.
 - Si el primer `dotnet build` se queja de `Microsoft.Win32.Registry`, ejecuta:
@@ -48,6 +67,8 @@ MainWindow.*       interfaz (Optimizaciones + Reparaciones), vista Lista/Cuadric
 TojiDialog.*       dialogos modales con el tema (avisos, confirmaciones, pedir texto)
 Ui.cs              CornerRadius adjunto para botones + barra de titulo oscura (DWM)
 Models.cs          mapeo de los JSON
+PowerShellRunner.cs  ejecuta PowerShell oculto y detecta fallos (codigo de salida y stderr)
+DataUpdater.cs     OTA de data\*.json firmada (ECDSA) con fusion de perfiles
 TojiEngine.cs      motor: aplicar/revertir/backup/codigo/restaurar
 data\*.json        tweaks, apps, features, perfiles (editables / OTA)
 ```

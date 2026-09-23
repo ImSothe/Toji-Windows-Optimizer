@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <!-- El motor usa el registro de Windows; en estos tests solo se prueban partes multiplataforma -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <!-- Mismo codigo que la app (enlazado, no copiado): solo las partes sin WPF -->
+  <ItemGroup>
+    <Compile Include="..\..\src\TOJI\TojiEngine.cs" Link="App\TojiEngine.cs" />
+    <Compile Include="..\..\src\TOJI\Models.cs" Link="App\Models.cs" />
+    <Compile Include="..\..\src\TOJI\PowerShellRunner.cs" Link="App\PowerShellRunner.cs" />
+    <Compile Include="..\..\src\TOJI\DataUpdater.cs" Link="App\DataUpdater.cs" />
+    <Compile Include="..\..\src\TOJI\TextUtil.cs" Link="App\TextUtil.cs" />
+    <None Include="..\..\src\TOJI\data\*.json" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>

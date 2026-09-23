@@ -11,20 +11,25 @@ namespace Toji
 {
     public class TojiEngine
     {
-        public readonly string Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TOJI");
+        public readonly string Root;                  // %ProgramData%\TOJI (backups, log, perfiles del usuario)
         public readonly string BackupDir;
         public readonly string BaseDir;               // carpeta del .exe (donde estan los JSON)
         // camelCase al escribir: mismo formato que los JSON de data\ (y que las versiones PowerShell/web)
         private readonly JsonSerializerOptions _json = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        public TojiEngine()
+        public TojiEngine() : this(AppDomain.CurrentDomain.BaseDirectory,
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TOJI")) { }
+
+        public TojiEngine(string baseDir, string root)
         {
-            BaseDir = AppDomain.CurrentDomain.BaseDirectory;
+            BaseDir = baseDir;
+            Root = root;
             BackupDir = Path.Combine(Root, "backups");
             Directory.CreateDirectory(BackupDir);
+            try { MigrateLegacyCustomProfiles(); } catch (Exception ex) { Log("Migracion de perfiles: " + ex.Message); }
         }
 
-        private string DataPath(string file)
+        public string DataPath(string file)
         {
             // Busca los JSON en \data\ y, si no, junto al exe (compatibilidad)
             var p1 = Path.Combine(BaseDir, "data", file);
@@ -44,12 +49,14 @@ namespace Toji
             var f = JsonSerializer.Deserialize<TweaksFile>(File.ReadAllText(DataPath("tweaks.json")), _json);
             return f?.Tweaks ?? new List<Tweak>();
         }
+        // Perfiles oficiales (data\profiles.json, actualizables por OTA) + perfiles propios del usuario
         public List<Profile> LoadProfiles()
         {
-            var path = DataPath("profiles.json");
-            if (!File.Exists(path)) return new List<Profile>();
-            var f = JsonSerializer.Deserialize<ProfilesFile>(File.ReadAllText(path), _json);
-            return f?.Profiles ?? new List<Profile>();
+            var official = ReadProfilesFile(DataPath("profiles.json")).Profiles;
+            var ids = new HashSet<string>(official.Select(p => p.Id));
+            var user = ReadProfilesFile(UserProfilesPath).Profiles.Where(p => !ids.Contains(p.Id)).ToList();
+            foreach (var p in user) p.IsCustom = true;
+            return official.Concat(user).ToList();
         }
 
         // ---------------- Estado aplicado ----------------
@@ -130,13 +137,8 @@ namespace Toji
         { { "Boot", 0 }, { "System", 1 }, { "Automatic", 2 }, { "Auto", 2 }, { "Manual", 3 }, { "Disabled", 4 } };
 
         // ---------------- PowerShell (command / appx / restore) ----------------
-        public void RunPowerShellHidden(string command)
-        {
-            var psi = new ProcessStartInfo("powershell.exe",
-                "-NoProfile -ExecutionPolicy Bypass -Command \"" + command.Replace("\"", "\\\"") + "\"")
-            { UseShellExecute = false, CreateNoWindow = true, WindowStyle = ProcessWindowStyle.Hidden };
-            using (var p = Process.Start(psi)) p.WaitForExit();
-        }
+        // Lanza una excepcion si el comando falla: ApplyTweak/RevertTweak la registran como error de ese ajuste
+        public void RunPowerShellHidden(string command) => PowerShellRunner.Run(command);
         public void RunPowerShellVisible(string title, string command)
         {
             var full = "$host.UI.RawUI.WindowTitle='" + title + "'; Write-Host '=== " + title + " ===' -ForegroundColor Green; " + command + "; Write-Host ''; Write-Host 'Terminado. Puedes cerrar esta ventana.' -ForegroundColor Green";
@@ -181,7 +183,7 @@ namespace Toji
                             RunPowerShellHidden("Get-AppxPackage -Name '" + op.Package + "' -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue");
                             break;
                         default:
-                            res.Errors.Add("op desconocida: " + op.Type); break;
+                            res.Errors.Add("op desconocida: " + op.Type); res.Ok = false; break;
                     }
                 }
                 catch (Exception ex) { res.Errors.Add(op.Type + ": " + ex.Message); res.Ok = false; }
@@ -211,8 +213,9 @@ namespace Toji
                 }
                 catch (Exception ex) { res.Errors.Add(b.Type + ": " + ex.Message); res.Ok = false; }
             }
-            File.Delete(path);
-            Log("REVERTIDO " + id);
+            // Si algo fallo, el backup se conserva: el ajuste sigue contando como aplicado y se puede reintentar
+            if (res.Ok) { File.Delete(path); Log("REVERTIDO " + id); }
+            else Log("REVERTIDO CON ERRORES " + id + " (se conserva el backup) | " + string.Join("; ", res.Errors));
             return res;
         }
 
@@ -262,20 +265,80 @@ namespace Toji
         }
 
         // ---------------- Perfiles propios ----------------
+        // Los perfiles del usuario viven fuera de data\ para que ni la OTA ni reinstalar TOJI los borren
+        public const string CustomProfileDesc = "Perfil personalizado";
+        private static readonly string[] BuiltInProfileKeys = { "competitivo", "ciber", "ciberseguridad", "limpio" };
+        public string UserProfilesPath => Path.Combine(Root, "profiles.user.json");
+
+        public static string ProfileId(string name)
+        {
+            string id = new string((name ?? "perfil").Trim().ToLowerInvariant()
+                .Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray()).Trim('_');
+            return string.IsNullOrEmpty(id) ? "perfil" : id;
+        }
+
+        // Un nombre esta reservado si coincide (sin tildes ni mayusculas) con el id o el nombre de un perfil oficial
+        public bool IsReservedProfileName(string name, out string suggestion)
+        {
+            var reserved = new HashSet<string>(BuiltInProfileKeys);
+            foreach (var p in ReadProfilesFile(DataPath("profiles.json")).Profiles.Where(p => p.Desc != CustomProfileDesc))
+            {
+                reserved.Add(TextUtil.Fold(p.Id ?? ""));
+                reserved.Add(TextUtil.Fold(ProfileId(p.Name)));
+            }
+            bool hit = reserved.Contains(TextUtil.Fold(ProfileId(name)));
+            suggestion = hit ? (name ?? "").Trim() + "_Custom" : null;
+            return hit;
+        }
+
         public void SaveProfile(string name, List<string> ids)
         {
-            var path = DataPath("profiles.json");
-            ProfilesFile doc = File.Exists(path)
-                ? JsonSerializer.Deserialize<ProfilesFile>(File.ReadAllText(path), _json)
-                : new ProfilesFile();
-            if (doc == null) doc = new ProfilesFile();
-            string id = new string((name ?? "perfil").ToLowerInvariant()
-                .Select(c => char.IsLetterOrDigit(c) ? c : '_').ToArray()).Trim('_');
-            if (string.IsNullOrEmpty(id)) id = "perfil";
+            name = (name ?? "").Trim();
+            if (IsReservedProfileName(name, out var suggestion))
+                throw new InvalidOperationException($"«{name}» es un perfil oficial de TOJI. Elige otro nombre, por ejemplo «{suggestion}».");
+            string id = ProfileId(name);
+            var doc = ReadProfilesFile(UserProfilesPath);
             doc.Profiles.RemoveAll(p => p.Id == id);
-            doc.Profiles.Add(new Profile { Id = id, Name = name, Desc = "Perfil personalizado", Tweaks = ids });
-            File.WriteAllText(path, JsonSerializer.Serialize(doc, _json));
+            doc.Profiles.Add(new Profile { Id = id, Name = name, Desc = CustomProfileDesc, Tweaks = ids });
+            WriteJsonAtomic(UserProfilesPath, doc);
             Log("Perfil guardado: " + name);
+        }
+
+        // Versiones anteriores guardaban los perfiles propios dentro de data\profiles.json: se mueven al fichero de usuario
+        public void MigrateLegacyCustomProfiles() => MoveCustomProfilesToUserFile(DataPath("profiles.json"));
+
+        // Tambien la usa la OTA antes de sustituir profiles.json: asi la descarga fusiona y no pisa perfiles propios
+        public int MoveCustomProfilesToUserFile(string officialPath)
+        {
+            if (!File.Exists(officialPath)) return 0;
+            var doc = ReadProfilesFile(officialPath);
+            var custom = doc.Profiles.Where(p => p.Desc == CustomProfileDesc).ToList();
+            if (custom.Count == 0) return 0;
+            var user = ReadProfilesFile(UserProfilesPath);
+            foreach (var p in custom)
+                if (!user.Profiles.Any(u => u.Id == p.Id)) user.Profiles.Add(p);
+            WriteJsonAtomic(UserProfilesPath, user);
+            doc.Profiles.RemoveAll(p => p.Desc == CustomProfileDesc);
+            WriteJsonAtomic(officialPath, doc);
+            Log($"Perfiles propios movidos a {UserProfilesPath}: {custom.Count}");
+            return custom.Count;
+        }
+
+        private ProfilesFile ReadProfilesFile(string path)
+        {
+            if (!File.Exists(path)) return new ProfilesFile();
+            var doc = JsonSerializer.Deserialize<ProfilesFile>(File.ReadAllText(path), _json) ?? new ProfilesFile();
+            doc.Profiles ??= new List<Profile>();
+            return doc;
+        }
+
+        // Escritura atomica: si se corta a mitad no deja un JSON a medias
+        internal void WriteJsonAtomic<T>(string path, T value)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            var tmp = path + ".tmp";
+            File.WriteAllText(tmp, JsonSerializer.Serialize(value, _json));
+            File.Move(tmp, path, true);
         }
     }
 }

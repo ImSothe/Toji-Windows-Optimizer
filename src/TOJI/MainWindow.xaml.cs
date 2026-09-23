@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,6 +61,8 @@ namespace Toji
         {
             InitializeComponent();
             NativeTheme.ApplyDarkTitleBar(this);
+            var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            if (ver != null) VersionText.Text = $"v{ver.Major}.{ver.Minor}.{ver.Build}";
             try
             {
                 _tweaks = _eng.LoadTweaks();
@@ -114,11 +115,12 @@ namespace Toji
             BtnNet.Click += (s, e) => _eng.RunPowerShellVisible("Reset de red", "netsh winsock reset; netsh int ip reset; ipconfig /flushdns; Write-Host 'Reinicia el PC.' -ForegroundColor Yellow");
             BtnWU.Click += (s, e) => _eng.RunPowerShellVisible("Reparar Windows Update", "net stop wuauserv; net stop bits; Rename-Item \"$env:SystemRoot\\SoftwareDistribution\" SoftwareDistribution.old -ErrorAction SilentlyContinue; net start wuauserv; net start bits");
 
-            Loaded += (s, e) =>
+            Loaded += async (s, e) =>
             {
                 UpdateItemWidth();
                 if (_loadError != null)
                     TojiDialog.Info(this, "Error al cargar datos", "No se pudieron cargar los datos (tweaks.json).\n\n" + _loadError);
+                await CheckOtaAsync();
             };
 
             ApplyFilter();
@@ -133,15 +135,7 @@ namespace Toji
         private static readonly string[] CatOrder =
         { "Rendimiento", "Input", "Energia", "Red", "GPU", "Interfaz", "Privacidad", "Almacenamiento", "Debloat", "Activacion", "Windows Update", "Seguridad", "PROHIBIDO" };
 
-        // Minusculas y sin tildes, para que "telemetría" encuentre "telemetria"
-        private static string Fold(string s)
-        {
-            if (string.IsNullOrEmpty(s)) return "";
-            var sb = new StringBuilder(s.Length);
-            foreach (var ch in s.ToLowerInvariant().Normalize(NormalizationForm.FormD))
-                if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark) sb.Append(ch);
-            return sb.ToString();
-        }
+        private static string Fold(string s) => TextUtil.Fold(s);
 
         // ---------------- Lista de ajustes (vista Lista / Cuadricula) ----------------
         private void BuildList()
@@ -516,11 +510,17 @@ namespace Toji
                 await Task.Run(() =>
                 {
                     int total = Math.Max(toRevert.Count + toApply.Count, 1); int i = 0;
-                    foreach (var id in toRevert) { i++; rep.Report(Tuple.Create(i * 100 / total, "Revirtiendo: " + TweakName(id))); errs.AddRange(_eng.RevertTweak(id).Errors); }
+                    foreach (var id in toRevert)
+                    {
+                        i++; rep.Report(Tuple.Create(i * 100 / total, "Revirtiendo: " + TweakName(id)));
+                        errs.AddRange(_eng.RevertTweak(id).Errors.Select(e => TweakName(id) + " → " + e));
+                    }
                     foreach (var id in toApply)
                     {
                         i++; rep.Report(Tuple.Create(i * 100 / total, "Aplicando: " + TweakName(id)));
-                        var t = _tweaks.First(x => x.Id == id); var r = _eng.ApplyTweak(t); errs.AddRange(r.Errors); if (t.Reboot) reboot = true;
+                        var t = _tweaks.First(x => x.Id == id); var r = _eng.ApplyTweak(t);
+                        errs.AddRange(r.Errors.Select(e => t.Name + " → " + e));
+                        if (t.Reboot) reboot = true;
                     }
                 });
             }
@@ -531,14 +531,15 @@ namespace Toji
             StatusText.Text = "Listo.";
             var summary = $"Aplicados: {toApply.Count}   ·   Revertidos: {toRevert.Count}";
             if (reboot) summary += "\n\nAlgunos cambios necesitan REINICIAR para surtir efecto.";
-            if (errs.Count > 0) summary += "\n\nAvisos:\n" + string.Join("\n", errs.Select(x => "   •  " + x));
-            TojiDialog.Info(this, "Cambios aplicados", summary);
+            if (errs.Count > 0) summary += $"\n\n{errs.Count} operaciones fallaron (detalle también en %ProgramData%\\TOJI\\toji.log):\n" + string.Join("\n", errs.Select(x => "   •  " + x));
+            TojiDialog.Info(this, errs.Count > 0 ? "Aplicado con errores" : "Cambios aplicados", summary);
         }
 
         private async Task RevertAll()
         {
             if (!TojiDialog.Confirm(this, "Revertir TODO", "Se deshará todo lo aplicado por TOJI y Windows volverá a los valores que tenía antes.", "Revertir TODO", danger: true)) return;
             var applied = _eng.GetApplied().ToList();
+            var errs = new List<string>();
             SetBusy(true);
             var progress = new Progress<Tuple<int, string>>(p => { Progress.Value = p.Item1; StatusText.Text = p.Item2; });
             var rep = (IProgress<Tuple<int, string>>)progress;
@@ -547,17 +548,23 @@ namespace Toji
                 await Task.Run(() =>
                 {
                     int total = Math.Max(applied.Count, 1); int i = 0;
-                    foreach (var id in applied) { i++; rep.Report(Tuple.Create(i * 100 / total, "Revirtiendo: " + TweakName(id))); _eng.RevertTweak(id); }
+                    foreach (var id in applied)
+                    {
+                        i++; rep.Report(Tuple.Create(i * 100 / total, "Revirtiendo: " + TweakName(id)));
+                        errs.AddRange(_eng.RevertTweak(id).Errors.Select(e => TweakName(id) + " → " + e));
+                    }
                 });
             }
-            catch (Exception ex) { TojiDialog.Info(this, "Revertir TODO", "Algo falló al revertir:\n\n" + ex.Message); }
+            catch (Exception ex) { errs.Add(ex.Message); }
             finally { SetBusy(false); }
 
             foreach (var kv in _boxes) kv.Value.IsChecked = false;
             ClearProfileSelection("Selección manual");
             RefreshApplied(); UpdateCount();
             StatusText.Text = "Listo.";
-            TojiDialog.Info(this, "Revertir TODO", "Todo revertido. Reinicia el PC para que se asiente.");
+            TojiDialog.Info(this, "Revertir TODO", errs.Count == 0
+                ? "Todo revertido. Reinicia el PC para que se asiente."
+                : "Revertido con avisos (detalle también en toji.log):\n" + string.Join("\n", errs.Select(x => "   •  " + x)));
         }
 
         private async Task CreateRestorePoint()
@@ -590,6 +597,14 @@ namespace Toji
             catch (Exception ex) { ShowToast(ex.Message, ToastKind.Error); }
         }
 
+        // La OTA descarga en segundo plano; los datos nuevos se cargan en el siguiente arranque
+        private async Task CheckOtaAsync()
+        {
+            var r = await new DataUpdater(_eng).CheckAndUpdateAsync();
+            if (r.Status == OtaStatus.Updated)
+                ShowToast($"Base de ajustes actualizada (v{r.Version}). Reinicia TOJI para verla.");
+        }
+
         private void SaveProfile()
         {
             var ids = CheckedIds().ToList();
@@ -597,7 +612,13 @@ namespace Toji
             var name = TojiDialog.Prompt(this, "Guardar perfil",
                 $"Guarda los {ids.Count} ajustes marcados como un perfil propio. Aparecerá junto a los perfiles de TOJI.",
                 "Mi setup", "Guardar", "Nombre del perfil",
-                validate: s => string.IsNullOrWhiteSpace(s) ? "Escribe un nombre para el perfil." : null);
+                validate: s =>
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return "Escribe un nombre para el perfil.";
+                    if (_eng.IsReservedProfileName(s, out var suggestion))
+                        return $"«{s.Trim()}» es un perfil oficial de TOJI y no se puede sobrescribir. Elige otro nombre, por ejemplo «{suggestion}».";
+                    return null;
+                });
             if (name == null) return;
             name = name.Trim();
             try { _eng.SaveProfile(name, ids); }
