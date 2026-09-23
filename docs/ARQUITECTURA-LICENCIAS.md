@@ -1,6 +1,6 @@
-# TOJI Celestial Optimizer — Arquitectura de licencias y freemium
+# Sothe Optimizer — Arquitectura de licencias y freemium
 
-> Estado: **cliente implementado** en `src/TOJI/Licensing/` + `PaywallDialog` (modo DEMO en Debug). Pendiente: cuenta de Keygen,
+> Estado: **cliente implementado** en `src/SotheOptimizer/Licensing/` + `PaywallDialog` (modo DEMO en Debug). Pendiente: cuenta de Keygen,
 > Worker de Cloudflare, producto de Lemon Squeezy y verificación Ed25519 de las respuestas de Keygen (se activa al probar con la cuenta real).
 > Precios y funciones verificados en septiembre de 2026; revísalos antes de contratar.
 
@@ -25,7 +25,7 @@
 
 Por qué esta combinación:
 
-- **Keygen** es una API dedicada a licencias. Tiene justo lo que pide TOJI: máquinas con huella, límite de máquinas por licencia, políticas de prueba temporales y la estrategia `UNIQUE_PER_POLICY`. Esta estrategia impide que un mismo PC repita la prueba aunque reinstale Windows, siempre que la huella salga del hardware. El plan **Dev es gratis hasta 100 usuarios activos** y los de pago empiezan en **49 $/mes**. Además, **Keygen CE es autoalojable gratis** si algún día quieres dejar de pagar la nube.
+- **Keygen** es una API dedicada a licencias. Tiene justo lo que pide Sothe Optimizer: máquinas con huella, límite de máquinas por licencia, políticas de prueba temporales y la estrategia `UNIQUE_PER_POLICY`. Esta estrategia impide que un mismo PC repita la prueba aunque reinstale Windows, siempre que la huella salga del hardware. El plan **Dev es gratis hasta 100 usuarios activos** y los de pago empiezan en **49 $/mes**. Además, **Keygen CE es autoalojable gratis** si algún día quieres dejar de pagar la nube.
 - **Lemon Squeezy** es *Merchant of Record*: cobra, emite facturas y liquida el IVA de cada país de la UE por ti, algo clave vendiendo desde España a consumidores europeos. Cuesta **5 % + 0,50 $ por venta**, con recargos de ~1,5 % en pagos internacionales o por PayPal, y sin cuota mensual. Stripe la compró en 2024 y sigue operando y aceptando altas, aunque su equipo empuja *Stripe Managed Payments* como sucesor. Por eso el diseño deja el cobro **desacoplado**: cambiar de pasarela solo toca el Worker.
 - **El Worker** guarda los secretos (token de administrador de Keygen y firma de webhooks) fuera del `.exe`. Un secreto dentro del cliente se extrae en minutos.
 
@@ -55,7 +55,7 @@ Compartir códigos (exportar/importar) se deja libre a propósito, porque hace d
 ```mermaid
 sequenceDiagram
   participant U as Usuario
-  participant App as TOJI (C#)
+  participant App as Sothe Optimizer (C#)
   participant LS as Lemon Squeezy
   participant W as Worker (Cloudflare)
   participant K as Keygen
@@ -64,7 +64,7 @@ sequenceDiagram
   U->>LS: Checkout (email + pago; IVA incluido)
   LS->>W: Webhook order_created (firmado HMAC)
   W->>K: Crea licencia (política Permanente, maxMachines=1)
-  W->>U: Email con la clave TOJI
+  W->>U: Email con la clave Sothe Optimizer
   U->>App: Pega la clave
   App->>K: Activa máquina (huella HWID) y valida con scope fingerprint
   K-->>App: Válida + fichero de máquina firmado (Ed25519)
@@ -93,14 +93,14 @@ Un botón en la app, "Mover mi licencia a este PC", llama a `POST /transfer { ke
 ### 5.1 Módulos nuevos
 
 ```
-src/TOJI/Licensing/
+src/SotheOptimizer/Licensing/
   HardwareId.cs            Huella del PC (ver 5.2)
   LicenseStatus.cs         enum LicenseState + record LicenseStatus(State, DaysLeft, Email, ExpiresAt)
   ILicenseProvider.cs      ActivateAsync / ValidateAsync / StartTrialAsync / TransferAsync
   KeygenLicenseProvider.cs HttpClient -> api.keygen.sh y Worker (verificar la firma Ed25519: pendiente de la cuenta real)
-  LicenseStore.cs          %ProgramData%\TOJI\license.dat cifrado con DPAPI (ProtectedData, LocalMachine)
+  LicenseStore.cs          %ProgramData%\SotheOptimizer\license.dat cifrado con DPAPI (ProtectedData, LocalMachine)
   LicenseService.cs        Estado actual, caché offline, periodo de gracia, evento StatusChanged
-src/TOJI/PaywallDialog.xaml(.cs)  Modal con la estética TOJI: clave, Comprar, Probar 7 días
+src/SotheOptimizer/PaywallDialog.xaml(.cs)  Modal con la estética de Sothe: clave, Comprar, Probar 7 días
 server/worker/            Cloudflare Worker (TypeScript): /trial, /transfer, /webhooks/lemonsqueezy
 ```
 
@@ -108,7 +108,7 @@ server/worker/            Cloudflare Worker (TypeScript): /trial, /transfer, /we
 
 - Componentes: **UUID SMBIOS** (`Win32_ComputerSystemProduct.UUID`) + **serie de placa base** (`Win32_BaseBoard.SerialNumber`), mediante `System.Management`. Sobreviven a reinstalar Windows, que es lo que impide repetir la prueba.
 - Algunos fabricantes ponen valores genéricos (`FFFFFFFF-…`, `03000200-0400-…`, "To be filled by O.E.M."). Se detectan y entonces se añade `MachineGuid` (`HKLM\SOFTWARE\Microsoft\Cryptography`).
-- Huella = `SHA-256(sal_de_TOJI + componentes normalizados)` en hexadecimal. Nunca se envían los números de serie en claro, lo que ayuda al cumplir el RGPD.
+- Huella = `SHA-256(sal_de_Sothe + componentes normalizados)` en hexadecimal. Nunca se envían los números de serie en claro, lo que ayuda al cumplir el RGPD.
 
 ### 5.3 Punto de control en la UI (muro de pago)
 

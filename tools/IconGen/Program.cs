@@ -9,10 +9,10 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 
-// Genera el icono de la app (icon.ico) a partir del logo vectorial SotheLogo de Themes/TojiTheme.xaml,
+// Genera el icono de la app (icon.ico) a partir del logo vectorial SotheLogo de Themes/SotheTheme.xaml,
 // sobre una loseta oscura redondeada para que se lea bien en barras de tareas claras y oscuras.
-//   IconGen <TojiTheme.xaml> <salida.ico>
-// Si cambia el logo, vuelve a ejecutarlo: dotnet run --project tools/IconGen -- src/TOJI/Themes/TojiTheme.xaml src/TOJI/Assets/icon.ico
+//   IconGen <SotheTheme.xaml> <salida.ico>
+// Si cambia el logo, vuelve a ejecutarlo: dotnet run --project tools/IconGen -- src/SotheOptimizer/Themes/SotheTheme.xaml src/SotheOptimizer/Assets/icon.ico
 internal static class Program
 {
     private static readonly int[] Sizes = { 16, 20, 24, 32, 40, 48, 64, 128, 256 };
@@ -24,7 +24,7 @@ internal static class Program
         {
             if (args.Length != 2)
             {
-                Console.Error.WriteLine("Uso: IconGen <TojiTheme.xaml> <salida.ico>");
+                Console.Error.WriteLine("Uso: IconGen <SotheTheme.xaml> <salida.ico>");
                 return 2;
             }
             var logo = LoadLogo(args[0]);

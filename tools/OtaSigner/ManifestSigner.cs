@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 
 // Firma de los datos de la app. Solo la usan OtaSigner y los tests: no forma parte del .exe del cliente,
-// que unicamente lleva la clave PUBLICA y la verificacion (src/TOJI/SignedData.cs).
+// que unicamente lleva la clave PUBLICA y la verificacion (src/SotheOptimizer/SignedData.cs).
 internal static class ManifestSigner
 {
     public static readonly string[] Files = { "tweaks.json", "apps.json", "features.json", "profiles.json" };

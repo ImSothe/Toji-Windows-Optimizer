@@ -1,1 +1,1 @@
-# TojiCelestialOptimizer
+# Sothe Optimizer

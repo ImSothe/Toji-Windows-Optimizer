@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-// Firma de los datos (data\*.json) de Sothe Celestial Optimizer. Herramienta interna del autor: no va en el .exe.
+// Firma de los datos (data\*.json) de Sothe Optimizer. Herramienta interna del autor: no va en el .exe.
 //   keygen <carpeta> [--source <SignedData.cs>]
 //                  crea ota-private.pem (NUNCA al repo) y muestra la clave publica; con --source la escribe en el codigo
 //   sign <carpeta-data> <ota-private.pem> <version>
@@ -21,9 +21,9 @@ internal static class Program
                 return KeyGen(args[1], args.Length == 4 && args[2] == "--source" ? args[3] : null);
             if (args.Length == 4 && args[0] == "sign") return Sign(args[1], args[2], int.Parse(args[3]));
             if (args.Length == 3 && args[0] == "verify") return Verify(args[1], args[2]);
-            Console.Error.WriteLine("Uso:\n  OtaSigner keygen <carpeta> [--source src/TOJI/SignedData.cs]\n" +
+            Console.Error.WriteLine("Uso:\n  OtaSigner keygen <carpeta> [--source src/SotheOptimizer/SignedData.cs]\n" +
                                     "  OtaSigner sign <carpeta-data> <ota-private.pem> <version>\n" +
-                                    "  OtaSigner verify <carpeta-data> <clave-publica | src/TOJI/SignedData.cs>");
+                                    "  OtaSigner verify <carpeta-data> <clave-publica | src/SotheOptimizer/SignedData.cs>");
             return 2;
         }
         catch (Exception ex)

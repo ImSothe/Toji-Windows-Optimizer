@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <!-- El motor usa el registro de Windows; en estos tests solo se prueban partes multiplataforma -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <!-- Mismo codigo que la app (enlazado, no copiado): solo las partes sin WPF -->
+  <ItemGroup>
+    <Compile Include="..\..\src\SotheOptimizer\SotheEngine.cs" Link="App\SotheEngine.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Models.cs" Link="App\Models.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\PowerShellRunner.cs" Link="App\PowerShellRunner.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\DataUpdater.cs" Link="App\DataUpdater.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\SignedData.cs" Link="App\SignedData.cs" />
+    <!-- El firmador del autor (tools/OtaSigner): asi los tests firman exactamente como el -->
+    <Compile Include="..\..\tools\OtaSigner\ManifestSigner.cs" Link="Tools\ManifestSigner.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\TextUtil.cs" Link="App\TextUtil.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\WindowsTools.cs" Link="App\WindowsTools.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\TimerResolution.cs" Link="App\TimerResolution.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseModels.cs" Link="App\Licensing\LicenseModels.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseConfig.cs" Link="App\Licensing\LicenseConfig.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Licensing\HardwareId.cs" Link="App\Licensing\HardwareId.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseStore.cs" Link="App\Licensing\LicenseStore.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseService.cs" Link="App\Licensing\LicenseService.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Licensing\KeygenLicenseProvider.cs" Link="App\Licensing\KeygenLicenseProvider.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Licensing\OtherProviders.cs" Link="App\Licensing\OtherProviders.cs" />
+    <None Include="..\..\src\SotheOptimizer\data\*.json" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Igual que en la app: los JSON incrustados son la copia por defecto si falta data\ -->
+    <EmbeddedResource Include="..\..\src\SotheOptimizer\data\*.json" LogicalName="data/%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>
