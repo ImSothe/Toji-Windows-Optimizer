@@ -48,6 +48,10 @@ Los tweaks ejecutan comandos como administrador, asi que TOJI solo acepta datos 
 
 Los perfiles que crea el usuario se guardan en `%ProgramData%\TOJI\profiles.user.json`: la OTA y reinstalar TOJI no los tocan.
 
+## Icono de la app
+`Assets\icon.ico` sale del logo vectorial (`SotheLogo` en `Themes\TojiTheme.xaml`). Si cambias el logo, regeneralo:
+`dotnet run --project tools/IconGen -- src/TOJI/Themes/TojiTheme.xaml src/TOJI/Assets/icon.ico`
+
 ## Licencias
 - Configura `Licensing/LicenseConfig.cs` (cuenta de Keygen, Worker de pruebas y enlace de compra).
 - Sin configurar: en **Debug** se usa el modo DEMO (claves `TOJI-DEMO-PRO`, `TOJI-DEMO-REVOKED`, prueba local de 7 dias);
@@ -73,7 +77,10 @@ MainWindow.*       interfaz: Optimizaciones, Apps (Winget), Reparaciones, Caract
 MainWindow.Tabs.cs pestanas Apps (winget + drivers GPU) y Caracteristicas (WMI, con PowerShell de respaldo)
 WindowsTools*.cs   winget, caracteristicas opcionales y deteccion de GPU (validan ids antes de usarlos)
 TojiDialog.*       dialogos modales con el tema (avisos, confirmaciones, pedir texto)
-Ui.cs              CornerRadius adjunto para botones + barra de titulo oscura (DWM)
+Ui.cs              CornerRadius adjunto para botones
+BorderlessWindow.cs  ventanas sin marco: arrastre, botones propios, maximizar sin tapar la barra de tareas
+TimerResolution.cs Timer Resolution 0.5 ms (ntdll) y proceso residente por tarea programada
+Assets\icon.ico    icono del .exe y de la barra de tareas (tools/IconGen)
 Models.cs          mapeo de los JSON
 PowerShellRunner.cs  ejecuta PowerShell oculto y detecta fallos (codigo de salida y stderr)
 DataUpdater.cs     OTA de data\*.json firmada (ECDSA) con fusion de perfiles

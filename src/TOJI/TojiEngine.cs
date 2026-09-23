@@ -277,7 +277,7 @@ namespace Toji
         {
             try
             {
-                RunPowerShellHidden("Set-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore' -Name SystemRestorePointCreationFrequency -Value 0 -Type DWord -Force; Enable-ComputerRestore -Drive $env:SystemDrive\\; Checkpoint-Computer -Description 'TOJI' -RestorePointType MODIFY_SETTINGS");
+                RunPowerShellHidden("Set-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore' -Name SystemRestorePointCreationFrequency -Value 0 -Type DWord -Force; Enable-ComputerRestore -Drive $env:SystemDrive\\; Checkpoint-Computer -Description 'Sothe Celestial Optimizer' -RestorePointType MODIFY_SETTINGS");
                 return true;
             }
             catch { return false; }

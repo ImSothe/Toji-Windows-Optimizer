@@ -62,7 +62,7 @@ namespace Toji
         public MainWindow()
         {
             InitializeComponent();
-            NativeTheme.ApplyDarkTitleBar(this);
+            BorderlessWindow.Attach(this, RootBorder, BtnMinimize, BtnMaximize, BtnCloseWindow, TitleBar, HeaderBar);
             var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             if (ver != null) VersionText.Text = $"v{ver.Major}.{ver.Minor}.{ver.Build}";
             try

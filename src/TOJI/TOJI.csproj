@@ -9,6 +9,7 @@
     <AssemblyName>TOJI</AssemblyName>
     <RootNamespace>Toji</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
     <Version>1.0.0</Version>
     <Product>Sothe Celestial Optimizer</Product>
     <Company>Sothe</Company>
@@ -19,6 +20,12 @@
   <ItemGroup>
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- Icono de la app (lo genera tools/IconGen a partir del logo): el .exe lo lleva como recurso Win32
+       y las ventanas lo cargan como recurso WPF para la barra de tareas -->
+  <ItemGroup>
+    <Resource Include="Assets\icon.ico" />
   </ItemGroup>
 
   <!-- Los JSON viven junto al .exe para poder actualizarlos (OTA) sin recompilar -->
