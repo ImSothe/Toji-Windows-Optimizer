@@ -21,30 +21,39 @@
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Horizontal">
           <!-- Logo: Lanza Inversa del Cielo (daga de Toji) -->
-          <Grid Width="40" Height="40" Margin="0,0,15,0">
+          <Grid Width="44" Height="54" Margin="0,0,15,0">
               <Grid.RenderTransform>
-                  <RotateTransform Angle="-40" CenterX="20" CenterY="20"/>
+                  <!-- Inclinación característica de 45 grados -->
+                  <RotateTransform Angle="-45" CenterX="22" CenterY="27"/>
               </Grid.RenderTransform>
-    
-              <!-- Resplandor del filo -->
-              <Path Data="M 20,2 L 36,4 L 30,22 L 24,28 L 16,28 L 16,14 Z" Fill="#A78BFA" Opacity="0.2">
+
+              <!-- Resplandor maldito de fondo -->
+              <Path Data="M 23,2 L 29,8 L 29,26 L 11,26 L 11,16 L 17,10 L 17,20 L 23,20 Z" Fill="#A78BFA" Opacity="0.3">
                   <Path.Effect>
-                      <BlurEffect Radius="10"/>
+                      <BlurEffect Radius="8"/>
                   </Path.Effect>
               </Path>
 
-              <!-- Hoja principal -->
-              <Path Data="M 20,2 L 24,14 L 24,28 L 16,28 L 16,14 Z" Fill="#E9E6F0"/>
+              <!-- Hoja asimétrica principal (Filo de acero) -->
+              <Path Data="M 23,2 L 29,8 L 29,26 L 11,26 L 11,16 L 17,10 L 17,20 L 23,20 Z" Fill="#E9E6F0"/>
     
-              <!-- Gancho característico -->
-              <Path Data="M 24,16 L 36,4 L 30,22 L 24,24 Z" Fill="#A78BFA"/>
+              <!-- Grabado sutil en el centro de la hoja -->
+              <Path Data="M 17,21 L 23,21 L 23,23 L 17,23 Z" Fill="#050505" Opacity="0.5"/>
+
+              <!-- Tsuba (Guardia cruzada) -->
+              <Path Data="M 7,26 L 33,26 L 33,29 L 7,29 Z" Fill="#2E1065"/>
     
-              <!-- Guardia y mango -->
-              <Path Data="M 12,28 L 28,28 L 28,31 L 12,31 Z" Fill="#8B5CF6"/>
-              <Path Data="M 17,31 L 23,31 L 23,38 L 17,38 Z" Fill="#4C1D95"/>
+              <!-- Mango (Tsuka) -->
+              <Path Data="M 16,29 L 24,29 L 24,38 L 16,38 Z" Fill="#8B5CF6"/>
     
-              <!-- Eslabón de la Cadena -->
-              <Path Data="M 18,38 A 3,4 0 1 0 22,38 A 3,4 0 1 0 18,38" Stroke="#A78BFA" StrokeThickness="2" Fill="Transparent"/>
+              <!-- Detalle visual del vendaje cruzado en el mango -->
+              <Path Data="M 16,31 L 24,33 M 16,34 L 24,36" Stroke="#4C1D95" StrokeThickness="1.5"/>
+
+              <!-- Argolla del pomo -->
+              <Path Data="M 17,41 A 3,3 0 1 0 23,41 A 3,3 0 1 0 17,41" Stroke="#A78BFA" StrokeThickness="2" Fill="Transparent"/>
+
+              <!-- Primer eslabón de la Cadena de los Mil Kilómetros -->
+              <Path Data="M 18,46 A 2,3 0 1 0 22,46 A 2,3 0 1 0 18,46" Stroke="#8B5CF6" StrokeThickness="1.5" Fill="Transparent"/>
           </Grid>
           <StackPanel Margin="0" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
