@@ -58,7 +58,12 @@ Los perfiles que crea el usuario se guardan en `%ProgramData%\TOJI\profiles.user
 ## Licencias
 - Configura `Licensing/LicenseConfig.cs` (cuenta de Keygen, Worker de pruebas y enlace de compra).
 - Sin configurar: en **Debug** se usa el modo DEMO (claves `TOJI-DEMO-PRO`, `TOJI-DEMO-REVOKED`, prueba local de 7 dias);
-  en **Release** APLICAR y Guardar perfil quedan bloqueados (nunca gratis por despiste).
+  en **Release** los ajustes PRO y Guardar perfil quedan bloqueados (nunca gratis por despiste).
+- **Paywall inteligente:** cada tweak de `data\tweaks.json` lleva `"isPro"`. Sin licencia, APLICAR aplica lo gratuito
+  (privacidad, telemetria, interfaz...) y, si hay algun ajuste PRO nuevo marcado, se para y abre el muro de pago.
+  Sin la propiedad el ajuste es gratis. Lo que el exe trae como PRO sigue siendolo aunque se edite `data\`
+  (asi no se desbloquea con el Bloc de notas): la OTA puede marcar mas ajustes como PRO, pero para liberar uno
+  hay que sacar version nueva.
 - Revertir, Revertir TODO, Simular, exportar/importar y Reparaciones funcionan siempre sin licencia.
 
 ## Notas
@@ -88,7 +93,7 @@ Models.cs          mapeo de los JSON
 PowerShellRunner.cs  ejecuta PowerShell oculto y detecta fallos (codigo de salida y stderr)
 DataUpdater.cs     OTA de data\*.json firmada (ECDSA) con fusion de perfiles
 Licensing\         huella HWID, cache cifrada (DPAPI), estados y proveedores (Keygen / Demo)
-PaywallDialog.*    muro de pago (solo en APLICAR con cambios nuevos y Guardar perfil)
+PaywallDialog.*    muro de pago (APLICAR con algun ajuste PRO nuevo, y Guardar perfil)
 TojiEngine.cs      motor: aplicar/revertir/backup/codigo/restaurar
 data\*.json        tweaks, apps, features, perfiles (editables / OTA)
 ```

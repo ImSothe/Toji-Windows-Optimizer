@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,13 +10,14 @@ using Toji.Licensing;
 
 namespace Toji
 {
-    // Muro de pago "mirar pero no tocar": solo aparece al pulsar APLICAR (con cambios nuevos) o Guardar perfil sin licencia
+    // Muro de pago inteligente: sin licencia se aplican los ajustes gratuitos; aparece al pulsar APLICAR con algun
+    // ajuste PRO nuevo marcado, o al Guardar perfil
     public partial class PaywallDialog : Window
     {
         private readonly LicenseService _lic;
         private bool _busy;
 
-        private PaywallDialog(Window owner, LicenseService lic, string action)
+        private PaywallDialog(Window owner, LicenseService lic, string action, IReadOnlyList<string> proTweaks)
         {
             InitializeComponent();
             _lic = lic;
@@ -22,7 +25,7 @@ namespace Toji
             else WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
             var s = lic.Status;
-            ReasonText.Text = Reason(s, action);
+            ReasonText.Text = Reason(s, action, proTweaks);
             if (s.State == LicenseState.TrialExpired) TitleText.Text = "Tu prueba ha terminado";
             if (s.State == LicenseState.Revoked) TitleText.Text = "Licencia desactivada";
             if (s.State == LicenseState.ValidationRequired) TitleText.Text = "Valida tu licencia";
@@ -53,8 +56,10 @@ namespace Toji
 
         public string SuccessMessage { get; private set; }
 
-        // Devuelve true si (ya o tras el dialogo) se puede modificar el sistema
-        public static async Task<bool> EnsureCanModifyAsync(Window owner, LicenseService lic, string action, Action<string> onUnlocked = null)
+        // Devuelve true si (ya o tras el dialogo) se puede modificar el sistema.
+        // proTweaks: nombres de los ajustes PRO que se iban a aplicar (el dialogo los lista)
+        public static async Task<bool> EnsureCanModifyAsync(Window owner, LicenseService lic, string action, Action<string> onUnlocked = null,
+            IReadOnlyList<string> proTweaks = null)
         {
             if (lic.Status.CanModify) return true;
             // Si solo falta validar, se intenta en silencio antes de molestar
@@ -63,17 +68,32 @@ namespace Toji
                 await lic.RefreshOnlineAsync();
                 if (lic.Status.CanModify) return true;
             }
-            var d = new PaywallDialog(owner, lic, action);
+            var d = new PaywallDialog(owner, lic, action, proTweaks);
             d.ShowDialog();
             if (lic.Status.CanModify && d.SuccessMessage != null) onUnlocked?.Invoke(d.SuccessMessage);
             return lic.Status.CanModify;
         }
 
-        public static void Show(Window owner, LicenseService lic) => new PaywallDialog(owner, lic, "aplicar cambios").ShowDialog();
+        public static void Show(Window owner, LicenseService lic) => new PaywallDialog(owner, lic, "aplicar ajustes PRO", null).ShowDialog();
 
-        private static string Reason(LicenseStatus s, string action)
+        public const string ProSelectedMessage = "Has seleccionado ajustes avanzados. Necesitas una licencia Sothe PRO para aplicarlos.";
+
+        private static string Reason(LicenseStatus s, string action, IReadOnlyList<string> proTweaks)
         {
             var extra = string.IsNullOrEmpty(s.Message) ? "" : s.Message + " ";
+            if (proTweaks != null && proTweaks.Count > 0)
+            {
+                const int max = 4;
+                var list = string.Join("\n", proTweaks.Take(max).Select(n => "•  " + n));
+                if (proTweaks.Count > max) list += $"\n…y {proTweaks.Count - max} más";
+                var hint = s.State switch
+                {
+                    LicenseState.Revoked => extra + "Si crees que es un error, contacta con soporte.",
+                    LicenseState.ValidationRequired => extra + "Conéctate a Internet y pulsa «Validar ahora».",
+                    _ => "Los ajustes gratuitos se aplican sin licencia: desmarca los PRO para aplicar solo esos."
+                };
+                return ProSelectedMessage + "\n\n" + list + "\n\n" + hint;
+            }
             return s.State switch
             {
                 LicenseState.TrialExpired => $"Hazte con Sothe PRO para seguir pudiendo {action}. Todo lo que ya aplicaste se puede revertir gratis.",

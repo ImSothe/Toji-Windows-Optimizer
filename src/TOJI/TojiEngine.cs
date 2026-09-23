@@ -42,7 +42,11 @@ namespace Toji
         public string ReadDataText(string file)
         {
             var path = DataPath(file);
-            if (File.Exists(path)) return File.ReadAllText(path);
+            return File.Exists(path) ? File.ReadAllText(path) : ReadEmbeddedText(file);
+        }
+
+        private static string ReadEmbeddedText(string file)
+        {
             using var s = typeof(TojiEngine).Assembly.GetManifestResourceStream(EmbeddedDataPrefix + file);
             if (s == null) return null;
             using var r = new StreamReader(s);
@@ -60,7 +64,19 @@ namespace Toji
         public List<Tweak> LoadTweaks()
         {
             var text = ReadDataText("tweaks.json") ?? throw new FileNotFoundException("No se encuentra tweaks.json", DataPath("tweaks.json"));
-            return JsonSerializer.Deserialize<TweaksFile>(text, _json)?.Tweaks ?? new List<Tweak>();
+            var tweaks = JsonSerializer.Deserialize<TweaksFile>(text, _json)?.Tweaks ?? new List<Tweak>();
+            // El precio no se rebaja editando data\tweaks.json: lo que el catalogo incrustado en el .exe marca como PRO
+            // sigue siendolo. La copia de disco (OTA) solo puede anadir ajustes PRO, nunca quitarlos
+            var embeddedPro = EmbeddedProIds();
+            foreach (var t in tweaks) if (embeddedPro.Contains(t.Id)) t.IsPro = true;
+            return tweaks;
+        }
+
+        private HashSet<string> EmbeddedProIds()
+        {
+            var text = ReadEmbeddedText("tweaks.json");
+            var tweaks = text == null ? null : JsonSerializer.Deserialize<TweaksFile>(text, _json)?.Tweaks;
+            return new HashSet<string>((tweaks ?? new List<Tweak>()).Where(t => t.IsPro).Select(t => t.Id));
         }
         public List<AppItem> LoadApps()
         {
@@ -83,6 +99,15 @@ namespace Toji
             var user = ReadProfilesFile(UserProfilesPath).Profiles.Where(p => !ids.Contains(p.Id)).ToList();
             foreach (var p in user) p.IsCustom = true;
             return official.Concat(user).ToList();
+        }
+
+        // ---------------- Paywall inteligente ----------------
+        // Ajustes PRO entre los que APLICAR va a aplicar ahora. Lo gratuito se aplica siempre sin licencia; basta uno
+        // PRO para exigirla. Los ya aplicados (por ejemplo durante la prueba) no cuentan: mantenerlos o revertirlos es gratis.
+        public static List<Tweak> ProTweaksToApply(IEnumerable<Tweak> tweaks, IEnumerable<string> toApply)
+        {
+            var ids = new HashSet<string>(toApply ?? Enumerable.Empty<string>());
+            return (tweaks ?? Enumerable.Empty<Tweak>()).Where(t => t.IsPro && ids.Contains(t.Id)).ToList();
         }
 
         // ---------------- Estado aplicado ----------------

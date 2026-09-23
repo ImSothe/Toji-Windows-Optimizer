@@ -32,6 +32,11 @@
     <GradientStop Color="#8B5CF6" Offset="0"/>
     <GradientStop Color="#C084FC" Offset="1"/>
   </LinearGradientBrush>
+  <!-- Etiqueta PRO de los ajustes de pago: magenta neon del logo hacia el violeta de la marca -->
+  <LinearGradientBrush x:Key="ProGradient" StartPoint="0,0" EndPoint="1,1">
+    <GradientStop Color="#E935C1" Offset="0"/>
+    <GradientStop Color="#8B5CF6" Offset="1"/>
+  </LinearGradientBrush>
   <LinearGradientBrush x:Key="BrandGradient" StartPoint="0,0" EndPoint="1,0">
     <GradientStop Color="#EDE9FE" Offset="0"/>
     <GradientStop Color="#A78BFA" Offset="0.5"/>

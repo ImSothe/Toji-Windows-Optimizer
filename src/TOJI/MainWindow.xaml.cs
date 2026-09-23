@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
@@ -224,7 +225,9 @@ namespace Toji
                 it.Box.VerticalAlignment = VerticalAlignment.Center;
                 Grid.SetColumn(it.Box, 0);
                 var dot = RiskDot(risk); Grid.SetColumn(dot, 1);
-                var name = new TextBlock { Text = t.Name, FontSize = 15, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 440 };
+                var name = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+                name.Children.Add(new TextBlock { Text = t.Name, FontSize = 15, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 440 });
+                if (t.IsPro) name.Children.Add(ProBadge());
                 Grid.SetColumn(name, 2);
                 var desc = new TextBlock { Text = t.Desc, FontSize = 13.5, Foreground = R("TextSub"), VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(18, 0, 12, 0) };
                 Grid.SetColumn(desc, 3);
@@ -248,7 +251,9 @@ namespace Toji
                 it.Box.Margin = new Thickness(0, 1, 12, 0);
                 it.Box.VerticalAlignment = VerticalAlignment.Top;
                 Grid.SetColumn(it.Box, 0);
-                var name = new TextBlock { Text = t.Name, FontSize = 15, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap };
+                var name = new TextBlock { FontSize = 15, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap };
+                name.Inlines.Add(new Run(t.Name));
+                if (t.IsPro) name.Inlines.Add(new InlineUIContainer(ProBadge()) { BaselineAlignment = BaselineAlignment.Center });
                 Grid.SetColumn(name, 1);
                 var pill = new Border
                 {
@@ -299,6 +304,15 @@ namespace Toji
             return wp;
         }
 
+        // Etiqueta PRO junto al titulo: el usuario ve que es de pago antes de marcarlo
+        private Border ProBadge() => new Border
+        {
+            CornerRadius = new CornerRadius(5), Background = R("ProGradient"), Padding = new Thickness(6, 1, 6, 2),
+            Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, ToolTip = "Requiere Sothe PRO",
+            Effect = new DropShadowEffect { Color = Color.FromRgb(0xE9, 0x35, 0xC1), BlurRadius = 8, ShadowDepth = 0, Opacity = 0.45 },
+            Child = new TextBlock { Text = "PRO", FontSize = 10.5, FontWeight = FontWeights.Bold, Foreground = Brushes.White }
+        };
+
         private static Border Badge(string text, Brush fg) => new Border
         {
             CornerRadius = new CornerRadius(6), BorderBrush = fg, BorderThickness = new Thickness(1), Padding = new Thickness(6, 1, 6, 2),
@@ -317,6 +331,8 @@ namespace Toji
                 sp.Children.Add(new TextBlock { Text = "Puede afectar a anti-cheats (Vanguard, FACEIT…).", Foreground = R("Extreme"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) });
             if (t.Reboot)
                 sp.Children.Add(new TextBlock { Text = "Requiere reiniciar.", Foreground = R("TextDim"), Margin = new Thickness(0, 6, 0, 0) });
+            if (t.IsPro)
+                sp.Children.Add(new TextBlock { Text = "Ajuste PRO: necesita licencia Sothe PRO para aplicarse.", Foreground = R("AccentHi"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) });
             return sp;
         }
 
@@ -498,7 +514,8 @@ namespace Toji
             {
                 var sb = new StringBuilder("No se ha tocado nada. Esto es lo que haría APLICAR:\n\n");
                 sb.AppendLine($"Se aplicarían ({toApply.Count}):");
-                foreach (var id in toApply) sb.AppendLine("   +  " + TweakName(id));
+                var proIds = new HashSet<string>(TojiEngine.ProTweaksToApply(_tweaks, toApply).Select(t => t.Id));
+                foreach (var id in toApply) sb.AppendLine("   +  " + TweakName(id) + (proIds.Contains(id) ? "   [PRO]" : ""));
                 sb.AppendLine();
                 sb.AppendLine($"Se revertirían ({toRevert.Count}):");
                 foreach (var id in toRevert) sb.AppendLine("   −  " + TweakName(id));
@@ -506,7 +523,10 @@ namespace Toji
                 return;
             }
 
-            if (toApply.Count > 0 && !await PaywallDialog.EnsureCanModifyAsync(this, _license, "aplicar cambios", msg => ShowToast(msg)))
+            // Paywall inteligente: lo gratuito se aplica sin licencia; con un solo ajuste PRO nuevo se para todo y se pide licencia
+            var pro = TojiEngine.ProTweaksToApply(_tweaks, toApply);
+            if (pro.Count > 0 && !await PaywallDialog.EnsureCanModifyAsync(this, _license, "aplicar ajustes PRO", msg => ShowToast(msg),
+                    pro.Select(t => t.Name).ToList()))
                 return;
 
             var newExtreme = _tweaks.Where(t => toApply.Contains(t.Id) && t.Danger == "extreme").ToList();

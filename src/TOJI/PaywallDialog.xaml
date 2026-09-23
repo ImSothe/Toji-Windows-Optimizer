@@ -51,7 +51,7 @@
           <UniformGrid Columns="2">
             <StackPanel Style="{StaticResource Benefit}">
               <Path Data="M 1,5 L 4.5,8.5 L 11,1" Stroke="{StaticResource AccentHi}" StrokeThickness="2" StrokeEndLineCap="Round" StrokeStartLineCap="Round" VerticalAlignment="Center" Margin="0,0,10,0"/>
-              <TextBlock Text="Aplica todos los ajustes y perfiles" VerticalAlignment="Center"/>
+              <TextBlock Text="Ajustes PRO de rendimiento" VerticalAlignment="Center"/>
             </StackPanel>
             <StackPanel Style="{StaticResource Benefit}">
               <Path Data="M 1,5 L 4.5,8.5 L 11,1" Stroke="{StaticResource AccentHi}" StrokeThickness="2" StrokeEndLineCap="Round" StrokeStartLineCap="Round" VerticalAlignment="Center" Margin="0,0,10,0"/>
