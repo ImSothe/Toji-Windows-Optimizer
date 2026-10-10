@@ -1,9 +1,10 @@
 # construir_actualizacion.ps1
-# Compila Sothe Optimizer en Release (un solo .exe) y FIRMA la release. Deja en una carpeta los 3 ficheros
-# que hay que subir a GitHub: SotheOptimizer.exe, release.json y release.sig.
+# Compila Sothe Optimizer en Release (un solo .exe, OFUSCADO por defecto) y FIRMA la release. Deja en una
+# carpeta los 3 ficheros que hay que subir a GitHub: SotheOptimizer.exe, release.json y release.sig.
 #
 # Uso (PowerShell, desde la raiz del repo):
 #   .\construir_actualizacion.ps1 -Version 1.1.0 -Pem C:\claves-sothe\ota-private.pem -Notes "Novedades..."
+#   .\construir_actualizacion.ps1 -Version 1.1.0 -Pem C:\claves-sothe\ota-private.pem -NoObfuscate   # build de depuracion/diagnostico
 #
 # La clave privada (.pem) es tuya y NUNCA va al repo. Con ella se firma; la app solo instala binarios cuya
 # firma valide con la clave publica incrustada (SignedData.PublicKey).
@@ -13,7 +14,8 @@ param(
     [Parameter(Mandatory = $true)] [string] $Version,
     [Parameter(Mandatory = $true)] [string] $Pem,
     [string] $Notes = "",
-    [string] $Out = "actualizacion"
+    [string] $Out = "actualizacion",
+    [switch] $NoObfuscate
 )
 
 $ErrorActionPreference = "Stop"
@@ -35,13 +37,20 @@ if ($actual -eq $Version) {
     Write-Warning "El .csproj ya tiene <Version>$Version</Version>. Si es una release nueva, sube el numero."
 }
 
-Write-Host "== 1/3  Compilando Release v$Version (un solo .exe)..." -ForegroundColor Cyan
-dotnet publish $proj -c Release -p:Version=$Version --nologo | Out-Host
+# Una DLL ya ofuscada no se vuelve a ofuscar (Obfuscar la renombraria sobre nombres ya cortos): build limpia siempre.
+Remove-Item "src\SotheOptimizer\obj", "src\SotheOptimizer\bin" -Recurse -Force -ErrorAction SilentlyContinue
+
+Write-Host "== 1/3  Compilando Release v$Version (un solo .exe$(if (-not $NoObfuscate) { ', ofuscado' }))..." -ForegroundColor Cyan
+if ($NoObfuscate) {
+    dotnet publish $proj -c Release -p:Version=$Version --nologo | Out-Host
+} else {
+    dotnet publish $proj -c Release -p:Version=$Version -p:Obfuscate=true --nologo | Out-Host
+}
 $exe = "src\SotheOptimizer\bin\Release\net8.0-windows\win-x64\publish\SotheOptimizer.exe"
 if (-not (Test-Path $exe)) { throw "No se genero el .exe en $exe" }
 
 Write-Host "== 2/3  Firmando la release..." -ForegroundColor Cyan
-dotnet run --project tools\OtaSigner -c Release --nologo -- sign-app $exe $Version $Pem $Notes | Out-Host
+dotnet run --project tools\OtaSigner -c Release -- sign-app $exe $Version $Pem $Notes | Out-Host
 $dir = Split-Path -Parent $exe
 foreach ($f in @("release.json", "release.sig")) {
     if (-not (Test-Path (Join-Path $dir $f))) { throw "No se genero $f (revisa la clave .pem)" }

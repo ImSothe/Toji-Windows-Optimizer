@@ -41,4 +41,94 @@
     <EmbeddedResource Include="data\*.json" LogicalName="data/%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!-- ======================= OFUSCACION (solo con -p:Obfuscate=true) =======================
+       Las builds publicas se ofuscan con Obfuscar (MIT) ANTES de empaquetar el .exe: renombra tipos y miembros,
+       oculta las cadenas de texto y no incluye simbolos de depuracion (un PDB incrustado delataria nombres y rutas).
+       Se excluyen los tipos que WPF o System.Text.Json resuelven por nombre (ventanas XAML, modelos JSON, enums).
+       Usa construir_actualizacion.ps1, que limpia obj\ antes (una DLL ya ofuscada no se vuelve a ofuscar). -->
+  <PropertyGroup Condition="'$(Obfuscate)' == 'true'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <!-- Corre siempre que se pida -p:Obfuscate=true. Pensado para una build de publicacion limpia
+       (construir_actualizacion.ps1 borra obj\ antes): no intenta ser incremental. -->
+  <Target Name="ObfuscateAssembly" BeforeTargets="CopyFilesToOutputDirectory" AfterTargets="CoreCompile" Condition="'$(Obfuscate)' == 'true' And '$(MSBuildProjectName)' == 'SotheOptimizer'">
+    <PropertyGroup>
+      <ObfRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))</ObfRoot>
+      <ObfInDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\$(IntermediateOutputPath)obf-in'))</ObfInDir>
+      <ObfOutDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\$(IntermediateOutputPath)obf-out'))</ObfOutDir>
+      <ObfXml>$(ObfInDir)\obfuscar.xml</ObfXml>
+      <ObfDll>@(IntermediateAssembly->'%(FullPath)')</ObfDll>
+    </PropertyGroup>
+    <ItemGroup>
+      <ObfRefDir Include="@(ReferencePath->'%(RootDir)%(Directory)')" />
+      <ObfRefDirUnique Include="@(ObfRefDir->Distinct())" />
+    </ItemGroup>
+    <PropertyGroup>
+      <ObfSearch>@(ObfRefDirUnique->'  &lt;AssemblySearchPath path=&quot;%(FullPath)&quot; /&gt;', '%0D%0A')</ObfSearch>
+      <ObfConfig>
+&lt;?xml version='1.0'?&gt;
+&lt;Obfuscator&gt;
+  &lt;Var name="InPath" value="$(ObfInDir)" /&gt;
+  &lt;Var name="OutPath" value="$(ObfOutDir)" /&gt;
+  &lt;Var name="KeepPublicApi" value="false" /&gt;
+  &lt;Var name="HidePrivateApi" value="true" /&gt;
+  &lt;Var name="HideStrings" value="true" /&gt;
+  &lt;Var name="RenameProperties" value="true" /&gt;
+  &lt;Var name="RenameEvents" value="true" /&gt;
+  &lt;Var name="RenameFields" value="true" /&gt;
+  &lt;Var name="ReuseNames" value="true" /&gt;
+  &lt;Var name="UseUnicodeNames" value="false" /&gt;
+  &lt;Var name="OptimizeMethods" value="true" /&gt;
+  &lt;Var name="SuppressIldasm" value="true" /&gt;
+  &lt;Var name="AnalyzeXaml" value="true" /&gt;
+  &lt;Var name="SkipGenerated" value="true" /&gt;
+  &lt;Var name="LogFile" value="$(ObfOutDir)\obfuscar.log" /&gt;
+$(ObfSearch)
+  &lt;Module file="$(ObfInDir)\SotheOptimizer.dll"&gt;
+    &lt;!-- Ventanas y recursos XAML: WPF los resuelve por nombre --&gt;
+    &lt;SkipType name="Sothe.App" /&gt;
+    &lt;SkipType name="Sothe.MainWindow" /&gt;
+    &lt;SkipType name="Sothe.EulaWindow" /&gt;
+    &lt;SkipType name="Sothe.PaywallDialog" /&gt;
+    &lt;SkipType name="Sothe.SotheDialog" /&gt;
+    &lt;SkipType name="Sothe.Ui" /&gt;
+    &lt;SkipType name="Sothe.BorderlessWindow" /&gt;
+    &lt;!-- Modelos que System.Text.Json lee y escribe por nombre de propiedad --&gt;
+    &lt;SkipType name="Sothe.Tweak" /&gt;
+    &lt;SkipType name="Sothe.TweakOp" /&gt;
+    &lt;SkipType name="Sothe.TweaksFile" /&gt;
+    &lt;SkipType name="Sothe.Profile" /&gt;
+    &lt;SkipType name="Sothe.ProfilesFile" /&gt;
+    &lt;SkipType name="Sothe.AppItem" /&gt;
+    &lt;SkipType name="Sothe.AppsFile" /&gt;
+    &lt;SkipType name="Sothe.FeatureItem" /&gt;
+    &lt;SkipType name="Sothe.FeaturesFile" /&gt;
+    &lt;SkipType name="Sothe.OpBackup" /&gt;
+    &lt;SkipType name="Sothe.OtaManifest" /&gt;
+    &lt;SkipType name="Sothe.ReleaseManifest" /&gt;
+    &lt;SkipType name="Sothe.AppUpdater/PendingUpdate" /&gt;
+    &lt;SkipType name="Sothe.Licensing.LicenseCache" /&gt;
+    &lt;!-- Enums (sus nombres acaban en etiquetas guardadas) y P/Invoke (se enlazan por nombre de funcion) --&gt;
+    &lt;SkipType name="Sothe.UpdateStatus" /&gt;
+    &lt;SkipType name="Sothe.OtaStatus" /&gt;
+    &lt;SkipType name="Sothe.FeatureState" /&gt;
+    &lt;SkipType name="Sothe.Licensing.LicenseState" /&gt;
+    &lt;SkipType name="Sothe.Licensing.ProviderOutcome" /&gt;
+    &lt;SkipMethod type="Sothe.TimerResolution" name="Nt*" /&gt;
+  &lt;/Module&gt;
+&lt;/Obfuscator&gt;
+      </ObfConfig>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(ObfInDir);$(ObfOutDir)" />
+    <MakeDir Directories="$(ObfInDir);$(ObfOutDir)" />
+    <Copy SourceFiles="$(ObfDll)" DestinationFolder="$(ObfInDir)" />
+    <WriteLinesToFile File="$(ObfXml)" Lines="$(ObfConfig)" Overwrite="true" />
+    <Exec Command="dotnet tool run obfuscar.console &quot;$(ObfXml)&quot;" WorkingDirectory="$(ObfRoot)" />
+    <Error Condition="!Exists('$(ObfOutDir)\SotheOptimizer.dll')" Text="Obfuscar no genero la DLL ofuscada." />
+    <Copy SourceFiles="$(ObfOutDir)\SotheOptimizer.dll" DestinationFiles="$(ObfDll)" />
+  </Target>
+
 </Project>
