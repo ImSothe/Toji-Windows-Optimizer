@@ -66,7 +66,7 @@ namespace Sothe.Tests
         }
 
         private static AppUpdater Make(FakeGitHub gh, string pub, Version current = null) =>
-            new AppUpdater(current ?? Current, Repo, pub, gh, "https://api.test");
+            new AppUpdater(current ?? Current, Repo, pub, gh, "https://api.test", new[] { "api.test", "dl.test" });
 
         [Fact]
         public async Task VersionNueva_Firmada_SeOfrece()

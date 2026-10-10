@@ -75,8 +75,10 @@ internal static class Program
     {
         if (!System.Version.TryParse(version.TrimStart('v', 'V'), out _))
             throw new InvalidDataException($"Version invalida: '{version}' (usa algo como 1.1.0).");
-        var sha = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(exePath)));
-        var manifest = new { version, file = Path.GetFileName(exePath), sha256 = sha, notes };
+        var exeBytes = File.ReadAllBytes(exePath);
+        var sha = Convert.ToHexString(SHA256.HashData(exeBytes));
+        // size entra en lo firmado: la app descarta una descarga de otro tamano antes de gastar memoria o disco
+        var manifest = new { version, file = Path.GetFileName(exePath), sha256 = sha, size = exeBytes.LongLength, notes };
         var bytes = JsonSerializer.SerializeToUtf8Bytes(manifest, new JsonSerializerOptions { WriteIndented = true });
         using var ecdsa = ECDsa.Create();
         ecdsa.ImportFromPem(File.ReadAllText(pemPath));

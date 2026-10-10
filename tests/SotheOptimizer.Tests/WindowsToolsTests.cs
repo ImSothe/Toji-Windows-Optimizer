@@ -111,7 +111,7 @@ namespace Sothe.Tests
         public void ScriptDeConsulta_FuncionaEnPowerShellReal()
         {
             // Sintaxis valida en PowerShell 7 (en Linux Get-WindowsOptionalFeature no existe: el error se detecta)
-            PowerShellRunner.Executable = "pwsh";
+            TestPowerShell.Use();
             var ex = Record.Exception(() => PowerShellRunner.RunCapture(FeatureCommands.QueryScript(new[] { "NetFx3" }), 60000));
             if (ex != null) Assert.DoesNotContain("ParserError", ex.Message);
         }

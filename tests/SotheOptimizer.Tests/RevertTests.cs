@@ -10,7 +10,7 @@ namespace Sothe.Tests
     {
         private static SotheEngine EngineWithCommandBackup(TestDirs d, string revertCommand)
         {
-            PowerShellRunner.Executable = "pwsh";
+            TestPowerShell.Use();
             var eng = d.Engine();
             var backup = new[] { new OpBackup { Type = "command", Revert = revertCommand } };
             File.WriteAllText(Path.Combine(eng.BackupDir, "tweak_prueba.json"), JsonSerializer.Serialize(backup));

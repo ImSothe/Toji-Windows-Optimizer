@@ -45,6 +45,12 @@ namespace Sothe.Licensing
                 return new LicenseStatus { State = LicenseState.ValidationRequired, MaskedKey = masked, TrialAvailable = trialAvailable,
                     Message = "El reloj del sistema va por detrás de la última vez que se usó Sothe." };
 
+            // Una validacion "en el futuro" solo sale de un reloj manipulado o de un fichero fabricado: dejaria la
+            // licencia sin caducar nunca en modo offline. Se exige validar de nuevo contra el servidor.
+            if (c.LastValidatedUtc > now.AddHours(1))
+                return new LicenseStatus { State = LicenseState.ValidationRequired, MaskedKey = masked, TrialAvailable = trialAvailable,
+                    Message = "La fecha de la última validación de la licencia no es válida: hay que volver a validarla." };
+
             if (c.IsTrial)
             {
                 if (c.ExpiresAtUtc == null)

@@ -22,6 +22,8 @@
     <Compile Include="..\..\src\SotheOptimizer\TextUtil.cs" Link="App\TextUtil.cs" />
     <Compile Include="..\..\src\SotheOptimizer\WindowsTools.cs" Link="App\WindowsTools.cs" />
     <Compile Include="..\..\src\SotheOptimizer\TimerResolution.cs" Link="App\TimerResolution.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\SystemPaths.cs" Link="App\SystemPaths.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\SecureStorage.cs" Link="App\SecureStorage.cs" />
     <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseModels.cs" Link="App\Licensing\LicenseModels.cs" />
     <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseConfig.cs" Link="App\Licensing\LicenseConfig.cs" />
     <Compile Include="..\..\src\SotheOptimizer\Licensing\HardwareId.cs" Link="App\Licensing\HardwareId.cs" />

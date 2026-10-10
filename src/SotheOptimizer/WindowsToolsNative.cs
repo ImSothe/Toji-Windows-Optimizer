@@ -79,7 +79,8 @@ namespace Sothe
 
         private static async Task<(int code, string output)> RunAsync(string exe, IEnumerable<string> args, int timeoutMs, CancellationToken ct)
         {
-            var psi = new ProcessStartInfo(exe)
+            // winget: ruta del alias de ejecucion del usuario, no un nombre suelto (se buscaria junto al .exe)
+            var psi = new ProcessStartInfo(exe == "winget" ? SystemPaths.Winget : exe)
             {
                 UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true,
                 StandardOutputEncoding = Encoding.UTF8

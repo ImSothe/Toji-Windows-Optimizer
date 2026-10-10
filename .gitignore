@@ -91,3 +91,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+
+# --- Salidas de publicacion locales ---
+publish-out/
+release-*/

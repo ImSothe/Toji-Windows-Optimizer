@@ -658,6 +658,8 @@ namespace Sothe
             {
                 var updater = new AppUpdater(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
                 if (!updater.IsConfigured) return;
+                // Solo se prepara una actualizacion si la carpeta de datos es de confianza (ver SecureStorage)
+                if (!OperatingSystem.IsWindows() || !SecureStorage.RootTrusted) { _eng.Log("Auto-update omitido: la carpeta de datos no es de confianza."); return; }
                 var check = await updater.CheckAsync();
                 if (check.Status != UpdateStatus.Available)
                 {

@@ -208,9 +208,24 @@ namespace Sothe
         }
         public void RunPowerShellVisible(string title, string command)
         {
+            // El titulo va entre comillas simples de PowerShell: solo letras, cifras y signos inofensivos
+            title = SafeTitle(title);
             var full = "$host.UI.RawUI.WindowTitle='" + title + "'; Write-Host '=== " + title + " ===' -ForegroundColor Green; " + command + "; Write-Host ''; Write-Host 'Terminado. Puedes cerrar esta ventana.' -ForegroundColor Green";
-            Process.Start(new ProcessStartInfo("powershell.exe", "-NoExit -NoProfile -ExecutionPolicy Bypass -Command \"" + full.Replace("\"", "\\\"") + "\"") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(SystemPaths.WindowsPowerShell, "-NoExit -NoProfile -ExecutionPolicy Bypass -Command \"" + full.Replace("\"", "\\\"") + "\"") { UseShellExecute = true });
         }
+
+        public static string SafeTitle(string title)
+        {
+            var clean = new string((title ?? "").Where(c => char.IsLetterOrDigit(c) || c == ' ' || c == '-' || c == '.' || c == '(' || c == ')').ToArray()).Trim();
+            return clean.Length == 0 ? "Sothe" : clean;
+        }
+
+        // Nombres de servicio y de paquete Appx que acaban dentro de un comando de PowerShell. Vienen de tweaks.json (firmado),
+        // pero se validan igualmente: una comilla, un punto y coma o un salto de linea romperian el comando.
+        private static readonly System.Text.RegularExpressions.Regex ServiceNamePattern = new System.Text.RegularExpressions.Regex(@"^[A-Za-z0-9_.@$-]{1,256}$");
+        private static readonly System.Text.RegularExpressions.Regex AppxNamePattern = new System.Text.RegularExpressions.Regex(@"^[A-Za-z0-9_.*-]{1,256}$");
+        public static bool IsValidServiceName(string name) => name != null && ServiceNamePattern.IsMatch(name);
+        public static bool IsValidAppxName(string name) => name != null && AppxNamePattern.IsMatch(name);
 
         // ---------------- Aplicar / Revertir ----------------
         public ApplyResult ApplyTweak(Tweak t)
@@ -233,6 +248,7 @@ namespace Sothe
                         }
                         case "service":
                         {
+                            if (!IsValidServiceName(op.Name)) throw new ArgumentException("nombre de servicio no valido: " + op.Name);
                             string svcPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\" + op.Name;
                             var prior = RegGet(svcPath, "Start");
                             backup.Add(new OpBackup { Type = "reg", Path = svcPath, Name = "Start", PriorExists = prior.exists, PriorValue = prior.val, PriorKind = prior.kind });
@@ -246,6 +262,7 @@ namespace Sothe
                             RunCommand(op.Apply);
                             break;
                         case "appx":
+                            if (!IsValidAppxName(op.Package)) throw new ArgumentException("nombre de paquete no valido: " + op.Package);
                             backup.Add(new OpBackup { Type = "appx" });
                             RunPowerShellHidden("Get-AppxPackage -Name '" + op.Package + "' -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue");
                             break;

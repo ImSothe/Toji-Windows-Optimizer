@@ -14,7 +14,9 @@ namespace Sothe
     // Los errores silenciados a proposito en tweaks.json no cuentan como fallo.
     public static class PowerShellRunner
     {
-        public static string Executable = "powershell.exe";   // los tests lo cambian a "pwsh"
+        // Ruta absoluta de Windows PowerShell 5.1 (un nombre suelto se buscaria primero junto al .exe: ver SystemPaths).
+        // Los tests la cambian a "pwsh" si esta instalado.
+        public static string Executable = SystemPaths.WindowsPowerShell;
         public const int DefaultTimeoutMs = 5 * 60 * 1000;
 
         public static void Run(string command, int timeoutMs = DefaultTimeoutMs) => RunCapture(command, timeoutMs);
