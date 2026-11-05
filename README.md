@@ -199,4 +199,4 @@ cause instability. A restore point is created automatically; keep it enabled. Pr
 [MIT](LICENSE)
 
 Built with AI-assisted development (Claude Code); the design, the decisions and the verification are mine. Contact:
-[LinkedIn](https://www.linkedin.com/in/%C3%A1ngel-baz-monteiro-8196a21a9/) · [@SoySothe](https://www.instagram.com/soysothe)
+[LinkedIn](https://www.linkedin.com/in/%C3%A1ngel-baz-monteiro-8196a21a9/)
