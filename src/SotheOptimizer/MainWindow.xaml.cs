@@ -484,7 +484,8 @@ namespace Sothe
         {
             var ids = CheckedIds().ToList();
             var applied = _eng.GetApplied();
-            var toRevert = applied.Where(a => !ids.Contains(a)).ToList();
+            // LIFO: lo ultimo que se aplico es lo primero que se deshace (ver SotheEngine.OrderForRevert)
+            var toRevert = _eng.OrderForRevert(applied.Where(a => !ids.Contains(a)));
             var toApply = ids.Where(i => !applied.Contains(i)).ToList();
 
             if (toApply.Count == 0 && toRevert.Count == 0)
@@ -514,8 +515,10 @@ namespace Sothe
             }
 
             _sessionDirty = true;   // no auto-reiniciar por una actualizacion mientras se toca el sistema
+            if (toApply.Count > 0 && !await EnsureRestorePointAsync()) return;
             SetBusy(true);
             var errs = new List<string>(); bool reboot = false;
+            int okApplied = 0, okReverted = 0;
             var progress = new Progress<Tuple<int, string>>(p => { Progress.Value = p.Item1; StatusText.Text = p.Item2; });
             var rep = (IProgress<Tuple<int, string>>)progress;
 
@@ -527,13 +530,16 @@ namespace Sothe
                     foreach (var id in toRevert)
                     {
                         i++; rep.Report(Tuple.Create(i * 100 / total, "Revirtiendo: " + TweakName(id)));
-                        errs.AddRange(_eng.RevertTweak(id).Errors.Select(e => TweakName(id) + " → " + e));
+                        var rv = _eng.RevertTweak(id);
+                        if (rv.Ok) okReverted++;
+                        errs.AddRange(rv.Errors.Select(e => TweakName(id) + " → " + e));
                     }
                     foreach (var id in toApply)
                     {
                         i++; rep.Report(Tuple.Create(i * 100 / total, "Aplicando: " + TweakName(id)));
                         var t = _tweaks.First(x => x.Id == id); var r = _eng.ApplyTweak(t);
                         errs.AddRange(r.Errors.Select(e => t.Name + " → " + e));
+                        if (r.Ok && !r.Skipped) okApplied++;
                         if (t.Reboot) reboot = true;
                     }
                 });
@@ -543,7 +549,7 @@ namespace Sothe
 
             RefreshApplied(); UpdateCount();
             StatusText.Text = "Listo.";
-            var summary = $"Aplicados: {toApply.Count}   ·   Revertidos: {toRevert.Count}";
+            var summary = $"Aplicados: {okApplied} de {toApply.Count}   ·   Revertidos: {okReverted} de {toRevert.Count}";
             if (reboot) summary += "\n\nAlgunos cambios necesitan REINICIAR para surtir efecto.";
             if (errs.Count > 0) summary += $"\n\n{errs.Count} operaciones fallaron (detalle también en %ProgramData%\\SotheOptimizer\\sothe.log):\n" + string.Join("\n", errs.Select(x => "   •  " + x));
             SotheDialog.Info(this, errs.Count > 0 ? "Aplicado con errores" : "Cambios aplicados", summary);
@@ -551,8 +557,8 @@ namespace Sothe
 
         private async Task RevertAll()
         {
-            if (!SotheDialog.Confirm(this, "Revertir TODO", "Se deshará todo lo aplicado por Sothe y Windows volverá a los valores que tenía antes.", "Revertir TODO", danger: true)) return;
-            var applied = _eng.GetApplied().ToList();
+            if (!SotheDialog.Confirm(this, "Revertir TODO", "Se deshará todo lo aplicado por Toji, empezando por lo último, y se restaurarán los valores que tenía el sistema antes de cada cambio. Los ajustes de comando se deshacen con su orden de reversión; el debloat (Appx) no es reversible.", "Revertir TODO", danger: true)) return;
+            var applied = _eng.AppliedNewestFirst();   // LIFO
             var errs = new List<string>();
             _sessionDirty = true;
             SetBusy(true);
@@ -580,6 +586,26 @@ namespace Sothe
             SotheDialog.Info(this, "Revertir TODO", errs.Count == 0
                 ? "Todo revertido. Reinicia el PC para que se asiente."
                 : "Revertido con avisos (detalle también en sothe.log):\n" + string.Join("\n", errs.Select(x => "   •  " + x)));
+        }
+
+        private bool _restorePointDone;   // una vez por sesion: Windows limita los puntos de restauracion
+
+        // Antes del primer lote de cambios de la sesion. Si falla, el usuario decide si sigue sin red de seguridad.
+        private async Task<bool> EnsureRestorePointAsync()
+        {
+            if (_restorePointDone || AutoRestoreChk.IsChecked != true) return true;
+            SetBusy(true);
+            Progress.IsIndeterminate = true;
+            StatusText.Text = "Creando punto de restauración antes de aplicar… puede tardar un minuto.";
+            bool ok;
+            try { ok = await Task.Run(() => _eng.CreateRestorePoint()); }
+            catch { ok = false; }
+            finally { SetBusy(false); }
+            StatusText.Text = "Listo.";
+            if (ok) { _restorePointDone = true; ShowToast("Punto de restauración creado"); return true; }
+            return SotheDialog.Confirm(this, "Sin punto de restauración",
+                "No se pudo crear el punto de restauración (¿está desactivada la protección del sistema?).\n\nPuedes continuar igualmente: cada ajuste guarda su estado previo y se puede revertir, pero un punto de restauración cubre fallos que eso no cubre.",
+                "Continuar sin punto", danger: true);
         }
 
         private async Task CreateRestorePoint()

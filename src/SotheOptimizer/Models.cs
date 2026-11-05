@@ -75,10 +75,18 @@ namespace Sothe
         public string Revert { get; set; }         // para ops de tipo command
     }
 
+    // Fichero de backup de un ajuste: secuencia de aplicacion (para revertir en orden LIFO) y estado previo de cada operacion
+    public class BackupFile
+    {
+        public long Seq { get; set; }
+        public List<OpBackup> Ops { get; set; } = new List<OpBackup>();
+    }
+
     public class ApplyResult
     {
         public string Id { get; set; }
         public bool Ok { get; set; }
+        public bool Skipped { get; set; }          // ya estaba aplicado: no se ha tocado nada
         public List<string> Errors { get; set; } = new List<string>();
         public bool Reboot { get; set; }
     }

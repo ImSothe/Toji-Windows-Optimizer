@@ -114,6 +114,53 @@ namespace Sothe
         }
         private string BackupPath(string id) => Path.Combine(BackupDir, id + ".json");
 
+        // Orden de reversion: LIFO. Lo ultimo que se aplico es lo primero que se deshace. Cada backup lleva un numero de
+        // secuencia creciente; los backups antiguos (un array sin secuencia) se ordenan por la fecha de su fichero.
+        // Deshacer en otro orden deja mal el estado cuando dos ajustes tocan la misma clave: el "valor previo" del segundo
+        // es lo que dejo el primero.
+        public List<string> OrderForRevert(IEnumerable<string> ids)
+        {
+            return (ids ?? Enumerable.Empty<string>())
+                .Distinct()
+                .OrderByDescending(id => SequenceOf(id))
+                .ThenByDescending(id => id, StringComparer.Ordinal)
+                .ToList();
+        }
+
+        // Ajustes aplicados, el ultimo primero
+        public List<string> AppliedNewestFirst() => OrderForRevert(GetApplied());
+
+        private long SequenceOf(string id)
+        {
+            try
+            {
+                var path = BackupPath(id);
+                if (!File.Exists(path)) return 0;
+                return ReadBackup(path).Seq;
+            }
+            catch (Exception ex) when (ex is IOException || ex is JsonException || ex is UnauthorizedAccessException) { return 0; }
+        }
+
+        // Formato nuevo: { "seq": n, "ops": [...] }. Formato antiguo: [ ... ] (sin secuencia)
+        private BackupFile ReadBackup(string path)
+        {
+            var text = File.ReadAllText(path);
+            using var doc = JsonDocument.Parse(text);
+            if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                return new BackupFile { Seq = File.GetLastWriteTimeUtc(path).Ticks, Ops = JsonSerializer.Deserialize<List<OpBackup>>(text, _json) ?? new List<OpBackup>() };
+            var file = JsonSerializer.Deserialize<BackupFile>(text, _json) ?? new BackupFile();
+            file.Ops ??= new List<OpBackup>();
+            return file;
+        }
+
+        // La secuencia nueva es siempre mayor que cualquiera ya guardada, aunque el reloj retroceda
+        private long NextSequence()
+        {
+            long max = 0;
+            foreach (var id in GetApplied()) max = Math.Max(max, SequenceOf(id));
+            return Math.Max(DateTime.UtcNow.Ticks, max + 1);
+        }
+
         // ---------------- Registro ----------------
         private static (RegistryKey baseKey, string sub) ParsePath(string path)
         {
@@ -222,7 +269,12 @@ namespace Sothe
         public ApplyResult ApplyTweak(Tweak t)
         {
             var res = new ApplyResult { Id = t.Id, Ok = true, Reboot = t.Reboot };
-            var backup = new List<OpBackup>();
+            // Un ajuste ya aplicado no se vuelve a aplicar: su backup guarda el estado ORIGINAL y volver a escribirlo
+            // lo sustituiria por el valor ya modificado (y revertir ya no devolveria nada)
+            if (File.Exists(BackupPath(t.Id))) { res.Skipped = true; return res; }
+
+            var file = new BackupFile { Seq = NextSequence() };
+            var backup = file.Ops;
             foreach (var op in t.Ops)
             {
                 try
@@ -234,6 +286,7 @@ namespace Sothe
                             var kind = ParseKind(op.Kind);
                             var prior = RegGet(op.Path, op.Name);
                             backup.Add(new OpBackup { Type = "reg", Path = op.Path, Name = op.Name, PriorExists = prior.exists, PriorValue = prior.val, PriorKind = prior.kind });
+                            SaveBackup(t.Id, file);   // primero la copia, despues el cambio: si el proceso muere aqui se puede deshacer
                             RegSet(op.Path, op.Name, ConvertValue(op, kind), kind);
                             break;
                         }
@@ -243,6 +296,7 @@ namespace Sothe
                             string svcPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\" + op.Name;
                             var prior = RegGet(svcPath, "Start");
                             backup.Add(new OpBackup { Type = "reg", Path = svcPath, Name = "Start", PriorExists = prior.exists, PriorValue = prior.val, PriorKind = prior.kind });
+                            SaveBackup(t.Id, file);
                             int start = StartMap.TryGetValue(op.Startup ?? "Manual", out var s) ? s : 3;
                             RegSet(svcPath, "Start", start, RegistryValueKind.DWord);
                             if (start == 4) RunPowerShellHidden("Stop-Service '" + op.Name + "' -Force -ErrorAction SilentlyContinue");
@@ -250,11 +304,13 @@ namespace Sothe
                         }
                         case "command":
                             backup.Add(new OpBackup { Type = "command", Revert = op.Revert });
+                            SaveBackup(t.Id, file);
                             RunCommand(op.Apply);
                             break;
                         case "appx":
                             if (!IsValidAppxName(op.Package)) throw new ArgumentException("nombre de paquete no valido: " + op.Package);
                             backup.Add(new OpBackup { Type = "appx" });
+                            SaveBackup(t.Id, file);
                             RunPowerShellHidden("Get-AppxPackage -Name '" + op.Package + "' -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue");
                             break;
                         default:
@@ -263,19 +319,32 @@ namespace Sothe
                 }
                 catch (Exception ex) { res.Errors.Add(op.Type + ": " + ex.Message); res.Ok = false; }
             }
-            File.WriteAllText(BackupPath(t.Id), JsonSerializer.Serialize(backup, _json));
+            // Un ajuste sin ninguna operacion valida no deja backup: no cuenta como aplicado
+            if (backup.Count > 0) SaveBackup(t.Id, file);
             Log("APLICADO " + t.Id + (res.Errors.Count > 0 ? " | errores: " + string.Join("; ", res.Errors) : ""));
             return res;
         }
+
+        // Escritura atomica: un corte a mitad no deja un backup a medias
+        private void SaveBackup(string id, BackupFile file) => WriteJsonAtomic(BackupPath(id), file);
 
         public ApplyResult RevertTweak(string id)
         {
             var res = new ApplyResult { Id = id, Ok = true };
             var path = BackupPath(id);
             if (!File.Exists(path)) { res.Ok = false; res.Errors.Add("sin backup"); return res; }
-            var ops = JsonSerializer.Deserialize<List<OpBackup>>(File.ReadAllText(path), _json);
-            foreach (var b in ops)
+            List<OpBackup> ops;
+            try { ops = ReadBackup(path).Ops; }
+            catch (Exception ex) when (ex is IOException || ex is JsonException || ex is UnauthorizedAccessException)
             {
+                res.Ok = false; res.Errors.Add("backup ilegible: " + ex.Message);
+                Log("REVERTIDO CON ERRORES " + id + " (backup ilegible, se conserva) | " + ex.Message);
+                return res;
+            }
+            // Dentro de un mismo ajuste tambien LIFO: si dos operaciones tocan la misma clave, la ultima se deshace primero
+            for (int i = ops.Count - 1; i >= 0; i--)
+            {
+                var b = ops[i];
                 try
                 {
                     if (b.Type == "reg")
@@ -326,14 +395,21 @@ namespace Sothe
         }
 
         // ---------------- Utilidades ----------------
+        // Windows solo deja crear un punto de restauracion cada 24 h, salvo que SystemRestorePointCreationFrequency valga 0.
+        // Se pone a 0 solo durante la llamada y se devuelve a su valor original (o se borra si no existia): antes se dejaba
+        // a 0 para siempre, un cambio del sistema que nadie habia pedido.
+        public const string RestorePointScript =
+            "$k = 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore'; $n = 'SystemRestorePointCreationFrequency'; " +
+            "$old = (Get-ItemProperty -Path $k -Name $n -ErrorAction SilentlyContinue).$n; " +
+            "try { Set-ItemProperty -Path $k -Name $n -Value 0 -Type DWord -Force; " +
+            "Enable-ComputerRestore -Drive \"$env:SystemDrive\\\\\"; " +
+            "Checkpoint-Computer -Description 'Toji' -RestorePointType MODIFY_SETTINGS } " +
+            "finally { if ($null -ne $old) { Set-ItemProperty -Path $k -Name $n -Value $old -Type DWord -Force } else { Remove-ItemProperty -Path $k -Name $n -ErrorAction SilentlyContinue } }";
+
         public bool CreateRestorePoint()
         {
-            try
-            {
-                RunPowerShellHidden("Set-ItemProperty 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore' -Name SystemRestorePointCreationFrequency -Value 0 -Type DWord -Force; Enable-ComputerRestore -Drive $env:SystemDrive\\; Checkpoint-Computer -Description 'Sothe Optimizer' -RestorePointType MODIFY_SETTINGS");
-                return true;
-            }
-            catch { return false; }
+            try { RunPowerShellHidden(RestorePointScript); return true; }
+            catch (Exception ex) { Log("Punto de restauracion: " + ex.Message); return false; }
         }
         public void ClearTemp()
         {
