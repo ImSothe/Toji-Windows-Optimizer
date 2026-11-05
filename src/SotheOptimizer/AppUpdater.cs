@@ -51,7 +51,7 @@ namespace Sothe
         // "owner/repo" de las releases PUBLICAS (un repo aparte solo para descargas, ver BUILD.md). Vacio =
         // auto-actualizacion desactivada. La firma va aparte de GitHub: aunque la cuenta de GitHub se viera comprometida,
         // sin la clave privada del autor no se puede firmar una release, y sin firma valida la app no instala nada.
-        public const string GitHubRepo = "ImSothe/Sothe-Windows-Optimizer";
+        public const string GitHubRepo = "ImSothe/Toji-Windows-Optimizer";
         public const string DefaultApiBase = "https://api.github.com";
 
         public const string PendingExe = "SotheOptimizer.pending.exe";
@@ -113,7 +113,7 @@ namespace Sothe
             {
                 using var http = _handler != null ? new HttpClient(_handler, false) : new HttpClient();
                 http.Timeout = TimeSpan.FromSeconds(20);
-                http.DefaultRequestHeaders.UserAgent.ParseAdd("Sothe-Optimizer");
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("Toji");
                 http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
 
                 var indexJson = await http.GetStringAsync($"{_apiBase}/repos/{_repo}/releases/latest", ct);
@@ -170,7 +170,7 @@ namespace Sothe
             {
                 using var http = _handler != null ? new HttpClient(_handler, false) : new HttpClient();
                 http.Timeout = Timeout.InfiniteTimeSpan;   // el tiempo total lo acota cts: 10 minutos
-                http.DefaultRequestHeaders.UserAgent.ParseAdd("Sothe-Optimizer");
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("Toji");
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 cts.CancelAfter(TimeSpan.FromMinutes(10));
 

@@ -245,7 +245,7 @@ namespace Sothe
         public static string PrepareProtectedCopy(string sourceExe)
         {
             if (string.IsNullOrEmpty(sourceExe) || !File.Exists(sourceExe))
-                throw new FileNotFoundException("No se encuentra el ejecutable de Sothe Optimizer.", sourceExe);
+                throw new FileNotFoundException("No se encuentra el ejecutable de Toji.", sourceExe);
             var dir = SystemPaths.ProtectedInstallDir;
             Directory.CreateDirectory(dir);
             SecureStorage.ApplyProtectedAcl(dir, inheritToChildren: true);

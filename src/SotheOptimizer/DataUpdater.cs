@@ -61,7 +61,7 @@ namespace Sothe
             {
                 using var http = _handler != null ? new HttpClient(_handler, false) : new HttpClient();
                 http.Timeout = TimeSpan.FromSeconds(20);
-                http.DefaultRequestHeaders.UserAgent.ParseAdd("Sothe-Optimizer");
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("Toji");
 
                 var manifestBytes = await http.GetByteArrayAsync(_baseUrl + "manifest.json", ct);
                 var signature = Convert.FromBase64String((await http.GetStringAsync(_baseUrl + "manifest.sig", ct)).Trim());

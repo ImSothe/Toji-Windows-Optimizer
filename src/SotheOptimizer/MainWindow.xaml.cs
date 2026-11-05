@@ -643,7 +643,7 @@ namespace Sothe
         {
             var r = await new DataUpdater(_eng).CheckAndUpdateAsync();
             if (r.Status == OtaStatus.Updated)
-                ShowToast($"Base de ajustes actualizada (v{r.Version}). Reinicia Sothe para verla.");
+                ShowToast($"Base de ajustes actualizada (v{r.Version}). Reinicia Toji para verla.");
         }
 
         // Comprobacion silenciosa de nueva version de la app. Solo descarga si la firma del autor es valida y el
@@ -683,7 +683,7 @@ namespace Sothe
                     Application.Current.Shutdown();
                     return;
                 }
-                ShowToast($"Actualización v{staged.Version} lista: se instalará al reiniciar Sothe.");
+                ShowToast($"Actualización v{staged.Version} lista: se instalará al reiniciar Toji.");
             }
             catch (Exception ex) { _eng.Log("Auto-update: " + ex.Message); }
         }
@@ -693,13 +693,13 @@ namespace Sothe
             var ids = CheckedIds().ToList();
             if (ids.Count == 0) { ShowToast("Marca primero los ajustes que quieras en el perfil.", ToastKind.Warn); return; }
             var name = SotheDialog.Prompt(this, "Guardar perfil",
-                $"Guarda los {ids.Count} ajustes marcados como un perfil propio. Aparecerá junto a los perfiles de Sothe.",
+                $"Guarda los {ids.Count} ajustes marcados como un perfil propio. Aparecerá junto a los perfiles de Toji.",
                 "Mi setup", "Guardar", "Nombre del perfil",
                 validate: s =>
                 {
                     if (string.IsNullOrWhiteSpace(s)) return "Escribe un nombre para el perfil.";
                     if (_eng.IsReservedProfileName(s, out var suggestion))
-                        return $"«{s.Trim()}» es un perfil oficial de Sothe y no se puede sobrescribir. Elige otro nombre, por ejemplo «{suggestion}».";
+                        return $"«{s.Trim()}» es un perfil oficial de Toji y no se puede sobrescribir. Elige otro nombre, por ejemplo «{suggestion}».";
                     return null;
                 });
             if (name == null) return;
@@ -738,11 +738,11 @@ namespace Sothe
 
             List<string> ids = null;
             var code = SotheDialog.Prompt(this, "Importar configuración",
-                "Pega el código de Sothe que te han compartido. Se marcarán sus ajustes; nada se aplica hasta que pulses APLICAR.",
+                "Pega el código de Toji que te han compartido. Se marcarán sus ajustes; nada se aplica hasta que pulses APLICAR.",
                 prefill, "Importar", SotheEngine.ExportPrefix + "…", code: true,
                 validate: text =>
                 {
-                    if (string.IsNullOrWhiteSpace(text)) return "Pega un código de Sothe.";
+                    if (string.IsNullOrWhiteSpace(text)) return "Pega un código de Toji.";
                     try { ids = _eng.ImportCode(text); }
                     catch { return "Código no válido. Comprueba que lo has copiado completo."; }
                     if (!ids.Any(id => id != null && _boxes.ContainsKey(id))) return "El código no contiene ajustes compatibles con esta versión.";

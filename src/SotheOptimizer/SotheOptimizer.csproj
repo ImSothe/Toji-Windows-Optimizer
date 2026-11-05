@@ -10,8 +10,8 @@
     <RootNamespace>Sothe</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-    <Version>1.1.0</Version>
-    <Product>Sothe Optimizer</Product>
+    <Version>1.2.0</Version>
+    <Product>Toji</Product>
     <Company>Sothe</Company>
     <Authors>Sothe</Authors>
     <!-- Distribucion en un unico .exe: `dotnet publish -c Release` deja solo SotheOptimizer.exe, con el runtime de .NET

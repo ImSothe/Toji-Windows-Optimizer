@@ -17,7 +17,7 @@ namespace Sothe.Tests
     // sin excepciones y script de reemplazo con copia de seguridad, tiempo maximo y escape de rutas.
     public class AppUpdaterHardeningTests
     {
-        private const string Repo = "ImSothe/Sothe-Windows-Optimizer";
+        private const string Repo = "ImSothe/Toji-Windows-Optimizer";
 
         private sealed class Gh : HttpMessageHandler
         {
