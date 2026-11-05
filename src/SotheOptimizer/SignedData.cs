@@ -19,7 +19,7 @@ namespace Sothe
     {
         // Clave publica (SubjectPublicKeyInfo en base64). La escribe aqui "OtaSigner keygen <carpeta> --source <este fichero>".
         // Vacia = no se confia en ningun fichero de disco (se usan siempre los JSON incrustados) y la OTA queda desactivada.
-        public const string PublicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnPaE6O+Tf0gVhrjkiw2wLHswkIeBR1K9R658L1Q3m2cvkalwupz+6V7voTN6z5IIkCG7Ypi4JHOfxF/e2X17Wg==";
+        public const string PublicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE18pdRahEKlKJLF1fuJHz2AKFUlZOERqsSiyScsuh+Vz7tVPGTEpWnoiGuydzBijo85QF0NEcG3oHy19bWAGDzQ==";
 
         public const string ManifestFile = "manifest.json";
         public const string SignatureFile = "manifest.sig";
