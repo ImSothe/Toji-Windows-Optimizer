@@ -10,7 +10,7 @@
     <RootNamespace>Sothe</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Product>Toji</Product>
     <Company>Sothe</Company>
     <Authors>Sothe</Authors>
