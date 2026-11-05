@@ -196,7 +196,7 @@
               <Border Grid.Row="4" Margin="0,14,0,0" Padding="0,16,0,0" BorderBrush="{StaticResource Stroke}" BorderThickness="0,1,0,0">
                 <DockPanel>
                   <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <CheckBox x:Name="AutoRestoreChk" Style="{StaticResource DangerSwitch}" IsChecked="True" VerticalAlignment="Center" Margin="0,0,14,0"
+                    <CheckBox x:Name="AutoRestoreChk" IsChecked="True" VerticalAlignment="Center" Margin="0,0,14,0"
                               Content="Punto de restauración al aplicar" ToolTip="Crea un punto de restauración de Windows antes del primer lote de cambios de cada sesión"/>
                     <Button x:Name="BtnRestore" Style="{StaticResource Btn}" Content="Punto de restauración" Margin="0,0,8,0"/>
                     <Button x:Name="BtnClean" Style="{StaticResource Btn}" Content="Limpiar basura" Margin="0,0,8,0"/>
