@@ -28,7 +28,7 @@ namespace Sothe
             DataPublicKey = dataPublicKey;
             BackupDir = Path.Combine(Root, "backups");
             Directory.CreateDirectory(BackupDir);
-            try { MigrateLegacyCustomProfiles(); } catch (Exception ex) { Log("Migracion de perfiles: " + ex.Message); }
+            try { MigrateLegacyCustomProfiles(); } catch (Exception ex) { Log("Profile migration: " + ex.Message); }
         }
 
         public string DataDir => Path.Combine(BaseDir, "data");
@@ -45,7 +45,7 @@ namespace Sothe
                 using var r = new StreamReader(new MemoryStream(bytes), Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
                 return r.ReadToEnd();
             }
-            if (reason != null && _rejected.Add(file)) Log($"data\\{file} ignorado ({reason}): se usa la copia incrustada en el .exe");
+            if (reason != null && _rejected.Add(file)) Log($"data\\{file} ignored ({reason}): using the copy embedded in the exe");
             return ReadEmbeddedText(file);
         }
         private readonly HashSet<string> _rejected = new HashSet<string>();
@@ -81,7 +81,7 @@ namespace Sothe
         // ---------------- Carga de datos ----------------
         public List<Tweak> LoadTweaks()
         {
-            var text = ReadDataText("tweaks.json") ?? throw new FileNotFoundException("No se encuentra tweaks.json", DataPath("tweaks.json"));
+            var text = ReadDataText("tweaks.json") ?? throw new FileNotFoundException("tweaks.json not found", DataPath("tweaks.json"));
             return JsonSerializer.Deserialize<TweaksFile>(text, _json)?.Tweaks ?? new List<Tweak>();
         }
         public List<AppItem> LoadApps()
@@ -175,7 +175,7 @@ namespace Sothe
                 case "HKCU": bk = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64); break;
                 case "HKCR": bk = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry64); break;
                 case "HKU": bk = RegistryKey.OpenBaseKey(RegistryHive.Users, RegistryView.Registry64); break;
-                default: throw new Exception("Hive no reconocido: " + hive);
+                default: throw new Exception("Unrecognized registry hive: " + hive);
             }
             return (bk, sub);
         }
@@ -313,7 +313,7 @@ namespace Sothe
                         }
                         case "service":
                         {
-                            if (!IsValidServiceName(op.Name)) throw new ArgumentException("nombre de servicio no valido: " + op.Name);
+                            if (!IsValidServiceName(op.Name)) throw new ArgumentException("invalid service name: " + op.Name);
                             string svcPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\" + op.Name;
                             var prior = RegGet(svcPath, "Start");
                             backup.Add(new OpBackup { Type = "reg", Path = svcPath, Name = "Start", PriorExists = prior.exists, PriorValue = prior.val, PriorKind = prior.kind,
@@ -331,7 +331,7 @@ namespace Sothe
                             {
                                 // Sin estado previo no se toca nada: no habria forma de volver a el
                                 try { cmd.Captured = PowerShellRunner.RunCapture(op.Capture).Trim(); }
-                                catch (Exception ex) { throw new InvalidOperationException("no se pudo guardar el estado previo, no se aplica: " + ex.Message, ex); }
+                                catch (Exception ex) { throw new InvalidOperationException("could not save the previous state, not applying: " + ex.Message, ex); }
                             }
                             backup.Add(cmd);
                             SaveBackup(t.Id, file);
@@ -339,20 +339,20 @@ namespace Sothe
                             break;
                         }
                         case "appx":
-                            if (!IsValidAppxName(op.Package)) throw new ArgumentException("nombre de paquete no valido: " + op.Package);
+                            if (!IsValidAppxName(op.Package)) throw new ArgumentException("invalid package name: " + op.Package);
                             backup.Add(new OpBackup { Type = "appx" });
                             SaveBackup(t.Id, file);
                             RunPowerShellHidden("Get-AppxPackage -Name '" + op.Package + "' -ErrorAction SilentlyContinue | Remove-AppxPackage -ErrorAction SilentlyContinue");
                             break;
                         default:
-                            res.Errors.Add("op desconocida: " + op.Type); res.Ok = false; break;
+                            res.Errors.Add("unknown op: " + op.Type); res.Ok = false; break;
                     }
                 }
                 catch (Exception ex) { res.Errors.Add(op.Type + ": " + ex.Message); res.Ok = false; }
             }
             // Un ajuste sin ninguna operacion valida no deja backup: no cuenta como aplicado
             if (backup.Count > 0) SaveBackup(t.Id, file);
-            Log("APLICADO " + t.Id + (res.Errors.Count > 0 ? " | errores: " + string.Join("; ", res.Errors) : ""));
+            Log("APPLIED " + t.Id + (res.Errors.Count > 0 ? " | errors: " + string.Join("; ", res.Errors) : ""));
             return res;
         }
 
@@ -374,13 +374,13 @@ namespace Sothe
         {
             var res = new ApplyResult { Id = id, Ok = true };
             var path = BackupPath(id);
-            if (!File.Exists(path)) { res.Ok = false; res.Errors.Add("sin backup"); return res; }
+            if (!File.Exists(path)) { res.Ok = false; res.Errors.Add("no backup"); return res; }
             List<OpBackup> ops;
             try { ops = ReadBackup(path).Ops; }
             catch (Exception ex) when (ex is IOException || ex is JsonException || ex is UnauthorizedAccessException)
             {
-                res.Ok = false; res.Errors.Add("backup ilegible: " + ex.Message);
-                Log("REVERTIDO CON ERRORES " + id + " (backup ilegible, se conserva) | " + ex.Message);
+                res.Ok = false; res.Errors.Add("unreadable backup: " + ex.Message);
+                Log("REVERTED WITH ERRORS " + id + " (unreadable backup, kept) | " + ex.Message);
                 return res;
             }
             // Dentro de un mismo ajuste tambien LIFO: si dos operaciones tocan la misma clave, la ultima se deshace primero
@@ -398,13 +398,13 @@ namespace Sothe
                             RunPowerShellHidden("Start-Service -Name '" + b.Service + "' -ErrorAction SilentlyContinue");
                     }
                     else if (b.Type == "command" && !string.IsNullOrEmpty(b.Revert)) RunCommand(WithCaptured(b.Captured, b.Revert));
-                    else if (b.Type == "appx") res.Errors.Add("appx: reinstalar desde la Store (no auto-reversible)");
+                    else if (b.Type == "appx") res.Errors.Add("appx: reinstall from the Store (not auto-reversible)");
                 }
                 catch (Exception ex) { res.Errors.Add(b.Type + ": " + ex.Message); res.Ok = false; }
             }
             // Si algo fallo, el backup se conserva: el ajuste sigue contando como aplicado y se puede reintentar
-            if (res.Ok) { File.Delete(path); Log("REVERTIDO " + id); }
-            else Log("REVERTIDO CON ERRORES " + id + " (se conserva el backup) | " + string.Join("; ", res.Errors));
+            if (res.Ok) { File.Delete(path); Log("REVERTED " + id); }
+            else Log("REVERTED WITH ERRORS " + id + " (backup kept) | " + string.Join("; ", res.Errors));
             return res;
         }
 
@@ -454,7 +454,7 @@ namespace Sothe
         public bool CreateRestorePoint()
         {
             try { RunPowerShellHidden(RestorePointScript); return true; }
-            catch (Exception ex) { Log("Punto de restauracion: " + ex.Message); return false; }
+            catch (Exception ex) { Log("Restore point: " + ex.Message); return false; }
         }
         public void ClearTemp()
         {
@@ -464,7 +464,7 @@ namespace Sothe
         // ---------------- Perfiles propios ----------------
         // Los perfiles del usuario viven fuera de data\ para que ni la OTA ni reinstalar la app los borren
         public const string CustomProfileDesc = "Perfil personalizado";
-        private static readonly string[] BuiltInProfileKeys = { "competitivo", "ciber", "ciberseguridad", "limpio" };
+        private static readonly string[] BuiltInProfileKeys = { "competitivo", "ciber", "ciberseguridad", "limpio", "competitive", "cybersecurity", "clean" };
         public string UserProfilesPath => Path.Combine(Root, "profiles.user.json");
 
         public static string ProfileId(string name)
@@ -482,6 +482,7 @@ namespace Sothe
             {
                 reserved.Add(TextUtil.Fold(p.Id ?? ""));
                 reserved.Add(TextUtil.Fold(ProfileId(p.Name)));
+                reserved.Add(TextUtil.Fold(ProfileId(p.Es?.Name ?? "")));
             }
             bool hit = reserved.Contains(TextUtil.Fold(ProfileId(name)));
             suggestion = hit ? (name ?? "").Trim() + "_Custom" : null;
@@ -492,13 +493,13 @@ namespace Sothe
         {
             name = (name ?? "").Trim();
             if (IsReservedProfileName(name, out var suggestion))
-                throw new InvalidOperationException($"«{name}» es un perfil oficial de Sothe. Elige otro nombre, por ejemplo «{suggestion}».");
+                throw new InvalidOperationException($"“{name}” is an official Toji profile. Choose another name, for example “{suggestion}”.");
             string id = ProfileId(name);
             var doc = ReadProfilesFile(UserProfilesPath);
             doc.Profiles.RemoveAll(p => p.Id == id);
             doc.Profiles.Add(new Profile { Id = id, Name = name, Desc = CustomProfileDesc, Tweaks = ids });
             WriteJsonAtomic(UserProfilesPath, doc);
-            Log("Perfil guardado: " + name);
+            Log("Profile saved: " + name);
         }
 
         // Versiones anteriores guardaban los perfiles propios dentro de data\profiles.json: se mueven al fichero de usuario
@@ -517,7 +518,7 @@ namespace Sothe
             WriteJsonAtomic(UserProfilesPath, user);
             doc.Profiles.RemoveAll(p => p.Desc == CustomProfileDesc);
             WriteJsonAtomic(officialPath, doc);
-            Log($"Perfiles propios movidos a {UserProfilesPath}: {custom.Count}");
+            Log($"Custom profiles moved to {UserProfilesPath}: {custom.Count}");
             return custom.Count;
         }
 

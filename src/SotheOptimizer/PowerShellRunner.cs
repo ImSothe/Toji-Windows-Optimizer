@@ -36,7 +36,7 @@ namespace Sothe
 
             Process p;
             try { p = Process.Start(psi); }
-            catch (Win32Exception ex) { throw new InvalidOperationException("No se pudo iniciar PowerShell: " + ex.Message, ex); }
+            catch (Win32Exception ex) { throw new InvalidOperationException("Could not start PowerShell: " + ex.Message, ex); }
 
             using (p)
             {
@@ -45,12 +45,12 @@ namespace Sothe
                 if (!p.WaitForExit(timeoutMs))
                 {
                     try { p.Kill(true); } catch { }
-                    throw new TimeoutException($"PowerShell no terminó en {timeoutMs / 1000} s y se ha cancelado.");
+                    throw new TimeoutException($"PowerShell did not finish in {timeoutMs / 1000} s and was cancelled.");
                 }
                 p.WaitForExit();   // vacia los lectores asincronos
                 var err = CleanStdErr(stderr.Result);
                 if (p.ExitCode != 0 || err.Length > 0)
-                    throw new InvalidOperationException($"PowerShell falló (código {p.ExitCode})" + (err.Length > 0 ? ": " + Truncate(err, 400) : "."));
+                    throw new InvalidOperationException($"PowerShell failed (code {p.ExitCode})" + (err.Length > 0 ? ": " + Truncate(err, 400) : "."));
                 return stdout.Result ?? "";
             }
         }

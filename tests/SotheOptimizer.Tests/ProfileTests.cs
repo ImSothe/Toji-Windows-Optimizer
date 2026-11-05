@@ -43,7 +43,7 @@ namespace Sothe.Tests
             Assert.True(eng.IsReservedProfileName(name, out var suggestion));
             Assert.Equal(expectedSuggestion, suggestion);
             var ex = Assert.Throws<InvalidOperationException>(() => eng.SaveProfile(name, new List<string> { "game_mode" }));
-            Assert.Contains("perfil oficial", ex.Message);
+            Assert.Contains("official Toji profile", ex.Message);
             Assert.False(File.Exists(eng.UserProfilesPath));
         }
 

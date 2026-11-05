@@ -55,7 +55,7 @@ namespace Sothe.Tests
                 Apply = $"Set-Content -LiteralPath '{Q(marker)}' -Value x", Revert = "exit 0" } } };
             var r = eng.ApplyTweak(t);
             Assert.False(r.Ok);
-            Assert.Contains(r.Errors, e => e.Contains("no se pudo guardar el estado previo"));
+            Assert.Contains(r.Errors, e => e.Contains("could not save the previous state"));
             Assert.False(File.Exists(marker));                       // sin estado previo no hay forma de volver: no se toca
             Assert.DoesNotContain("nocap", eng.GetApplied());
         }

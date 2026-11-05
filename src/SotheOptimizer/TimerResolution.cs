@@ -54,7 +54,7 @@ namespace Sothe
                 if (_requested != 0 && _requested != desired) NtSetTimerResolution(_requested, false, out _);
                 OptOutOfTimerThrottling();
                 int status = NtSetTimerResolution(desired, true, out uint current);
-                if (status != 0) throw new InvalidOperationException($"NtSetTimerResolution fallo (NTSTATUS 0x{status:X8}).");
+                if (status != 0) throw new InvalidOperationException($"NtSetTimerResolution failed (NTSTATUS 0x{status:X8}).");
                 _requested = desired;
                 return current;
             }
@@ -93,7 +93,7 @@ namespace Sothe
         // Gana la menor puntuacion; en empate, la resolucion mas fina. Funcion pura (se prueba sin Windows)
         public static Probe ChooseBest(IReadOnlyList<Probe> probes)
         {
-            if (probes == null || probes.Count == 0) throw new ArgumentException("No hay candidatos.", nameof(probes));
+            if (probes == null || probes.Count == 0) throw new ArgumentException("No candidates.", nameof(probes));
             var best = probes[0];
             foreach (var p in probes)
                 if (p.Score < best.Score || (p.Score == best.Score && p.Resolution < best.Resolution)) best = p;
@@ -109,7 +109,7 @@ namespace Sothe
             if (steps < 1) throw new ArgumentOutOfRangeException(nameof(steps));
             if (stepMs <= 0) throw new ArgumentOutOfRangeException(nameof(stepMs));
             if (NtQueryTimerResolution(out uint coarsest, out uint finest, out _) != 0 || finest == 0)
-                throw new InvalidOperationException("No se pudo consultar la resolucion del temporizador.");
+                throw new InvalidOperationException("Could not query the timer resolution.");
             bool wasHolding; uint previous;
             lock (Gate) { wasHolding = _requested != 0; previous = _requested; }
             if (wasHolding) Release();
@@ -245,7 +245,7 @@ namespace Sothe
         public static string PrepareProtectedCopy(string sourceExe)
         {
             if (string.IsNullOrEmpty(sourceExe) || !File.Exists(sourceExe))
-                throw new FileNotFoundException("No se encuentra el ejecutable de Toji.", sourceExe);
+                throw new FileNotFoundException("The Toji executable was not found.", sourceExe);
             var dir = SystemPaths.ProtectedInstallDir;
             Directory.CreateDirectory(dir);
             SecureStorage.ApplyProtectedAcl(dir, inheritToChildren: true);

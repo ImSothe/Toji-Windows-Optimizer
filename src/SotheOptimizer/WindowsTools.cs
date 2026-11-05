@@ -22,7 +22,7 @@ namespace Sothe
         {
             var list = (ids ?? Enumerable.Empty<string>()).ToList();
             var bad = list.FirstOrDefault(i => !IsValidId(i));
-            if (bad != null) throw new ArgumentException("Id de winget no válido: " + bad);
+            if (bad != null) throw new ArgumentException("Invalid winget id: " + bad);
             return string.Join("; ", list.Select(command));
         }
 
@@ -52,7 +52,7 @@ namespace Sothe
         // Devuelve True/False en la salida segun si Windows pide reiniciar
         public static string SetScript(string feature, bool enable)
         {
-            if (!IsValidName(feature)) throw new ArgumentException("Característica no válida: " + feature);
+            if (!IsValidName(feature)) throw new ArgumentException("Invalid feature: " + feature);
             return enable
                 ? $"(Enable-WindowsOptionalFeature -Online -FeatureName '{feature}' -All -NoRestart -ErrorAction Stop).RestartNeeded"
                 : $"(Disable-WindowsOptionalFeature -Online -FeatureName '{feature}' -NoRestart -ErrorAction Stop).RestartNeeded";
@@ -63,7 +63,7 @@ namespace Sothe
         {
             var list = features.ToList();
             var bad = list.FirstOrDefault(f => !IsValidName(f));
-            if (bad != null) throw new ArgumentException("Característica no válida: " + bad);
+            if (bad != null) throw new ArgumentException("Invalid feature: " + bad);
             return "$n = @(" + string.Join(",", list.Select(f => "'" + f + "'")) + "); " +
                    "Get-WindowsOptionalFeature -Online | Where-Object { $n -contains $_.FeatureName } | ForEach-Object { \"$($_.FeatureName)=$($_.State)\" }";
         }

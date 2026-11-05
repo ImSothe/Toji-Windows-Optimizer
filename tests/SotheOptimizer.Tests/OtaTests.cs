@@ -115,7 +115,7 @@ namespace Sothe.Tests
             var r = await new DataUpdater(eng, Url, otherKey, server).CheckAndUpdateAsync();
 
             Assert.Equal(OtaStatus.Failed, r.Status);
-            Assert.Contains("firma", r.Message);
+            Assert.Contains("signature", r.Message);
         }
 
         [Fact]

@@ -40,7 +40,7 @@ namespace Sothe.Tests
             var eng = d.Engine();
 
             AssertUsaLoIncrustado(eng);
-            Assert.Contains("tweaks.json ignorado (sin manifiesto firmado)", File.ReadAllText(Path.Combine(d.Root, "sothe.log")));
+            Assert.Contains("tweaks.json ignored (no signed manifest)", File.ReadAllText(Path.Combine(d.Root, "sothe.log")));
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace Sothe.Tests
 
             var tweaks = d.Engine().LoadTweaks();
             Assert.Equal("safe", tweaks.Single(t => t.Id == "game_mode").Danger);
-            Assert.Contains("manipulado", File.ReadAllText(Path.Combine(d.Root, "sothe.log")));
+            Assert.Contains("tampered", File.ReadAllText(Path.Combine(d.Root, "sothe.log")));
         }
 
         [Fact]

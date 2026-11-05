@@ -56,7 +56,7 @@ namespace Sothe
         public async Task<OtaResult> CheckAndUpdateAsync(CancellationToken ct = default)
         {
             if (_baseUrl.Length == 0 || string.IsNullOrWhiteSpace(_publicKey))
-                return new OtaResult { Status = OtaStatus.Disabled, Message = "OTA sin configurar" };
+                return new OtaResult { Status = OtaStatus.Disabled, Message = "OTA is not configured" };
             try
             {
                 using var http = _handler != null ? new HttpClient(_handler, false) : new HttpClient();
@@ -66,13 +66,13 @@ namespace Sothe
                 var manifestBytes = await http.GetByteArrayAsync(_baseUrl + "manifest.json", ct);
                 var signature = Convert.FromBase64String((await http.GetStringAsync(_baseUrl + "manifest.sig", ct)).Trim());
                 if (!VerifySignature(manifestBytes, signature, _publicKey))
-                    throw new InvalidDataException("La firma del manifiesto no es válida: actualización rechazada.");
+                    throw new InvalidDataException("The manifest signature is not valid: update rejected.");
 
-                var manifest = SignedData.ParseManifest(manifestBytes) ?? throw new InvalidDataException("Manifiesto vacío.");
+                var manifest = SignedData.ParseManifest(manifestBytes) ?? throw new InvalidDataException("Empty manifest.");
                 if (manifest.Version <= LocalVersion())
                     return new OtaResult { Status = OtaStatus.UpToDate, Version = manifest.Version };
                 if (manifest.Files.Keys.Any(f => !AllowedFiles.Contains(f)))
-                    throw new InvalidDataException("El manifiesto incluye ficheros no permitidos.");
+                    throw new InvalidDataException("The manifest includes disallowed files.");
 
                 // 1) Descargar y verificar TODO en una carpeta temporal antes de tocar data\
                 var staging = Path.Combine(_eng.Root, "ota-staging");
@@ -82,7 +82,7 @@ namespace Sothe
                 {
                     var bytes = await http.GetByteArrayAsync(_baseUrl + file, ct);
                     if (!string.Equals(Convert.ToHexString(SHA256.HashData(bytes)), hash, StringComparison.OrdinalIgnoreCase))
-                        throw new InvalidDataException($"{file}: el SHA-256 no coincide con el manifiesto.");
+                        throw new InvalidDataException($"{file}: the SHA-256 does not match the manifest.");
                     ValidateJson(file, bytes);
                     File.WriteAllBytes(Path.Combine(staging, file), bytes);
                 }
@@ -100,12 +100,12 @@ namespace Sothe
                 File.WriteAllText(Path.Combine(DataDir, SignedData.SignatureFile), Convert.ToBase64String(signature));
                 Directory.Delete(staging, true);
 
-                _eng.Log($"OTA: datos actualizados a la versión {manifest.Version}");
+                _eng.Log($"OTA: data updated to version {manifest.Version}");
                 return new OtaResult { Status = OtaStatus.Updated, Version = manifest.Version };
             }
             catch (Exception ex) when (!(ex is OperationCanceledException && ct.IsCancellationRequested))
             {
-                _eng.Log("OTA fallida: " + ex.Message);
+                _eng.Log("OTA failed: " + ex.Message);
                 return new OtaResult { Status = OtaStatus.Failed, Message = ex.Message };
             }
         }
@@ -120,12 +120,12 @@ namespace Sothe
             {
                 var t = JsonSerializer.Deserialize<TweaksFile>(bytes, _json);
                 if (t?.Tweaks == null || t.Tweaks.Count == 0 || t.Tweaks.Any(x => string.IsNullOrEmpty(x.Id)))
-                    throw new InvalidDataException("tweaks.json no es válido.");
+                    throw new InvalidDataException("tweaks.json is not valid.");
             }
             else if (file == "profiles.json")
             {
                 var p = JsonSerializer.Deserialize<ProfilesFile>(bytes, _json);
-                if (p?.Profiles == null) throw new InvalidDataException("profiles.json no es válido.");
+                if (p?.Profiles == null) throw new InvalidDataException("profiles.json is not valid.");
             }
             else
             {

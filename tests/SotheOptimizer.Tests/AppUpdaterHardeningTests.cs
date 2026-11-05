@@ -115,7 +115,7 @@ namespace Sothe.Tests
             gh.ExeUrl = "https://evil.example.com/SotheOptimizer.exe";
             var info = await Make(gh, pub).CheckAsync();
             Assert.Equal(UpdateStatus.Failed, info.Status);
-            Assert.Contains("URL no permitida", info.Message);
+            Assert.Contains("disallowed URL", info.Message);
         }
 
         [Fact]

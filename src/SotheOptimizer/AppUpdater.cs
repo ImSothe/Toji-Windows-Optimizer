@@ -106,9 +106,9 @@ namespace Sothe
         // No descarga el .exe todavia.
         public async Task<UpdateInfo> CheckAsync(CancellationToken ct = default)
         {
-            if (!IsConfigured) return new UpdateInfo { Status = UpdateStatus.Disabled, Message = "Auto-actualizacion sin configurar" };
-            if (!RepoPattern.IsMatch(_repo)) return Fail("Repositorio de actualizaciones no valido.");
-            if (!IsAllowedUrl(_apiBase)) return Fail("El servidor de actualizaciones debe ser HTTPS y de GitHub.");
+            if (!IsConfigured) return new UpdateInfo { Status = UpdateStatus.Disabled, Message = "Auto-update is not configured" };
+            if (!RepoPattern.IsMatch(_repo)) return Fail("Invalid update repository.");
+            if (!IsAllowedUrl(_apiBase)) return Fail("The update server must be HTTPS and a GitHub host.");
             try
             {
                 using var http = _handler != null ? new HttpClient(_handler, false) : new HttpClient();
@@ -119,28 +119,28 @@ namespace Sothe
                 var indexJson = await http.GetStringAsync($"{_apiBase}/repos/{_repo}/releases/latest", ct);
                 var (manifestUrl, sigUrl, assetUrl) = FindAssets(indexJson);
                 if (manifestUrl == null || sigUrl == null)
-                    return Fail("La release no incluye release.json firmado.");
+                    return Fail("The release does not include a signed release.json.");
                 if (!IsAllowedUrl(manifestUrl) || !IsAllowedUrl(sigUrl))
-                    return Fail("La release apunta a una URL no permitida (solo HTTPS de GitHub).");
+                    return Fail("The release points to a disallowed URL (GitHub HTTPS only).");
 
                 var manifestBytes = await http.GetByteArrayAsync(manifestUrl, ct);
                 var signature = Convert.FromBase64String((await http.GetStringAsync(sigUrl, ct)).Trim());
                 if (!SignedData.VerifySignature(manifestBytes, signature, _publicKey))
-                    return Fail("La firma de la actualizacion no es valida: se ignora.");
+                    return Fail("The update signature is not valid: ignored.");
 
                 var manifest = JsonSerializer.Deserialize<ReleaseManifest>(manifestBytes, Json);
                 if (manifest == null || !Version.TryParse((manifest.Version ?? "").TrimStart('v', 'V'), out var version)
                     || string.IsNullOrWhiteSpace(manifest.Sha256) || string.IsNullOrWhiteSpace(manifest.File))
-                    return Fail("Manifiesto de release invalido.");
+                    return Fail("Invalid release manifest.");
                 if (manifest.Size < 0 || manifest.Size > MaxExeBytes)
-                    return Fail("El tamano declarado en el manifiesto no es valido.");
+                    return Fail("The size declared in the manifest is not valid.");
 
                 // El .exe se busca por el nombre firmado, no por el que diga GitHub
                 var exeUrl = assetUrl != null && AssetName(indexJson, assetUrl) == manifest.File ? assetUrl : UrlOfAsset(indexJson, manifest.File);
                 if (exeUrl == null)
-                    return Fail($"La release no incluye {manifest.File}.");
+                    return Fail($"The release does not include {manifest.File}.");
                 if (!IsAllowedUrl(exeUrl))
-                    return Fail("El instalador apunta a una URL no permitida (solo HTTPS de GitHub).");
+                    return Fail("The installer points to a disallowed URL (GitHub HTTPS only).");
 
                 if (version <= _current)
                     return new UpdateInfo { Status = UpdateStatus.UpToDate, Version = version };
@@ -163,7 +163,7 @@ namespace Sothe
         {
             if (info == null || info.Status != UpdateStatus.Available)
                 return info ?? new UpdateInfo { Status = UpdateStatus.Failed };
-            if (!IsAllowedUrl(info.ExeUrl)) return Fail("El instalador apunta a una URL no permitida (solo HTTPS de GitHub).");
+            if (!IsAllowedUrl(info.ExeUrl)) return Fail("The installer points to a disallowed URL (GitHub HTTPS only).");
             long limit = info.Size > 0 ? info.Size : MaxExeBytes;
             string tmp = null;
             try
@@ -177,7 +177,7 @@ namespace Sothe
                 using var resp = await http.GetAsync(info.ExeUrl, HttpCompletionOption.ResponseHeadersRead, cts.Token);
                 resp.EnsureSuccessStatusCode();
                 if (resp.Content.Headers.ContentLength is long declared && declared > limit)
-                    return Fail("El instalador es mas grande de lo declarado: descartado.");
+                    return Fail("The installer is larger than declared: discarded.");
 
                 Directory.CreateDirectory(stageDir);
                 tmp = Path.Combine(stageDir, PendingExe + ".part");
@@ -193,7 +193,7 @@ namespace Sothe
                         while ((n = await src.ReadAsync(buffer, 0, buffer.Length, cts.Token)) > 0)
                         {
                             total += n;
-                            if (total > limit) return DiscardPart(tmp, "El instalador supera el tamano permitido: descartado.");
+                            if (total > limit) return DiscardPart(tmp, "The installer exceeds the allowed size: discarded.");
                             hasher.AppendData(buffer, 0, n);
                             await dst.WriteAsync(buffer, 0, n, cts.Token);
                         }
@@ -201,9 +201,9 @@ namespace Sothe
                     hash = Convert.ToHexString(hasher.GetHashAndReset());
                 }
                 if (info.Size > 0 && total != info.Size)
-                    return DiscardPart(tmp, "El tamano del instalador no coincide con el manifiesto firmado: descartado.");
+                    return DiscardPart(tmp, "The installer size does not match the signed manifest: discarded.");
                 if (!string.Equals(hash, info.Sha256, StringComparison.OrdinalIgnoreCase))
-                    return DiscardPart(tmp, "El instalador descargado no coincide con la firma: descartado.");
+                    return DiscardPart(tmp, "The downloaded installer does not match the signature: discarded.");
 
                 var staged = Path.Combine(stageDir, PendingExe);
                 File.Move(tmp, staged, true);
@@ -304,7 +304,7 @@ namespace Sothe
                 $"del /q \"{S(pendingInfo)}\" >nul 2>&1\r\n" +
                 "goto launch\r\n" +
                 ":failed\r\n" +
-                $"echo %date% %time% no se pudo reemplazar el ejecutable; se conserva la version anterior >> \"{S(log)}\"\r\n" +
+                $"echo %date% %time% could not replace the executable; keeping the previous version >> \"{S(log)}\"\r\n" +
                 $"if exist \"{S(targetExe)}.old\" move /y \"{S(targetExe)}.old\" \"{S(targetExe)}\" >nul\r\n" +
                 ":launch\r\n" +
                 $"start \"\" \"{S(targetExe)}\"\r\n" +

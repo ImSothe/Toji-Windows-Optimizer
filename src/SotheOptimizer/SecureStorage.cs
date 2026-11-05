@@ -57,7 +57,7 @@ namespace Sothe
                     // Alguien sin privilegios creo la carpeta antes que la app: se aparta entera y se empieza de cero
                     var aside = root.TrimEnd('\\', '/') + ".untrusted-" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
                     Directory.Move(root, aside);
-                    log($"La carpeta de datos no pertenecía a un administrador: apartada en {aside}");
+                    log($"The data folder was not owned by an administrator: moved aside to {aside}");
                 }
                 Directory.CreateDirectory(root);
                 ApplyProtectedAcl(root, inheritToChildren: true);
@@ -66,16 +66,16 @@ namespace Sothe
                 foreach (var entry in new DirectoryInfo(root).EnumerateFileSystemInfos("*", SearchOption.AllDirectories).ToList())
                 {
                     if (IsTrustedOwner(OwnerOf(entry), trusted)) { ResetInheritance(entry); continue; }
-                    log($"Eliminado por no pertenecer a un administrador: {entry.FullName}");
+                    log($"Removed because it is not owned by an administrator: {entry.FullName}");
                     try { if (entry is DirectoryInfo di) di.Delete(true); else entry.Delete(); }
-                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException) { log($"No se pudo eliminar {entry.FullName}: {ex.Message}"); return false; }
+                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException) { log($"Could not remove {entry.FullName}: {ex.Message}"); return false; }
                 }
                 RootTrusted = true;
                 return true;
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is InvalidOperationException || ex is SystemException)
             {
-                log("No se pudo asegurar la carpeta de datos: " + ex.Message);
+                log("Could not secure the data folder: " + ex.Message);
                 return false;
             }
         }

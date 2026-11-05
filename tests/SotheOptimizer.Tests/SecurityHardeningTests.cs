@@ -73,7 +73,7 @@ namespace Sothe.Tests
             Assert.True(SecureStorage.Harden(root, log.Add));   // el usuario de los tests NO es de confianza aqui
             Assert.False(File.Exists(Path.Combine(root, "plantado.json")));   // lo plantado ya no esta en la carpeta nueva
             Assert.Single(Directory.GetDirectories(Path.GetDirectoryName(root), "SotheOptimizer.untrusted-*"));
-            Assert.Contains(log, l => l.Contains("apartada"));
+            Assert.Contains(log, l => l.Contains("moved aside"));
         }
 
         // ---------------- Rutas absolutas ----------------
@@ -171,7 +171,7 @@ namespace Sothe.Tests
             var t = new Tweak { Id = "evil_svc", Ops = new System.Collections.Generic.List<TweakOp> { new TweakOp { Type = "service", Name = "x'; calc; '", Startup = "Disabled" } } };
             var r = eng.ApplyTweak(t);
             Assert.False(r.Ok);
-            Assert.Contains(r.Errors, e => e.Contains("nombre de servicio no valido"));
+            Assert.Contains(r.Errors, e => e.Contains("invalid service name"));
         }
     }
 }

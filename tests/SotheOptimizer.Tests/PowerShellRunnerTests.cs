@@ -52,7 +52,7 @@ namespace Sothe.Tests
         {
             var ex = RunFail("exit 3");
             Assert.IsType<InvalidOperationException>(ex);
-            Assert.Contains("código 3", ex.Message);
+            Assert.Contains("code 3", ex.Message);
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace Sothe.Tests
         {
             var ex = RunFail(OperatingSystem.IsWindows() ? "cmd.exe /c exit 4" : "/bin/sh -c 'exit 4'");
             Assert.IsType<InvalidOperationException>(ex);
-            Assert.Contains("código 4", ex.Message);
+            Assert.Contains("code 4", ex.Message);
         }
 
         [Fact]

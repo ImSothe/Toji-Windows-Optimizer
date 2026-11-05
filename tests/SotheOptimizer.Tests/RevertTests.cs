@@ -34,9 +34,9 @@ namespace Sothe.Tests
             var eng = EngineWithCommandBackup(d, "exit 5");
             var r = eng.RevertTweak("tweak_prueba");
             Assert.False(r.Ok);
-            Assert.Contains(r.Errors, e => e.Contains("código 5"));
+            Assert.Contains(r.Errors, e => e.Contains("code 5"));
             Assert.Contains("tweak_prueba", eng.GetApplied());
-            Assert.Contains("REVERTIDO CON ERRORES tweak_prueba", File.ReadAllText(Path.Combine(eng.Root, "sothe.log")));
+            Assert.Contains("REVERTED WITH ERRORS tweak_prueba", File.ReadAllText(Path.Combine(eng.Root, "sothe.log")));
         }
     }
 }

@@ -96,7 +96,7 @@ namespace Sothe.Tests
             gh.Assets["release.json"] = Encoding.UTF8.GetBytes("{\"version\":\"9.9.9\",\"file\":\"SotheOptimizer.exe\",\"sha256\":\"00\"}");
             var info = await Make(gh, pub).CheckAsync();
             Assert.Equal(UpdateStatus.Failed, info.Status);
-            Assert.Contains("firma", info.Message);
+            Assert.Contains("signature", info.Message);
         }
 
         [Fact]

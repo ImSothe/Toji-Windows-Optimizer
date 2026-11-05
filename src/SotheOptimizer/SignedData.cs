@@ -48,18 +48,18 @@ namespace Sothe
             {
                 var manifestPath = Path.Combine(dir, ManifestFile);
                 var signaturePath = Path.Combine(dir, SignatureFile);
-                if (!File.Exists(manifestPath) || !File.Exists(signaturePath)) { reason = "sin manifiesto firmado"; return null; }
+                if (!File.Exists(manifestPath) || !File.Exists(signaturePath)) { reason = "no signed manifest"; return null; }
                 var bytes = File.ReadAllBytes(manifestPath);
                 var signature = Convert.FromBase64String(File.ReadAllText(signaturePath).Trim());
-                if (!VerifySignature(bytes, signature, publicKey)) { reason = "firma no valida"; return null; }
+                if (!VerifySignature(bytes, signature, publicKey)) { reason = "invalid signature"; return null; }
                 var manifest = ParseManifest(bytes);
-                if (manifest?.Files == null) { reason = "manifiesto vacio"; return null; }
+                if (manifest?.Files == null) { reason = "empty manifest"; return null; }
                 reason = null;
                 return manifest;
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is FormatException || ex is JsonException)
             {
-                reason = "manifiesto ilegible: " + ex.Message;
+                reason = "unreadable manifest: " + ex.Message;
                 return null;
             }
         }
@@ -74,13 +74,13 @@ namespace Sothe
             if (!File.Exists(path)) { reason = null; return null; }
             var manifest = ReadVerifiedManifest(dir, publicKey, out reason);
             if (manifest == null) return null;
-            if (!manifest.Files.TryGetValue(file, out var expected)) { reason = "no figura en el manifiesto firmado"; return null; }
+            if (!manifest.Files.TryGetValue(file, out var expected)) { reason = "not listed in the signed manifest"; return null; }
             byte[] bytes;
             try { bytes = File.ReadAllBytes(path); }
-            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException) { reason = "ilegible: " + ex.Message; return null; }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException) { reason = "unreadable: " + ex.Message; return null; }
             if (!string.Equals(Convert.ToHexString(SHA256.HashData(bytes)), expected, StringComparison.OrdinalIgnoreCase))
             {
-                reason = "manipulado (el SHA-256 no coincide con el manifiesto)";
+                reason = "tampered with (the SHA-256 does not match the manifest)";
                 return null;
             }
             version = manifest.Version;
