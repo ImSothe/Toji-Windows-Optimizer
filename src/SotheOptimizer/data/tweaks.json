@@ -762,7 +762,7 @@
         {
           "type": "command",
           "apply": "bcdedit /set hypervisorlaunchtype off",
-          "revert": "function bs($n, $v) { if (-not $v) { bcdedit /deletevalue $n } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } bs 'hypervisorlaunchtype' $captured",
+          "revert": "function bs($n, $v) { if (-not $v) { if (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s')) { bcdedit /deletevalue $n } } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } bs 'hypervisorlaunchtype' $captured",
           "capture": "function bv($n) { $m = (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s+(\\S+)')).Matches; if ($m.Count) { $m[0].Groups[1].Value } else { '' } } bv 'hypervisorlaunchtype'"
         }
       ]
@@ -1289,7 +1289,7 @@
         {
           "type": "command",
           "apply": "bcdedit /set disabledynamictick yes; bcdedit /set useplatformtick yes",
-          "revert": "function bs($n, $v) { if (-not $v) { bcdedit /deletevalue $n } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } $p = $captured -split '\\|'; bs 'disabledynamictick' $p[0]; bs 'useplatformtick' $p[1]",
+          "revert": "function bs($n, $v) { if (-not $v) { if (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s')) { bcdedit /deletevalue $n } } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } $p = $captured -split '\\|'; bs 'disabledynamictick' $p[0]; bs 'useplatformtick' $p[1]",
           "capture": "function bv($n) { $m = (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s+(\\S+)')).Matches; if ($m.Count) { $m[0].Groups[1].Value } else { '' } } (bv 'disabledynamictick') + '|' + (bv 'useplatformtick')"
         }
       ]
@@ -1367,8 +1367,8 @@
       "ops": [
         {
           "type": "command",
-          "apply": "bcdedit /deletevalue useplatformclock; Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue",
-          "revert": "function bs($n, $v) { if (-not $v) { bcdedit /deletevalue $n } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } $lines = $captured -split \"`n\"; $c = ($lines | Where-Object { $_ -like 'clock=*' }) -replace '^clock=',''; bs 'useplatformclock' $c; foreach ($l in $lines) { if ($l -match '^dev=(?<id>.+)\\|OK$') { Enable-PnpDevice -InstanceId $Matches.id -Confirm:$false -ErrorAction SilentlyContinue } }",
+          "apply": "if (bcdedit /enum '{current}' | Select-String '^\\s*useplatformclock\\s') { bcdedit /deletevalue useplatformclock }; Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue",
+          "revert": "function bs($n, $v) { if (-not $v) { if (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s')) { bcdedit /deletevalue $n } } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } $lines = $captured -split \"`n\"; $c = ($lines | Where-Object { $_ -like 'clock=*' }) -replace '^clock=',''; bs 'useplatformclock' $c; foreach ($l in $lines) { if ($l -match '^dev=(?<id>.+)\\|OK$') { Enable-PnpDevice -InstanceId $Matches.id -Confirm:$false -ErrorAction SilentlyContinue } }",
           "capture": "function bv($n) { $m = (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s+(\\S+)')).Matches; if ($m.Count) { $m[0].Groups[1].Value } else { '' } } \"clock=$(bv 'useplatformclock')\"; Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | ForEach-Object { 'dev=' + $_.InstanceId + '|' + $_.Status }"
         }
       ]
