@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Comprobacion REAL de reversibilidad: aplica y revierte ajustes en este Windows y compara el estado antes/despues.
+       Modifica el sistema (de forma temporal), asi que pide administrador. Ver el comentario de Program.cs. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <NoWarn>CA1416</NoWarn>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\src\SotheOptimizer\SotheEngine.cs" Link="App\SotheEngine.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Models.cs" Link="App\Models.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\PowerShellRunner.cs" Link="App\PowerShellRunner.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\SignedData.cs" Link="App\SignedData.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\TextUtil.cs" Link="App\TextUtil.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\TimerResolution.cs" Link="App\TimerResolution.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\SystemPaths.cs" Link="App\SystemPaths.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\SecureStorage.cs" Link="App\SecureStorage.cs" />
+    <EmbeddedResource Include="..\..\src\SotheOptimizer\data\*.json" LogicalName="data/%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>
