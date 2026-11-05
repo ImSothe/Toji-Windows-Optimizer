@@ -1380,15 +1380,22 @@
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Instala un proceso ligero que arranca con Windows y mantiene el temporizador a maxima resolucion fija (no solo cuando una app lo pide).",
-      "warning": "Combinalo con 'timer_resolution' para efecto global. Sube un poco el consumo. Al revertir se quita la tarea y se cierra el proceso.",
+      "desc": "Instala un proceso ligero que arranca con Windows y mantiene el temporizador fijo en la resolucion que mejor responde en tu PC (se calibra al aplicar, unos segundos con el PC en reposo).",
+      "warning": "Medido en Windows 11: un proceso residente baja el reloj del sistema a ~0.5 ms, pero Sleep(1) de OTROS programas solo mejora con GlobalTimerResolutionRequests (este ajuste lo activa) y puede requerir reiniciar. Sube un poco el consumo.",
       "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel",
+          "name": "GlobalTimerResolutionRequests",
+          "value": 1
+        },
         {
           "type": "command",
           "apply": "Install-SotheTimerRes",
           "revert": "Uninstall-SotheTimerRes"
         }
-      ]
+      ],
+      "reboot": true
     },
     {
       "id": "nvidia_telemetry_off",

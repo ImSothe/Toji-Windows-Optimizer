@@ -17,7 +17,7 @@ namespace Sothe
                 ShutdownMode = ShutdownMode.OnExplicitShutdown;
                 var worker = new System.Threading.Thread(() =>
                 {
-                    try { if (OperatingSystem.IsWindows()) TimerResolution.RunResident(); }
+                    try { if (OperatingSystem.IsWindows()) TimerResolution.RunResident(TimerResolution.ParseResolution(e.Args)); }
                     finally { Dispatcher.BeginInvoke(new Action(Shutdown)); }   // al soltar la resolucion, el proceso termina
                 }) { IsBackground = false, Name = "TimerResolutionResident" };
                 worker.SetApartmentState(System.Threading.ApartmentState.MTA);
