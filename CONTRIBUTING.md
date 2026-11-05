@@ -15,6 +15,17 @@ Tweaks are data, not code: edit `src/SotheOptimizer/data/tweaks.json`. A tweak i
 - Risk level: `safe` changes appearance or privacy toggles; `moderate` changes behaviour with a performance or power
   trade-off; `high` weakens a protection; `extreme` is hidden behind Advanced Mode.
 
+## Translations
+
+English is the default language and Spanish is included.
+
+- **Tweaks, apps, features and profiles** (`data/*.json`): the main fields (`name`, `desc`, `warning`) are English; the
+  translation goes in the item's `es` block. Every item must have it; a test checks that.
+- **Everything else** (buttons, dialogs, messages): one table, `src/SotheOptimizer/Strings.cs`, with the English text and
+  the Spanish text under the same key. Use `Loc.T("key")` in code and `{Binding [key], Source={x:Static local:Loc.Instance}}`
+  in XAML. Tests fail if a key is missing in either language, if `{0}` placeholders differ, or if a key is used but not defined.
+- Technical messages (log lines, engine errors) are English only and are not translated.
+
 ## Tests
 
 ```powershell

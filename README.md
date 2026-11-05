@@ -42,6 +42,10 @@ button ("Revert ALL") restores it in the right order.
 <td><img src="docs/images/toji-apps.png" alt="Apps tab (winget)" /></td>
 <td><img src="docs/images/toji-repairs.png" alt="Repairs tab" /></td>
 <td><img src="docs/images/toji-features.png" alt="Windows features tab" /></td>
+<td><img src="docs/images/toji-optimizations-es.png" alt="The same window in Spanish" /></td>
+</tr>
+<tr>
+<td align="center"><sub>Apps</sub></td><td align="center"><sub>Repairs</sub></td><td align="center"><sub>Features</sub></td><td align="center"><sub>Spanish (ES button)</sub></td>
 </tr>
 </table>
 
@@ -56,8 +60,9 @@ button ("Revert ALL") restores it in the right order.
 | **Profiles** | Competitive · Cybersecurity · Clean · your own, with a shareable code (`SOTHE-1-...`) |
 | **Repairs** | SFC, DISM, network reset, Windows Update repair, CHKDSK |
 
-> The UI is in **Spanish** and so are most code comments; the documentation is in English. Internationalising the UI is
-> on the roadmap.
+> **Languages.** The UI is in **English** by default and switches to **Spanish** with the `ES` / `EN` button in the header
+> (it keeps your selection and remembers the choice). Tweak, app and profile texts live in the data files with an `es` block;
+> the rest are in one table, `Strings.cs`. Most code comments are in Spanish.
 
 ---
 
