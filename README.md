@@ -8,11 +8,25 @@
 ![.NET 8](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white)
 ![WPF](https://img.shields.io/badge/UI-WPF-5C2D91)
 ![Windows 10 | 11](https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-0078D4?logo=windows&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-162%20passing-success)
-![Coverage](https://img.shields.io/badge/line%20coverage-87.6%25%20(non--UI)-success)
+![Tests](https://img.shields.io/badge/tests-172%20passing-success)
+![Coverage](https://img.shields.io/badge/line%20coverage-87.5%25%20(non--UI)-success)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 </div>
+
+<div align="center">
+
+<img src="docs/images/toji-optimizations.png" width="860" alt="Toji: tweaks list with risk levels, profiles, search and the Apply / Revert all bar" />
+
+</div>
+
+<table>
+<tr>
+<td><img src="docs/images/toji-apps.png" alt="Apps tab (winget)" /></td>
+<td><img src="docs/images/toji-repairs.png" alt="Repairs tab" /></td>
+<td><img src="docs/images/toji-features.png" alt="Windows features tab" /></td>
+</tr>
+</table>
 
 ---
 
@@ -49,6 +63,12 @@ Each tweak stores the previous state of every operation **before** executing it,
 that carries a sequence number. Reverting is **LIFO**: the last tweak applied is the first one undone, and inside a
 tweak the last operation is undone first.
 
+Registry and service operations record the previous value automatically. Command tweaks (power plans, `bcdedit`,
+hibernation, scheduled tasks, MSI...) declare a read-only `capture` script whose output is stored in the backup and
+handed to `apply` and `revert` as `$captured`, so a revert puts back **what was there**, not a hard-coded default. If
+the capture fails, nothing is applied. `regsub` applies one value to every subkey (one per network interface) and
+remembers each one's previous value.
+
 Why that matters: two tweaks can write the same key (`defender_full_off` and `defender_realtime_off` both write
 `DisableRealtimeMonitoring`). The second tweak's "previous value" is whatever the first one left. Undoing them in
 alphabetical order re-applies the first tweak's value and leaves Defender's real-time protection **off after
@@ -56,10 +76,30 @@ alphabetical order re-applies the first tweak's value and leaves Defender's real
 run against a sandbox registry key (`RegistryRevertTests`).
 
 - A crash mid-apply leaves a backup for every operation that ran, so the tweak is still revertible.
+- Disabling a service stops it; reverting restores its start type **and** starts it again if it was running.
 - Re-applying an already-applied tweak is a no-op (it would otherwise overwrite the original state with the modified one).
 - A restore point is created automatically before the first batch of a session (opt out with a checkbox). The
   temporary `SystemRestorePointCreationFrequency = 0` needed to allow it is put back afterwards.
 - A revert that fails keeps its backup, so the tweak still counts as applied and can be retried.
+
+### Verified on a real machine, not just in unit tests
+
+`tools/RoundTripCheck` applies and reverts tweaks on the actual Windows it runs on and diffs a snapshot of the system
+(registry values, power plans and their values, services and their start type, scheduled tasks, hibernation,
+`bcdedit`, HPET, MSI) before and after. On a Windows 11 machine that was already heavily tuned:
+
+- **47 of 47** tweaks (all `safe` and `moderate` ones plus `hpet_off`, `bcd_timer` and `gpu_msi_mode`) restored the
+  exact previous state after apply -> revert.
+- Applying all 47 and then reverting newest-first ("Revert all") left **zero differences** from the starting state.
+- The resident timer process holds the calibrated resolution, refuses a second instance and releases it on stop.
+
+Running it the first time **found real bugs** that the unit tests could not: reverts restored hard-coded defaults, so a
+custom power plan was replaced, an existing "Ultimate Performance" plan deleted, hibernation turned back on and
+existing `TCPNoDelay` values removed. Those are fixed (see the commit history) and covered by tests.
+
+Honest limits of that run: 36 of the 47 tweaks were already applied on that machine, so they showed no *change* (the
+restore check still holds); `firewall_off`, `hypervisor_off`, the Defender/UAC/VBS family, `reserved_storage_off` and
+the Appx debloat were **not** run live (the tool refuses security-weakening tweaks by default).
 
 ### Signed auto-update
 
@@ -102,7 +142,7 @@ standalone library is [WindowsTimerResolution](https://github.com/ImSothe/Window
 dotnet test tests/SotheOptimizer.Tests -c Release
 ```
 
-**162 tests**, ~2 s. Line coverage is **87.6 %** (766 / 874) and branch coverage 72.5 %, measured with `coverlet`
+**172 tests**, ~2 s. Line coverage is **87.5 %** (788 / 901) and branch coverage 72.5 %, measured with `coverlet`
 over the engine, updaters, signing, storage hardening and timer code. The WPF windows (about 1.6k lines) are **not**
 covered, so that figure is not the coverage of the whole product. The registry round-trip tests only ever touch
 `HKCU\Software\TojiTests\<guid>`.
@@ -130,13 +170,14 @@ src/SotheOptimizer/
   MainWindow*.cs/xaml   WPF UI
 tests/SotheOptimizer.Tests/   xUnit
 tools/OtaSigner/              key generation and signing
+tools/RoundTripCheck/         real apply/revert check with before/after system snapshots
 ```
 
 ## Known limits
 
-- **Not every tweak is reversible.** Appx debloat cannot be reinstalled automatically, and some command-based tweaks
-  (`hpet_off`, `gpu_msi_mode`, the `powercfg` ones, `nagle_off`) restore a fixed default rather than the exact previous
-  state. Tracking their prior state is the next engineering item.
+- **Not every tweak is reversible.** Appx debloat cannot be reinstalled automatically (the app says so). A setting
+  that was never explicitly set in a power plan (for example `CPMINCORES` on some custom plans) has no value to put back,
+  so its revert is skipped. `reserved_storage_off` and the security-weakening tweaks have not been verified live.
 - **No measurements for most tweaks.** Several performance tweaks (for example `nagle_off`, `gaming_gpu_priority`,
   `game_mode`) are community folklore with no measured effect on modern Windows; treat them as optional. On current
   Windows, Defender tweaks are also ignored while Tamper Protection is on.
