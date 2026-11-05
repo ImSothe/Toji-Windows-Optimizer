@@ -23,10 +23,9 @@
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
-  <!-- Licencias: huella del PC por WMI y cache cifrada con DPAPI -->
+  <!-- WMI: caracteristicas de Windows y deteccion de GPU -->
   <ItemGroup>
     <PackageReference Include="System.Management" Version="8.0.0" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 
   <!-- Icono de la app (lo genera tools/IconGen a partir del logo): el .exe lo lleva como recurso Win32
@@ -91,7 +90,6 @@ $(ObfSearch)
     &lt;SkipType name="Sothe.App" /&gt;
     &lt;SkipType name="Sothe.MainWindow" /&gt;
     &lt;SkipType name="Sothe.EulaWindow" /&gt;
-    &lt;SkipType name="Sothe.PaywallDialog" /&gt;
     &lt;SkipType name="Sothe.SotheDialog" /&gt;
     &lt;SkipType name="Sothe.Ui" /&gt;
     &lt;SkipType name="Sothe.BorderlessWindow" /&gt;
@@ -109,13 +107,10 @@ $(ObfSearch)
     &lt;SkipType name="Sothe.OtaManifest" /&gt;
     &lt;SkipType name="Sothe.ReleaseManifest" /&gt;
     &lt;SkipType name="Sothe.AppUpdater/PendingUpdate" /&gt;
-    &lt;SkipType name="Sothe.Licensing.LicenseCache" /&gt;
     &lt;!-- Enums (sus nombres acaban en etiquetas guardadas) y P/Invoke (se enlazan por nombre de funcion) --&gt;
     &lt;SkipType name="Sothe.UpdateStatus" /&gt;
     &lt;SkipType name="Sothe.OtaStatus" /&gt;
     &lt;SkipType name="Sothe.FeatureState" /&gt;
-    &lt;SkipType name="Sothe.Licensing.LicenseState" /&gt;
-    &lt;SkipType name="Sothe.Licensing.ProviderOutcome" /&gt;
     &lt;SkipMethod type="Sothe.TimerResolution" name="Nt*" /&gt;
   &lt;/Module&gt;
 &lt;/Obfuscator&gt;

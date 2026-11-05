@@ -107,15 +107,6 @@ namespace Sothe
             return official.Concat(user).ToList();
         }
 
-        // ---------------- Paywall inteligente ----------------
-        // Ajustes PRO entre los que APLICAR va a aplicar ahora. Lo gratuito se aplica siempre sin licencia; basta uno
-        // PRO para exigirla. Los ya aplicados (por ejemplo durante la prueba) no cuentan: mantenerlos o revertirlos es gratis.
-        public static List<Tweak> ProTweaksToApply(IEnumerable<Tweak> tweaks, IEnumerable<string> toApply)
-        {
-            var ids = new HashSet<string>(toApply ?? Enumerable.Empty<string>());
-            return (tweaks ?? Enumerable.Empty<Tweak>()).Where(t => t.IsPro && ids.Contains(t.Id)).ToList();
-        }
-
         // ---------------- Estado aplicado ----------------
         public HashSet<string> GetApplied()
         {

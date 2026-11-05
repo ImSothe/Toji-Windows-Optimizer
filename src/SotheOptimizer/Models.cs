@@ -11,7 +11,6 @@ namespace Sothe
         public string Name { get; set; }
         public string Category { get; set; }
         public string Danger { get; set; }        // safe | moderate | high | extreme
-        public bool IsPro { get; set; }           // true = necesita Sothe PRO para aplicarlo (sin la propiedad: gratis)
         public bool Portable { get; set; }
         public bool Anticheat { get; set; }
         public bool Reboot { get; set; }

@@ -12,7 +12,7 @@ namespace Sothe.Tests
     // ignora y la app usa los JSON incrustados en el .exe
     public class SignedDataTests
     {
-        private const string SoloUno = "{ \"tweaks\": [ { \"id\": \"solo_disco\", \"name\": \"Solo disco\", \"isPro\": false } ] }";
+        private const string SoloUno = "{ \"tweaks\": [ { \"id\": \"solo_disco\", \"name\": \"Solo disco\" } ] }";
 
         private static string Tweaks(TestDirs d) => Path.Combine(d.Data, "tweaks.json");
         // La copia de disco (un solo ajuste) no se ha usado: mandan los ajustes incrustados en el .exe
@@ -48,13 +48,13 @@ namespace Sothe.Tests
         {
             using var d = new TestDirs();
             d.Sign();
-            // Un solo cambio tras la firma: el ajuste PRO pasa a gratis
+            // Un solo cambio tras la firma: un ajuste "safe" pasa a "extreme"
             var text = File.ReadAllText(Tweaks(d));
-            var i = text.IndexOf("\"isPro\": true", StringComparison.Ordinal);
-            File.WriteAllText(Tweaks(d), text.Substring(0, i) + "\"isPro\": false" + text.Substring(i + "\"isPro\": true".Length));
+            var i = text.IndexOf("\"danger\": \"safe\"", StringComparison.Ordinal);
+            File.WriteAllText(Tweaks(d), text.Substring(0, i) + "\"danger\": \"extreme\"" + text.Substring(i + "\"danger\": \"safe\"".Length));
 
             var tweaks = d.Engine().LoadTweaks();
-            Assert.True(tweaks.Single(t => t.Id == "game_mode").IsPro);
+            Assert.Equal("safe", tweaks.Single(t => t.Id == "game_mode").Danger);
             Assert.Contains("manipulado", File.ReadAllText(Path.Combine(d.Root, "sothe.log")));
         }
 

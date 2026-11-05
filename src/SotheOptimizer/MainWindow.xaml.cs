@@ -10,14 +10,12 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
-using Sothe.Licensing;
 
 namespace Sothe
 {
     public partial class MainWindow : Window
     {
         private readonly SotheEngine _eng = new SotheEngine();
-        private readonly LicenseService _license;
         private List<Tweak> _tweaks;
         private List<Profile> _profiles;
         private string _loadError;
@@ -79,11 +77,6 @@ namespace Sothe
                 _tweaks = new List<Tweak>(); _profiles = new List<Profile>();
             }
 
-            _license = LicenseFactory.CreateDefault(_eng.Root);
-            _license.StatusChanged += st => Dispatcher.Invoke(() => UpdateLicenseBadge(st));
-            UpdateLicenseBadge(_license.Status);
-            LicenseBadge.Click += (s, e) => ShowLicenseInfo();
-
             BuildList();
             BuildProfileBar();
             BuildRiskChips();
@@ -136,9 +129,6 @@ namespace Sothe
                 UpdateItemWidth();
                 if (_loadError != null)
                     SotheDialog.Info(this, "Error al cargar datos", "No se pudieron cargar los datos (tweaks.json).\n\n" + _loadError);
-                // Al arrancar: validacion online de la licencia (sin red se mantiene el estado guardado) y aviso de bloqueo
-                try { await _license.RefreshOnlineAsync(); } catch (Exception ex) { _eng.Log("Licencia: " + ex.Message); }
-                ShowLicenseNotice();
                 await CheckAppUpdateAsync();   // puede reiniciar la app; si lo hace, no sigue
                 await CheckOtaAsync();
             };
@@ -232,7 +222,6 @@ namespace Sothe
                 var dot = RiskDot(risk); Grid.SetColumn(dot, 1);
                 var name = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
                 name.Children.Add(new TextBlock { Text = t.Name, FontSize = 15, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 440 });
-                if (t.IsPro) name.Children.Add(ProBadge());
                 Grid.SetColumn(name, 2);
                 var desc = new TextBlock { Text = t.Desc, FontSize = 13.5, Foreground = R("TextSub"), VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(18, 0, 12, 0) };
                 Grid.SetColumn(desc, 3);
@@ -258,7 +247,6 @@ namespace Sothe
                 Grid.SetColumn(it.Box, 0);
                 var name = new TextBlock { FontSize = 15, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap };
                 name.Inlines.Add(new Run(t.Name));
-                if (t.IsPro) name.Inlines.Add(new InlineUIContainer(ProBadge()) { BaselineAlignment = BaselineAlignment.Center });
                 Grid.SetColumn(name, 1);
                 var pill = new Border
                 {
@@ -309,15 +297,6 @@ namespace Sothe
             return wp;
         }
 
-        // Etiqueta PRO junto al titulo: el usuario ve que es de pago antes de marcarlo
-        private Border ProBadge() => new Border
-        {
-            CornerRadius = new CornerRadius(5), Background = R("ProGradient"), Padding = new Thickness(6, 1, 6, 2),
-            Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, ToolTip = "Requiere Sothe PRO",
-            Effect = new DropShadowEffect { Color = Color.FromRgb(0xE9, 0x35, 0xC1), BlurRadius = 8, ShadowDepth = 0, Opacity = 0.45 },
-            Child = new TextBlock { Text = "PRO", FontSize = 10.5, FontWeight = FontWeights.Bold, Foreground = Brushes.White }
-        };
-
         private static Border Badge(string text, Brush fg) => new Border
         {
             CornerRadius = new CornerRadius(6), BorderBrush = fg, BorderThickness = new Thickness(1), Padding = new Thickness(6, 1, 6, 2),
@@ -336,8 +315,6 @@ namespace Sothe
                 sp.Children.Add(new TextBlock { Text = "Puede afectar a anti-cheats (Vanguard, FACEIT…).", Foreground = R("Extreme"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) });
             if (t.Reboot)
                 sp.Children.Add(new TextBlock { Text = "Requiere reiniciar.", Foreground = R("TextDim"), Margin = new Thickness(0, 6, 0, 0) });
-            if (t.IsPro)
-                sp.Children.Add(new TextBlock { Text = "Ajuste PRO: necesita licencia Sothe PRO para aplicarse.", Foreground = R("AccentHi"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) });
             return sp;
         }
 
@@ -520,20 +497,13 @@ namespace Sothe
             {
                 var sb = new StringBuilder("No se ha tocado nada. Esto es lo que haría APLICAR:\n\n");
                 sb.AppendLine($"Se aplicarían ({toApply.Count}):");
-                var proIds = new HashSet<string>(SotheEngine.ProTweaksToApply(_tweaks, toApply).Select(t => t.Id));
-                foreach (var id in toApply) sb.AppendLine("   +  " + TweakName(id) + (proIds.Contains(id) ? "   [PRO]" : ""));
+                foreach (var id in toApply) sb.AppendLine("   +  " + TweakName(id));
                 sb.AppendLine();
                 sb.AppendLine($"Se revertirían ({toRevert.Count}):");
                 foreach (var id in toRevert) sb.AppendLine("   −  " + TweakName(id));
                 SotheDialog.Info(this, "Simulación", sb.ToString().TrimEnd());
                 return;
             }
-
-            // Paywall inteligente: lo gratuito se aplica sin licencia; con un solo ajuste PRO nuevo se para todo y se pide licencia
-            var pro = SotheEngine.ProTweaksToApply(_tweaks, toApply);
-            if (pro.Count > 0 && !await PaywallDialog.EnsureCanModifyAsync(this, _license, "aplicar ajustes PRO", msg => ShowToast(msg),
-                    pro.Select(t => t.Name).ToList()))
-                return;
 
             var newExtreme = _tweaks.Where(t => toApply.Contains(t.Id) && t.Danger == "extreme").ToList();
             if (newExtreme.Count > 0)
@@ -696,7 +666,6 @@ namespace Sothe
         {
             var ids = CheckedIds().ToList();
             if (ids.Count == 0) { ShowToast("Marca primero los ajustes que quieras en el perfil.", ToastKind.Warn); return; }
-            if (!await PaywallDialog.EnsureCanModifyAsync(this, _license, "guardar perfiles propios", msg => ShowToast(msg))) return;
             var name = SotheDialog.Prompt(this, "Guardar perfil",
                 $"Guarda los {ids.Count} ajustes marcados como un perfil propio. Aparecerá junto a los perfiles de Sothe.",
                 "Mi setup", "Guardar", "Nombre del perfil",
@@ -713,48 +682,6 @@ namespace Sothe
             catch (Exception ex) { SotheDialog.Info(this, "No se pudo guardar", "No se pudo guardar el perfil.\n\n" + ex.Message); return; }
             BuildProfileBar();
             ShowToast($"Perfil «{name}» guardado");
-        }
-
-        // ---------------- Licencia ----------------
-        private void UpdateLicenseBadge(LicenseStatus st)
-        {
-            ResetStyled(LicenseBadge);
-            string text; Brush accent = null;
-            switch (st.State)
-            {
-                case LicenseState.Licensed:
-                    text = "PRO";
-                    LicenseBadge.Background = R("AccentGradient"); LicenseBadge.BorderBrush = R("AccentHi");
-                    LicenseBadge.Foreground = Brushes.White; LicenseBadge.Effect = (Effect)FindResource("GlowAccent");
-                    break;
-                case LicenseState.Trial: text = $"PRUEBA · {st.DaysLeft} {(st.DaysLeft == 1 ? "día" : "días")}"; accent = R("High"); break;
-                case LicenseState.TrialExpired: text = "PRUEBA TERMINADA"; accent = R("High"); break;
-                case LicenseState.Revoked: text = "LICENCIA DESACTIVADA"; accent = R("Extreme"); break;
-                case LicenseState.ValidationRequired: text = "VALIDAR LICENCIA"; accent = R("High"); break;
-                default: text = "SIN LICENCIA"; LicenseBadge.Foreground = R("TextSub"); break;
-            }
-            LicenseBadge.ToolTip = st.CanModify ? "Estado de tu licencia" : "Pulsa para introducir tu clave (prueba de 3 meses o licencia PRO)";
-            if (accent != null) { LicenseBadge.Foreground = accent; LicenseBadge.BorderBrush = accent; LicenseBadge.Background = Tint(accent, 0x1E); }
-            if (_license?.ProviderName == "Demo") text += " · DEMO";
-            LicenseBadge.Content = text;
-        }
-
-        // Una sola vez por bloqueo: prueba terminada, licencia caducada o desactivada, o clave que ya no vale en este PC
-        private void ShowLicenseNotice()
-        {
-            var notice = _license.TakeNotice();
-            if (notice != null && SotheDialog.Confirm(this, "Tu licencia", notice, "Introducir clave"))
-                PaywallDialog.Show(this, _license);
-        }
-
-        private void ShowLicenseInfo()
-        {
-            var st = _license.Status;
-            if (!st.CanModify) { PaywallDialog.Show(this, _license); return; }
-            var detail = st.State == LicenseState.Trial
-                ? $"Prueba gratuita activa: te quedan {st.DaysLeft} días (hasta el {st.ExpiresAtUtc?.ToLocalTime():d})."
-                : "Sothe PRO activado en este equipo.";
-            SotheDialog.Info(this, "Tu licencia", $"{detail}\n\nClave: {st.MaskedKey}\nEquipo: {_license.Fingerprint.Substring(0, Math.Min(12, _license.Fingerprint.Length))}…");
         }
 
         // Un clic: copia el codigo al portapapeles y avisa con un toast

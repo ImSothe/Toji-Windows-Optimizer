@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using Sothe.Licensing;
 using Xunit;
 
 namespace Sothe.Tests
@@ -132,29 +131,6 @@ namespace Sothe.Tests
             var un = TimerResolution.BuildUninstallScript();
             Assert.True(un.IndexOf("OpenExisting", StringComparison.Ordinal) < un.IndexOf("Unregister-ScheduledTask", StringComparison.Ordinal));
             Assert.True(un.IndexOf("OpenExisting", StringComparison.Ordinal) < un.IndexOf("Stop-Process", StringComparison.Ordinal));
-        }
-
-        // ---------------- Licencia ----------------
-        [Fact]
-        public void LicenciaConValidacionEnElFuturo_PideValidarDeNuevo()
-        {
-            var now = new DateTime(2026, 10, 10, 12, 0, 0, DateTimeKind.Utc);
-            var forged = new LicenseCache
-            {
-                Key = "FALSA-1234", Fingerprint = "FP", IsTrial = false, TrialUsed = false,
-                LastValidatedUtc = now.AddYears(5), LastSeenUtc = now.AddYears(-1)   // "validada" dentro de 5 anos: sin caducar nunca offline
-            };
-            var s = LicenseService.Evaluate(forged, "FP", now);
-            Assert.Equal(LicenseState.ValidationRequired, s.State);
-            Assert.False(s.CanModify);
-        }
-
-        [Fact]
-        public void LicenciaLegitima_ValidadaAhora_SigueFuncionando()
-        {
-            var now = new DateTime(2026, 10, 10, 12, 0, 0, DateTimeKind.Utc);
-            var ok = new LicenseCache { Key = "ABCD-1234", Fingerprint = "FP", LastValidatedUtc = now.AddMinutes(-5), LastSeenUtc = now.AddMinutes(-5) };
-            Assert.Equal(LicenseState.Licensed, LicenseService.Evaluate(ok, "FP", now).State);
         }
 
         // ---------------- Validacion de nombres que acaban en PowerShell ----------------

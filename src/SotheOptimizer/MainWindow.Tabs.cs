@@ -10,7 +10,7 @@ using System.Windows.Media;
 namespace Sothe
 {
     // Pestanas "Apps (Winget)" y "Caracteristicas de Windows" (portadas de la version PowerShell).
-    // Decision de negocio: son 100% GRATUITAS, con o sin licencia. No llames aqui a PaywallDialog:
+    // Estas pestanas no tienen restricciones:
     // el muro de pago solo va en APLICAR optimizaciones y Guardar perfil (MainWindow.xaml.cs).
     public partial class MainWindow
     {

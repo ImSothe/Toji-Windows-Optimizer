@@ -24,13 +24,6 @@
     <Compile Include="..\..\src\SotheOptimizer\TimerResolution.cs" Link="App\TimerResolution.cs" />
     <Compile Include="..\..\src\SotheOptimizer\SystemPaths.cs" Link="App\SystemPaths.cs" />
     <Compile Include="..\..\src\SotheOptimizer\SecureStorage.cs" Link="App\SecureStorage.cs" />
-    <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseModels.cs" Link="App\Licensing\LicenseModels.cs" />
-    <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseConfig.cs" Link="App\Licensing\LicenseConfig.cs" />
-    <Compile Include="..\..\src\SotheOptimizer\Licensing\HardwareId.cs" Link="App\Licensing\HardwareId.cs" />
-    <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseStore.cs" Link="App\Licensing\LicenseStore.cs" />
-    <Compile Include="..\..\src\SotheOptimizer\Licensing\LicenseService.cs" Link="App\Licensing\LicenseService.cs" />
-    <Compile Include="..\..\src\SotheOptimizer\Licensing\KeygenLicenseProvider.cs" Link="App\Licensing\KeygenLicenseProvider.cs" />
-    <Compile Include="..\..\src\SotheOptimizer\Licensing\OtherProviders.cs" Link="App\Licensing\OtherProviders.cs" />
     <None Include="..\..\src\SotheOptimizer\data\*.json" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Igual que en la app: los JSON incrustados son la copia por defecto si falta data\ -->
     <EmbeddedResource Include="..\..\src\SotheOptimizer\data\*.json" LogicalName="data/%(Filename)%(Extension)" />
