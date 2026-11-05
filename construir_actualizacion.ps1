@@ -1,10 +1,10 @@
 # construir_actualizacion.ps1
-# Compila Sothe Optimizer en Release (un solo .exe, OFUSCADO por defecto) y FIRMA la release. Deja en una
+# Compila Toji en Release (un solo .exe; sin ofuscar salvo con -Obfuscate) y FIRMA la release. Deja en una
 # carpeta los 3 ficheros que hay que subir a GitHub: SotheOptimizer.exe, release.json y release.sig.
 #
 # Uso (PowerShell, desde la raiz del repo):
 #   .\construir_actualizacion.ps1 -Version 1.1.0 -Pem C:\claves-sothe\ota-private.pem -Notes "Novedades..."
-#   .\construir_actualizacion.ps1 -Version 1.1.0 -Pem C:\claves-sothe\ota-private.pem -NoObfuscate   # build de depuracion/diagnostico
+#   .\construir_actualizacion.ps1 -Version 1.1.0 -Pem C:\claves-sothe\ota-private.pem -Obfuscate   # opcional: ofuscar con Obfuscar (por defecto NO: el proyecto es de codigo abierto)
 #
 # La clave privada (.pem) es tuya y NUNCA va al repo. Con ella se firma; la app solo instala binarios cuya
 # firma valide con la clave publica incrustada (SignedData.PublicKey).
@@ -15,7 +15,7 @@ param(
     [Parameter(Mandatory = $true)] [string] $Pem,
     [string] $Notes = "",
     [string] $Out = "actualizacion",
-    [switch] $NoObfuscate
+    [switch] $Obfuscate
 )
 
 $ErrorActionPreference = "Stop"
@@ -40,8 +40,8 @@ if ($actual -eq $Version) {
 # Una DLL ya ofuscada no se vuelve a ofuscar (Obfuscar la renombraria sobre nombres ya cortos): build limpia siempre.
 Remove-Item "src\SotheOptimizer\obj", "src\SotheOptimizer\bin" -Recurse -Force -ErrorAction SilentlyContinue
 
-Write-Host "== 1/3  Compilando Release v$Version (un solo .exe$(if (-not $NoObfuscate) { ', ofuscado' }))..." -ForegroundColor Cyan
-if ($NoObfuscate) {
+Write-Host "== 1/3  Compilando Release v$Version (un solo .exe$(if ($Obfuscate) { ', ofuscado' }))..." -ForegroundColor Cyan
+if (-not $Obfuscate) {
     dotnet publish $proj -c Release -p:Version=$Version --nologo | Out-Host
 } else {
     dotnet publish $proj -c Release -p:Version=$Version -p:Obfuscate=true --nologo | Out-Host
