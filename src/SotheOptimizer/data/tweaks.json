@@ -246,7 +246,8 @@
         {
           "type": "command",
           "apply": "powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
-          "revert": "powercfg /setactive 381b4222-f694-41f0-9685-ff5bb260df2e"
+          "revert": "powercfg /setactive $captured",
+          "capture": "[regex]::Match((powercfg /getactivescheme | Out-String),'[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}').Value"
         }
       ]
     },
@@ -262,7 +263,8 @@
         {
           "type": "command",
           "apply": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 100; powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100; powercfg /setactive SCHEME_CURRENT",
-          "revert": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 5; powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100; powercfg /setactive SCHEME_CURRENT"
+          "revert": "$p = $captured -split '\\|'; if ([int]$p[1] -ge 0) { powercfg /setacvalueindex $p[0] SUB_PROCESSOR PROCTHROTTLEMIN $p[1] }; if ([int]$p[2] -ge 0) { powercfg /setacvalueindex $p[0] SUB_PROCESSOR PROCTHROTTLEMAX $p[2] }; powercfg /setactive SCHEME_CURRENT",
+          "capture": "$g = [regex]::Match((powercfg /getactivescheme | Out-String),'[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}').Value; function acv($a) { $m = (powercfg /query $g SUB_PROCESSOR $a | Select-String '0x[0-9a-fA-F]+' -AllMatches).Matches.Value; if ($m.Count -ge 2) { [Convert]::ToInt32($m[-2],16) } else { -1 } }; $ac0 = acv 'PROCTHROTTLEMIN'; $ac1 = acv 'PROCTHROTTLEMAX'; \"$g|$ac0|$ac1\""
         }
       ]
     },
@@ -278,7 +280,8 @@
         {
           "type": "command",
           "apply": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 100; powercfg /setactive SCHEME_CURRENT",
-          "revert": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR CPMINCORES 10; powercfg /setactive SCHEME_CURRENT"
+          "revert": "$p = $captured -split '\\|'; if ([int]$p[1] -ge 0) { powercfg /setacvalueindex $p[0] SUB_PROCESSOR CPMINCORES $p[1] }; powercfg /setactive SCHEME_CURRENT",
+          "capture": "$g = [regex]::Match((powercfg /getactivescheme | Out-String),'[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}').Value; function acv($a) { $m = (powercfg /query $g SUB_PROCESSOR $a | Select-String '0x[0-9a-fA-F]+' -AllMatches).Matches.Value; if ($m.Count -ge 2) { [Convert]::ToInt32($m[-2],16) } else { -1 } }; $ac0 = acv 'CPMINCORES'; \"$g|$ac0\""
         }
       ]
     },
@@ -312,12 +315,19 @@
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Deja de agrupar paquetes pequenos: menos latencia en shooters.",
+      "desc": "Pone TcpAckFrequency y TCPNoDelay a 1 en cada interfaz de red (se restaura el valor previo de cada una). Solo afecta a trafico TCP: los shooters usan UDP.",
       "ops": [
         {
-          "type": "command",
-          "apply": "Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' | ForEach-Object { Set-ItemProperty $_.PSPath -Name TcpAckFrequency -Value 1 -Type DWord -Force; Set-ItemProperty $_.PSPath -Name TCPNoDelay -Value 1 -Type DWord -Force }",
-          "revert": "Get-ChildItem 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces' | ForEach-Object { Remove-ItemProperty $_.PSPath -Name TcpAckFrequency -ErrorAction SilentlyContinue; Remove-ItemProperty $_.PSPath -Name TCPNoDelay -ErrorAction SilentlyContinue }"
+          "type": "regsub",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces",
+          "name": "TcpAckFrequency",
+          "value": 1
+        },
+        {
+          "type": "regsub",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces",
+          "name": "TCPNoDelay",
+          "value": 1
         }
       ]
     },
@@ -433,7 +443,8 @@
         {
           "type": "command",
           "apply": "powercfg /hibernate off",
-          "revert": "powercfg /hibernate on"
+          "revert": "if ($captured -eq '1') { powercfg /hibernate on } else { powercfg /hibernate off }",
+          "capture": "(Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power' -Name HibernateEnabled).HibernateEnabled"
         }
       ]
     },
@@ -751,7 +762,8 @@
         {
           "type": "command",
           "apply": "bcdedit /set hypervisorlaunchtype off",
-          "revert": "bcdedit /set hypervisorlaunchtype auto"
+          "revert": "function bs($n, $v) { if (-not $v) { bcdedit /deletevalue $n } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } bs 'hypervisorlaunchtype' $captured",
+          "capture": "function bv($n) { $m = (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s+(\\S+)')).Matches; if ($m.Count) { $m[0].Groups[1].Value } else { '' } } bv 'hypervisorlaunchtype'"
         }
       ]
     },
@@ -768,7 +780,8 @@
         {
           "type": "command",
           "apply": "netsh advfirewall set allprofiles state off",
-          "revert": "netsh advfirewall set allprofiles state on"
+          "revert": "foreach ($x in ($captured -split ';')) { if ($x) { $n, $e = $x -split '='; Set-NetFirewallProfile -Name $n -Enabled $e } }",
+          "capture": "(Get-NetFirewallProfile | ForEach-Object { $_.Name + '=' + $_.Enabled }) -join ';'"
         }
       ]
     },
@@ -1111,8 +1124,9 @@
       "ops": [
         {
           "type": "command",
-          "apply": "powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 44444444-4444-4444-4444-444444444444 ; powercfg /setactive 44444444-4444-4444-4444-444444444444",
-          "revert": "powercfg /setactive 381b4222-f694-41f0-9685-ff5bb260df2e ; powercfg -delete 44444444-4444-4444-4444-444444444444"
+          "apply": "if (-not (powercfg /list | Select-String '44444444-4444-4444-4444-444444444444')) { powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 44444444-4444-4444-4444-444444444444 }; powercfg /setactive 44444444-4444-4444-4444-444444444444",
+          "revert": "$p = $captured -split '\\|'; powercfg /setactive $p[0]; if ($p[1] -eq 'new') { powercfg -delete 44444444-4444-4444-4444-444444444444 }",
+          "capture": "$a = [regex]::Match((powercfg /getactivescheme | Out-String),'[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}').Value; $e = if (powercfg /list | Select-String '44444444-4444-4444-4444-444444444444') { 'existing' } else { 'new' }; \"$a|$e\""
         }
       ]
     },
@@ -1236,8 +1250,9 @@
       "ops": [
         {
           "type": "command",
-          "apply": "schtasks /Change /TN \"\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser\" /Disable ; schtasks /Change /TN \"\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator\" /Disable ; schtasks /Change /TN \"\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip\" /Disable",
-          "revert": "schtasks /Change /TN \"\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser\" /Enable ; schtasks /Change /TN \"\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator\" /Enable ; schtasks /Change /TN \"\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip\" /Enable"
+          "apply": "foreach ($t in ($captured -split \"`n\")) { if ($t) { schtasks /Change /TN $t /Disable } }",
+          "revert": "foreach ($t in ($captured -split \"`n\")) { if ($t) { schtasks /Change /TN $t /Enable } }",
+          "capture": "$all = @('\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser','\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator','\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip'); ($all | Where-Object { $i = $_.LastIndexOf('\\'); $x = Get-ScheduledTask -TaskPath $_.Substring(0, $i + 1) -TaskName $_.Substring($i + 1) -ErrorAction SilentlyContinue; $x -and $x.State -ne 'Disabled' }) -join \"`n\""
         }
       ]
     },
@@ -1273,8 +1288,9 @@
       "ops": [
         {
           "type": "command",
-          "apply": "bcdedit /set disabledynamictick yes ; bcdedit /set useplatformtick yes",
-          "revert": "bcdedit /set disabledynamictick no ; bcdedit /deletevalue useplatformtick"
+          "apply": "bcdedit /set disabledynamictick yes; bcdedit /set useplatformtick yes",
+          "revert": "function bs($n, $v) { if (-not $v) { bcdedit /deletevalue $n } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } $p = $captured -split '\\|'; bs 'disabledynamictick' $p[0]; bs 'useplatformtick' $p[1]",
+          "capture": "function bv($n) { $m = (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s+(\\S+)')).Matches; if ($m.Count) { $m[0].Groups[1].Value } else { '' } } (bv 'disabledynamictick') + '|' + (bv 'useplatformtick')"
         }
       ]
     },
@@ -1290,8 +1306,9 @@
       "ops": [
         {
           "type": "command",
-          "apply": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IDLEDISABLE 1 ; powercfg /setactive SCHEME_CURRENT",
-          "revert": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IDLEDISABLE 0 ; powercfg /setactive SCHEME_CURRENT"
+          "apply": "powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR IDLEDISABLE 1; powercfg /setactive SCHEME_CURRENT",
+          "revert": "$p = $captured -split '\\|'; if ([int]$p[1] -ge 0) { powercfg /setacvalueindex $p[0] SUB_PROCESSOR IDLEDISABLE $p[1] }; powercfg /setactive SCHEME_CURRENT",
+          "capture": "$g = [regex]::Match((powercfg /getactivescheme | Out-String),'[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}').Value; function acv($a) { $m = (powercfg /query $g SUB_PROCESSOR $a | Select-String '0x[0-9a-fA-F]+' -AllMatches).Matches.Value; if ($m.Count -ge 2) { [Convert]::ToInt32($m[-2],16) } else { -1 } }; $ac0 = acv 'IDLEDISABLE'; \"$g|$ac0\""
         }
       ]
     },
@@ -1350,8 +1367,9 @@
       "ops": [
         {
           "type": "command",
-          "apply": "bcdedit /deletevalue useplatformclock ; Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue",
-          "revert": "Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | Enable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue"
+          "apply": "bcdedit /deletevalue useplatformclock; Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue",
+          "revert": "function bs($n, $v) { if (-not $v) { bcdedit /deletevalue $n } else { $w = if ($v -match '^(?i)(yes|s[ií]|true|on)$') { 'yes' } elseif ($v -match '^(?i)(no|false|off)$') { 'no' } else { $v }; bcdedit /set $n $w } } $lines = $captured -split \"`n\"; $c = ($lines | Where-Object { $_ -like 'clock=*' }) -replace '^clock=',''; bs 'useplatformclock' $c; foreach ($l in $lines) { if ($l -match '^dev=(?<id>.+)\\|OK$') { Enable-PnpDevice -InstanceId $Matches.id -Confirm:$false -ErrorAction SilentlyContinue } }",
+          "capture": "function bv($n) { $m = (bcdedit /enum '{current}' | Select-String ('^\\s*' + $n + '\\s+(\\S+)')).Matches; if ($m.Count) { $m[0].Groups[1].Value } else { '' } } \"clock=$(bv 'useplatformclock')\"; Get-PnpDevice -FriendlyName '*High Precision Event Timer*' -ErrorAction SilentlyContinue | ForEach-Object { 'dev=' + $_.InstanceId + '|' + $_.Status }"
         }
       ]
     },
@@ -1427,8 +1445,9 @@
       "ops": [
         {
           "type": "command",
-          "apply": "Get-PnpDevice -Class Display -Status OK -ErrorAction SilentlyContinue | ForEach-Object { $k = \"HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\$($_.InstanceId)\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties\"; New-Item -Path $k -Force -ErrorAction SilentlyContinue | Out-Null; Set-ItemProperty -Path $k -Name MSISupported -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue }",
-          "revert": "Get-PnpDevice -Class Display -Status OK -ErrorAction SilentlyContinue | ForEach-Object { $k = \"HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\$($_.InstanceId)\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties\"; Set-ItemProperty -Path $k -Name MSISupported -Value 0 -Type DWord -Force -ErrorAction SilentlyContinue }"
+          "apply": "Get-PnpDevice -Class Display -Status OK -ErrorAction SilentlyContinue | ForEach-Object { $k = \"HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\$($_.InstanceId)\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties\"; New-Item -Path $k -Force | Out-Null; Set-ItemProperty -Path $k -Name MSISupported -Value 1 -Type DWord -Force }",
+          "revert": "foreach ($l in ($captured -split \"`n\")) { if ($l) { $id, $v = $l -split '\\|'; $k = \"HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\$id\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties\"; if ($v -eq 'absent') { Remove-ItemProperty -Path $k -Name MSISupported -ErrorAction SilentlyContinue } else { Set-ItemProperty -Path $k -Name MSISupported -Value ([int]$v) -Type DWord -Force } } }",
+          "capture": "Get-PnpDevice -Class Display -Status OK -ErrorAction SilentlyContinue | ForEach-Object { $k = \"HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\$($_.InstanceId)\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties\"; $v = (Get-ItemProperty -Path $k -Name MSISupported -ErrorAction SilentlyContinue).MSISupported; $_.InstanceId + '|' + $(if ($null -eq $v) { 'absent' } else { $v }) }"
         }
       ]
     }

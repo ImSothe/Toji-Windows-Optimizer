@@ -187,6 +187,13 @@ namespace Sothe
             using (var key = bk.CreateSubKey(sub))
                 key.SetValue(name, value, kind);
         }
+        private static string[] SubKeyNames(string path)
+        {
+            var (bk, sub) = ParsePath(path);
+            using (bk)
+            using (var key = bk.OpenSubKey(sub, false))
+                return key?.GetSubKeyNames() ?? new string[0];
+        }
         private void RegDelete(string path, string name)
         {
             var (bk, sub) = ParsePath(path);
@@ -290,12 +297,27 @@ namespace Sothe
                             RegSet(op.Path, op.Name, ConvertValue(op, kind), kind);
                             break;
                         }
+                        case "regsub":
+                        {
+                            // El mismo valor en cada subclave (p. ej. una por interfaz de red): el estado previo se guarda por subclave
+                            var kind = ParseKind(op.Kind);
+                            var paths = SubKeyNames(op.Path).Select(c => op.Path.TrimEnd('\\') + "\\" + c).ToList();
+                            foreach (var child in paths)
+                            {
+                                var prior = RegGet(child, op.Name);
+                                backup.Add(new OpBackup { Type = "reg", Path = child, Name = op.Name, PriorExists = prior.exists, PriorValue = prior.val, PriorKind = prior.kind });
+                            }
+                            if (paths.Count > 0) SaveBackup(t.Id, file);
+                            foreach (var child in paths) RegSet(child, op.Name, ConvertValue(op, kind), kind);
+                            break;
+                        }
                         case "service":
                         {
                             if (!IsValidServiceName(op.Name)) throw new ArgumentException("nombre de servicio no valido: " + op.Name);
                             string svcPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\" + op.Name;
                             var prior = RegGet(svcPath, "Start");
-                            backup.Add(new OpBackup { Type = "reg", Path = svcPath, Name = "Start", PriorExists = prior.exists, PriorValue = prior.val, PriorKind = prior.kind });
+                            backup.Add(new OpBackup { Type = "reg", Path = svcPath, Name = "Start", PriorExists = prior.exists, PriorValue = prior.val, PriorKind = prior.kind,
+                                Service = op.Name, WasRunning = IsServiceRunning(op.Name) });
                             SaveBackup(t.Id, file);
                             int start = StartMap.TryGetValue(op.Startup ?? "Manual", out var s) ? s : 3;
                             RegSet(svcPath, "Start", start, RegistryValueKind.DWord);
@@ -303,10 +325,19 @@ namespace Sothe
                             break;
                         }
                         case "command":
-                            backup.Add(new OpBackup { Type = "command", Revert = op.Revert });
+                        {
+                            var cmd = new OpBackup { Type = "command", Revert = op.Revert };
+                            if (!string.IsNullOrEmpty(op.Capture))
+                            {
+                                // Sin estado previo no se toca nada: no habria forma de volver a el
+                                try { cmd.Captured = PowerShellRunner.RunCapture(op.Capture).Trim(); }
+                                catch (Exception ex) { throw new InvalidOperationException("no se pudo guardar el estado previo, no se aplica: " + ex.Message, ex); }
+                            }
+                            backup.Add(cmd);
                             SaveBackup(t.Id, file);
-                            RunCommand(op.Apply);
+                            RunCommand(WithCaptured(cmd.Captured, op.Apply));
                             break;
+                        }
                         case "appx":
                             if (!IsValidAppxName(op.Package)) throw new ArgumentException("nombre de paquete no valido: " + op.Package);
                             backup.Add(new OpBackup { Type = "appx" });
@@ -323,6 +354,17 @@ namespace Sothe
             if (backup.Count > 0) SaveBackup(t.Id, file);
             Log("APLICADO " + t.Id + (res.Errors.Count > 0 ? " | errores: " + string.Join("; ", res.Errors) : ""));
             return res;
+        }
+
+        // El estado capturado llega al script como una variable de PowerShell entre comillas simples (con las comillas
+        // duplicadas), nunca pegado como codigo: un valor raro no puede cambiar lo que ejecuta el script
+        public static string WithCaptured(string captured, string command) =>
+            captured == null || string.IsNullOrEmpty(command) ? command : "$captured = '" + captured.Replace("'", "''") + "'; " + command;
+
+        private bool IsServiceRunning(string name)
+        {
+            try { return PowerShellRunner.RunCapture("(Get-Service -Name '" + name + "' -ErrorAction SilentlyContinue).Status").Trim() == "Running"; }
+            catch (Exception ex) when (ex is InvalidOperationException || ex is TimeoutException) { return false; }
         }
 
         // Escritura atomica: un corte a mitad no deja un backup a medias
@@ -351,8 +393,11 @@ namespace Sothe
                     {
                         if (b.PriorExists) RegSet(b.Path, b.Name, ConvertStored(b.PriorValue, ParseKind(b.PriorKind)), ParseKind(b.PriorKind));
                         else RegDelete(b.Path, b.Name);
+                        // Deshabilitar un servicio lo paro: restaurar "Start" no lo vuelve a arrancar
+                        if (b.WasRunning && IsValidServiceName(b.Service) && (!b.PriorExists || b.PriorValue != "4"))
+                            RunPowerShellHidden("Start-Service -Name '" + b.Service + "' -ErrorAction SilentlyContinue");
                     }
-                    else if (b.Type == "command" && !string.IsNullOrEmpty(b.Revert)) RunCommand(b.Revert);
+                    else if (b.Type == "command" && !string.IsNullOrEmpty(b.Revert)) RunCommand(WithCaptured(b.Captured, b.Revert));
                     else if (b.Type == "appx") res.Errors.Add("appx: reinstalar desde la Store (no auto-reversible)");
                 }
                 catch (Exception ex) { res.Errors.Add(b.Type + ": " + ex.Message); res.Ok = false; }

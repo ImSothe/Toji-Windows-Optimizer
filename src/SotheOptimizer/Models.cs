@@ -21,7 +21,7 @@ namespace Sothe
 
     public class TweakOp
     {
-        public string Type { get; set; }          // reg | service | command | appx
+        public string Type { get; set; }          // reg | regsub (el mismo valor en cada subclave de Path) | service | command | appx
         public string Path { get; set; }
         public string Name { get; set; }
         public string Kind { get; set; }          // DWord (por defecto) | String | QWord ...
@@ -29,6 +29,9 @@ namespace Sothe
         public string Package { get; set; }
         public string Apply { get; set; }
         public string Revert { get; set; }
+        // Solo "command": script de PowerShell que escribe en stdout el estado actual ANTES de aplicar. Se guarda en el backup
+        // y llega a "apply" y a "revert" como la variable $captured, para restaurar lo que habia y no un valor fijo.
+        public string Capture { get; set; }
         public JsonElement Value { get; set; }     // numero o cadena; puede faltar
     }
 
@@ -73,6 +76,9 @@ namespace Sothe
         public string PriorValue { get; set; }
         public string PriorKind { get; set; }
         public string Revert { get; set; }         // para ops de tipo command
+        public string Captured { get; set; }       // estado previo que devolvio "capture" (null si el ajuste no lo usa)
+        public string Service { get; set; }        // servicio al que pertenece este valor Start (para volver a arrancarlo)
+        public bool WasRunning { get; set; }       // el servicio estaba en ejecucion antes de aplicar
     }
 
     // Fichero de backup de un ajuste: secuencia de aplicacion (para revertir en orden LIFO) y estado previo de cada operacion
