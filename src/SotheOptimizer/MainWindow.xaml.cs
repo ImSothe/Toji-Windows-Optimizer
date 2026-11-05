@@ -39,12 +39,9 @@ namespace Sothe
         // Nivel de peligro -> clave de color del tema y etiqueta visible
         private static readonly Dictionary<string, string> DangerKey = new Dictionary<string, string>
         { { "safe", "Safe" }, { "moderate", "Moderate" }, { "high", "High" }, { "extreme", "Extreme" } };
-        private static readonly Dictionary<string, string> DangerLabel = new Dictionary<string, string>
-        { { "todos", "Todos" }, { "safe", "Seguro" }, { "moderate", "Moderado" }, { "high", "Alto" }, { "extreme", "Prohibido" } };
+        private static string DangerLabelOf(string k) => Loc.T("lbl." + (k == "todos" ? "all" : k ?? ""));
         private static readonly Dictionary<string, string> ProfColor = new Dictionary<string, string>
         { { "competitivo", "#8B5CF6" }, { "ciber", "#38BDF8" }, { "limpio", "#A7A0BD" } };
-        private static readonly Dictionary<string, string> CatDisplay = new Dictionary<string, string>
-        { { "Energia", "Energía" }, { "Activacion", "Activación" }, { "Comunicacion", "Comunicación" } };
 
         private class Item { public Tweak Tweak; public CheckBox Box; public Border Card; public string Text; public string Danger; public string Cat; }
         private class Section { public FrameworkElement Header; public WrapPanel Panel; public string Cat; }
@@ -52,7 +49,7 @@ namespace Sothe
         private static Brush B(string hex) => new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
         private Brush R(string key) => (Brush)FindResource(key);
         private Brush DangerBrush(string danger) => danger != null && DangerKey.TryGetValue(danger, out var k) ? R(k) : R("TextSub");
-        private static string CatName(string cat) => CatDisplay.TryGetValue(cat, out var d) ? d : cat;
+        private static string CatName(string cat) { var k = "cat." + cat; var t = Loc.T(k); return t == k ? cat : t; }
 
         private static Brush Tint(Brush b, byte alpha)
         {
@@ -60,9 +57,15 @@ namespace Sothe
             return new SolidColorBrush(Color.FromArgb(alpha, c.R, c.G, c.B));
         }
 
-        public MainWindow()
+        public MainWindow() : this(null) { }
+
+        // Con "state" (cambio de idioma) la ventana nueva recupera lo marcado, la pestana, el modo y el tamano
+        internal MainWindow(UiState state)
         {
             InitializeComponent();
+            LangBtn.Content = Loc.T("lang.button");
+            LangBtn.ToolTip = Loc.T("lang.tooltip");
+            LangBtn.Click += (s, e) => SwitchLanguage();
             BorderlessWindow.Attach(this, RootBorder, BtnMinimize, BtnMaximize, BtnCloseWindow, TitleBar, HeaderBar);
             var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             if (ver != null) VersionText.Text = $"v{ver.Major}.{ver.Minor}.{ver.Build}";
@@ -89,10 +92,8 @@ namespace Sothe
             SearchBox.TextChanged += (s, e) => ApplyFilter();
             AdvancedChk.Checked += (s, e) =>
             {
-                if (!SotheDialog.Confirm(this, "Modo avanzado",
-                        "El Modo avanzado muestra los ajustes PROHIBIDOS: desactivan protecciones de Windows y pueden dejar el sistema inestable o inservible.\n\n" +
-                        "Úsalo solo si sabes exactamente lo que haces y con un punto de restauración creado.",
-                        "Mostrar PROHIBIDO", danger: true))
+                if (_restoring) { ApplyFilter(); return; }
+                if (!SotheDialog.Confirm(this, Loc.T("adv.title"), Loc.T("adv.body"), Loc.T("adv.ok"), danger: true))
                 { AdvancedChk.IsChecked = false; return; }
                 ApplyFilter();
             };
@@ -113,37 +114,90 @@ namespace Sothe
 
             // Reparaciones
             BtnClean2.Click += async (s, e) => await CleanTemp();
-            BtnFlushDns.Click += async (s, e) => await RunQuiet("ipconfig /flushdns", "Caché DNS vaciada");
+            BtnFlushDns.Click += async (s, e) => await RunQuiet("ipconfig /flushdns", Loc.T("dns.done"));
             BtnSFC.Click += (s, e) => _eng.RunPowerShellVisible("SFC", "sfc /scannow");
             BtnDISM.Click += (s, e) => _eng.RunPowerShellVisible("DISM", "DISM /Online /Cleanup-Image /RestoreHealth");
             BtnNet.Click += (s, e) =>
             {
-                if (!SotheDialog.Confirm(this, "Reset de red", "Se reiniciarán Winsock, TCP/IP y DNS y se renovará la IP. Perderás la conexión unos segundos y tendrás que reiniciar el PC.", "Resetear red")) return;
-                _eng.RunPowerShellVisible("Reset de red", "netsh winsock reset; netsh int ip reset; ipconfig /flushdns; ipconfig /release; ipconfig /renew; Write-Host 'Reinicia el PC para completar el reset.' -ForegroundColor Yellow");
+                if (!SotheDialog.Confirm(this, Loc.T("net.title"), Loc.T("net.body"), Loc.T("net.ok"))) return;
+                _eng.RunPowerShellVisible(Loc.T("net.title"), "netsh winsock reset; netsh int ip reset; ipconfig /flushdns; ipconfig /release; ipconfig /renew; Write-Host '" + Loc.T("net.restart") + "' -ForegroundColor Yellow");
             };
-            BtnWU.Click += (s, e) => _eng.RunPowerShellVisible("Reparar Windows Update", "net stop wuauserv; net stop bits; net stop cryptsvc; Rename-Item \"$env:SystemRoot\\SoftwareDistribution\" SoftwareDistribution.old -ErrorAction SilentlyContinue; Rename-Item \"$env:SystemRoot\\System32\\catroot2\" catroot2.old -ErrorAction SilentlyContinue; net start wuauserv; net start bits; net start cryptsvc; Write-Host 'Cache de Windows Update reiniciada.' -ForegroundColor Green");
+            BtnWU.Click += (s, e) => _eng.RunPowerShellVisible(Loc.T("wu.title"), "net stop wuauserv; net stop bits; net stop cryptsvc; Rename-Item \"$env:SystemRoot\\SoftwareDistribution\" SoftwareDistribution.old -ErrorAction SilentlyContinue; Rename-Item \"$env:SystemRoot\\System32\\catroot2\" catroot2.old -ErrorAction SilentlyContinue; net start wuauserv; net start bits; net start cryptsvc; Write-Host '" + Loc.T("wu.done") + "' -ForegroundColor Green");
             BtnChkdsk.Click += (s, e) => _eng.RunPowerShellVisible("CHKDSK", "chkdsk $env:SystemDrive /scan");
 
             Loaded += async (s, e) =>
             {
                 UpdateItemWidth();
                 if (_loadError != null)
-                    SotheDialog.Info(this, "Error al cargar datos", "No se pudieron cargar los datos (tweaks.json).\n\n" + _loadError);
+                    SotheDialog.Info(this, Loc.T("load.err.title"), Loc.T("load.err.body") + _loadError);
                 await CheckAppUpdateAsync();   // puede reiniciar la app; si lo hace, no sigue
                 await CheckOtaAsync();
             };
 
             ApplyFilter();
             UpdateCount();
+            if (state != null) RestoreState(state);
+        }
+
+        // Todo lo que el usuario ha tocado y no esta en el sistema: se conserva al cambiar de idioma
+        internal sealed class UiState
+        {
+            public HashSet<string> Tweaks; public List<string> Apps; public int Tab; public bool Advanced; public bool Grid;
+            public string TweakSearch, AppSearch; public double Left, Top, Width, Height; public WindowState State;
+            public bool RestorePointDone, SessionDirty;
+        }
+
+        private bool _restoring;
+
+        private UiState CaptureState() => new UiState
+        {
+            Tweaks = new HashSet<string>(CheckedIds()), Apps = CheckedAppIds(), Tab = Tabs.SelectedIndex, Advanced = AdvancedChk.IsChecked == true,
+            Grid = _view == ViewMode.Grid, TweakSearch = SearchBox.Text, AppSearch = AppSearch.Text,
+            Left = Left, Top = Top, Width = Width, Height = Height, State = WindowState,
+            RestorePointDone = _restorePointDone, SessionDirty = _sessionDirty
+        };
+
+        private void RestoreState(UiState st)
+        {
+            _restoring = true;
+            try
+            {
+                foreach (var kv in _boxes) kv.Value.IsChecked = st.Tweaks.Contains(kv.Key);
+                foreach (var kv in _appBoxes) kv.Value.IsChecked = st.Apps.Contains(kv.Key);
+                AdvancedChk.IsChecked = st.Advanced;
+                if (st.Grid) ViewGrid.IsChecked = true;
+                SearchBox.Text = st.TweakSearch ?? ""; AppSearch.Text = st.AppSearch ?? "";
+                Tabs.SelectedIndex = st.Tab;
+                _restorePointDone = st.RestorePointDone; _sessionDirty = st.SessionDirty;
+                WindowStartupLocation = WindowStartupLocation.Manual;
+                Left = st.Left; Top = st.Top; Width = st.Width; Height = st.Height;
+                if (st.State == WindowState.Maximized) WindowState = WindowState.Maximized;
+            }
+            finally { _restoring = false; }
+            ApplyFilter(); UpdateCount(); UpdateAppCount();
+        }
+
+        // Cambia el idioma: se guarda, y se abre una ventana nueva (los textos construidos en codigo se rehacen) con el mismo estado
+        private void SwitchLanguage()
+        {
+            if (_busy) { ShowToast(Loc.T("lang.busy"), ToastKind.Warn); return; }
+            var state = CaptureState();
+            Loc.SetLanguage(Loc.IsSpanish ? Loc.English : Loc.Spanish);
+            Loc.Save(_eng.Root);
+            var next = new MainWindow(state);
+            var old = this;
+            Application.Current.MainWindow = next;   // asi cerrar la vieja no termina la aplicacion
+            next.Show();
+            old.Close();
         }
 
         private IEnumerable<string> CheckedIds() => _boxes.Where(kv => kv.Value.IsChecked == true).Select(kv => kv.Key);
         private void RefreshApplied() => _appliedCount = _eng.GetApplied().Count;
-        private void UpdateCount() => CountText.Text = $"{_boxes.Count(kv => kv.Value.IsChecked == true)} seleccionados  ·  {_appliedCount} aplicados";
-        private string TweakName(string id) => _tweaks.FirstOrDefault(t => t.Id == id)?.Name ?? id;
+        private void UpdateCount() => CountText.Text = Loc.T("count.fmt", _boxes.Count(kv => kv.Value.IsChecked == true), _appliedCount);
+        private string TweakName(string id) => _tweaks.FirstOrDefault(t => t.Id == id)?.DisplayName ?? id;
 
         private static readonly string[] CatOrder =
-        { "Rendimiento", "Input", "Energia", "Red", "GPU", "Interfaz", "Privacidad", "Almacenamiento", "Debloat", "Activacion", "Windows Update", "Seguridad", "PROHIBIDO" };
+        { "Performance", "Input", "Power", "Network", "GPU", "Interface", "Privacy", "Storage", "Debloat", "Activation", "Windows Update", "Security", "FORBIDDEN" };
 
         private static string Fold(string s) => TextUtil.Fold(s);
 
@@ -173,7 +227,7 @@ namespace Sothe
                     card.MouseLeftButtonDown += (s, e) => _pressedCard = card;
                     card.MouseLeftButtonUp += (s, e) => { if (_pressedCard == card) cb.IsChecked = cb.IsChecked != true; _pressedCard = null; };
 
-                    var item = new Item { Tweak = t, Box = cb, Card = card, Danger = t.Danger, Cat = c, Text = Fold(t.Name + " " + t.Desc + " " + t.Id + " " + t.Category) };
+                    var item = new Item { Tweak = t, Box = cb, Card = card, Danger = t.Danger, Cat = c, Text = Fold(t.Name + " " + t.Desc + " " + (t.Es?.Name ?? "") + " " + (t.Es?.Desc ?? "") + " " + t.Id + " " + t.Category) };
                     RenderCard(item);
                     panel.Children.Add(card);
                     _items.Add(item);
@@ -183,7 +237,7 @@ namespace Sothe
 
         private FrameworkElement BuildSectionHeader(string cat, int count)
         {
-            bool forbidden = cat == "PROHIBIDO";
+            bool forbidden = cat == "FORBIDDEN";
             var head = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(2, 20, 0, 12) };
             head.Children.Add(new Border { Background = forbidden ? R("Extreme") : R("AccentGradient"), Width = 4, Height = 18, CornerRadius = new CornerRadius(2), Margin = new Thickness(0, 0, 10, 0) });
             head.Children.Add(new TextBlock { Text = CatName(cat).ToUpper(), FontSize = 15, FontWeight = FontWeights.Bold, Foreground = forbidden ? R("Extreme") : R("Text"), VerticalAlignment = VerticalAlignment.Center });
@@ -221,9 +275,9 @@ namespace Sothe
                 Grid.SetColumn(it.Box, 0);
                 var dot = RiskDot(risk); Grid.SetColumn(dot, 1);
                 var name = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-                name.Children.Add(new TextBlock { Text = t.Name, FontSize = 15, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 440 });
+                name.Children.Add(new TextBlock { Text = t.DisplayName, FontSize = 15, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 440 });
                 Grid.SetColumn(name, 2);
-                var desc = new TextBlock { Text = t.Desc, FontSize = 13.5, Foreground = R("TextSub"), VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(18, 0, 12, 0) };
+                var desc = new TextBlock { Text = t.DisplayDesc, FontSize = 13.5, Foreground = R("TextSub"), VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(18, 0, 12, 0) };
                 Grid.SetColumn(desc, 3);
                 var tags = BuildBadges(t, risk, compact: true); Grid.SetColumn(tags, 4);
 
@@ -246,13 +300,13 @@ namespace Sothe
                 it.Box.VerticalAlignment = VerticalAlignment.Top;
                 Grid.SetColumn(it.Box, 0);
                 var name = new TextBlock { FontSize = 15, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap };
-                name.Inlines.Add(new Run(t.Name));
+                name.Inlines.Add(new Run(t.DisplayName));
                 Grid.SetColumn(name, 1);
                 var pill = new Border
                 {
                     CornerRadius = new CornerRadius(10), Background = Tint(risk, 0x26), Padding = new Thickness(9, 2, 9, 3),
                     Margin = new Thickness(10, 0, 0, 0), VerticalAlignment = VerticalAlignment.Top,
-                    Child = new TextBlock { Text = DangerLabel.TryGetValue(t.Danger ?? "", out var l) ? l : t.Danger, FontSize = 12, FontWeight = FontWeights.SemiBold, Foreground = risk }
+                    Child = new TextBlock { Text = DangerLabelOf(t.Danger), FontSize = 12, FontWeight = FontWeights.SemiBold, Foreground = risk }
                 };
                 Grid.SetColumn(pill, 2);
                 header.Children.Add(it.Box); header.Children.Add(name); header.Children.Add(pill);
@@ -260,9 +314,9 @@ namespace Sothe
                 dp.Children.Add(header);
 
                 var body = new StackPanel { Margin = new Thickness(32, 8, 0, 0) };
-                body.Children.Add(new TextBlock { Text = t.Desc, FontSize = 13.5, Foreground = R("TextSub"), TextWrapping = TextWrapping.Wrap, LineHeight = 20 });
-                if (!string.IsNullOrEmpty(t.Warning))
-                    body.Children.Add(new TextBlock { Text = "⚠ " + t.Warning, FontSize = 12.5, Foreground = R("High"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) });
+                body.Children.Add(new TextBlock { Text = t.DisplayDesc, FontSize = 13.5, Foreground = R("TextSub"), TextWrapping = TextWrapping.Wrap, LineHeight = 20 });
+                if (!string.IsNullOrEmpty(t.DisplayWarning))
+                    body.Children.Add(new TextBlock { Text = "⚠ " + t.DisplayWarning, FontSize = 12.5, Foreground = R("High"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) });
                 var badges = BuildBadges(t, risk, compact: false);
                 if (badges.Children.Count > 0) { badges.Margin = new Thickness(-6, 10, 0, 0); body.Children.Add(badges); }
                 dp.Children.Add(body);
@@ -285,13 +339,13 @@ namespace Sothe
         private WrapPanel BuildBadges(Tweak t, Brush risk, bool compact)
         {
             var wp = new WrapPanel { VerticalAlignment = VerticalAlignment.Center };
-            if (compact && !string.IsNullOrEmpty(t.Warning)) wp.Children.Add(Badge("AVISO", R("High")));
-            if (t.Anticheat) wp.Children.Add(Badge("ANTI-CHEAT", R("Extreme")));
-            if (t.Reboot) wp.Children.Add(Badge("REINICIO", R("TextSub")));
+            if (compact && !string.IsNullOrEmpty(t.DisplayWarning)) wp.Children.Add(Badge(Loc.T("badge.warn"), R("High")));
+            if (t.Anticheat) wp.Children.Add(Badge(Loc.T("badge.anticheat"), R("Extreme")));
+            if (t.Reboot) wp.Children.Add(Badge(Loc.T("badge.reboot"), R("TextSub")));
             if (compact)
                 wp.Children.Add(new TextBlock
                 {
-                    Text = DangerLabel.TryGetValue(t.Danger ?? "", out var l) ? l : t.Danger, Foreground = risk, FontSize = 12.5,
+                    Text = DangerLabelOf(t.Danger), Foreground = risk, FontSize = 12.5,
                     FontWeight = FontWeights.SemiBold, MinWidth = 78, TextAlignment = TextAlignment.Right, VerticalAlignment = VerticalAlignment.Center
                 });
             return wp;
@@ -307,14 +361,14 @@ namespace Sothe
         private object BuildTooltip(Tweak t)
         {
             var sp = new StackPanel { MaxWidth = 390 };
-            sp.Children.Add(new TextBlock { Text = t.Name, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap });
-            sp.Children.Add(new TextBlock { Text = t.Desc, Foreground = R("TextSub"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0) });
-            if (!string.IsNullOrEmpty(t.Warning))
-                sp.Children.Add(new TextBlock { Text = "⚠ " + t.Warning, Foreground = R("High"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) });
+            sp.Children.Add(new TextBlock { Text = t.DisplayName, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap });
+            sp.Children.Add(new TextBlock { Text = t.DisplayDesc, Foreground = R("TextSub"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0) });
+            if (!string.IsNullOrEmpty(t.DisplayWarning))
+                sp.Children.Add(new TextBlock { Text = "⚠ " + t.DisplayWarning, Foreground = R("High"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) });
             if (t.Anticheat)
-                sp.Children.Add(new TextBlock { Text = "Puede afectar a anti-cheats (Vanguard, FACEIT…).", Foreground = R("Extreme"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) });
+                sp.Children.Add(new TextBlock { Text = Loc.T("tt.anticheat"), Foreground = R("Extreme"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) });
             if (t.Reboot)
-                sp.Children.Add(new TextBlock { Text = "Requiere reiniciar.", Foreground = R("TextDim"), Margin = new Thickness(0, 6, 0, 0) });
+                sp.Children.Add(new TextBlock { Text = Loc.T("tt.reboot"), Foreground = R("TextDim"), Margin = new Thickness(0, 6, 0, 0) });
             return sp;
         }
 
@@ -342,7 +396,7 @@ namespace Sothe
             try { _profiles = _eng.LoadProfiles(); } catch { }
             foreach (var p in _profiles)
             {
-                var pb = new Button { Content = p.Name, Style = (Style)FindResource("Pill"), Tag = p, ToolTip = p.Desc };
+                var pb = new Button { Content = p.DisplayName, Style = (Style)FindResource("Pill"), Tag = p, ToolTip = p.DisplayDesc };
                 pb.Click += (s, e) => SelectProfile((Profile)((Button)s).Tag);
                 ProfileBar.Children.Add(pb);
             }
@@ -362,7 +416,7 @@ namespace Sothe
                 }
                 else ResetStyled(child);
             }
-            ProfileLabel.Text = string.IsNullOrEmpty(p.Desc) ? p.Name : $"{p.Name} — {p.Desc}";
+            ProfileLabel.Text = string.IsNullOrEmpty(p.DisplayDesc) ? p.DisplayName : $"{p.DisplayName} — {p.DisplayDesc}";
             ProfileLabel.Foreground = B(col);
             UpdateCount();
         }
@@ -388,7 +442,7 @@ namespace Sothe
             {
                 var content = new StackPanel { Orientation = Orientation.Horizontal };
                 if (rk != "todos") content.Children.Add(new Ellipse { Width = 8, Height = 8, Fill = DangerBrush(rk), Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center });
-                content.Children.Add(new TextBlock { Text = DangerLabel[rk] });
+                content.Children.Add(new TextBlock { Text = DangerLabelOf(rk) });
                 var chip = new Button { Content = content, Style = (Style)FindResource("Pill"), Tag = rk, Padding = new Thickness(14, 6, 14, 6), Margin = new Thickness(0, 0, 8, 0), FontSize = 13.5 };
                 chip.Click += (s, e) => SetRiskFilter((string)((Button)s).Tag);
                 _riskBtns[rk] = chip;
@@ -419,7 +473,7 @@ namespace Sothe
 
         private void BuildCatCombo()
         {
-            CatCombo.Items.Add(new ComboBoxItem { Content = "Todas las categorías", Tag = "todas" });
+            CatCombo.Items.Add(new ComboBoxItem { Content = Loc.T("cat.all"), Tag = "todas" });
             foreach (var s in _sections) CatCombo.Items.Add(new ComboBoxItem { Content = CatName(s.Cat), Tag = s.Cat });
             CatCombo.SelectedIndex = 0;
             CatCombo.SelectionChanged += (s, e) => { _fCat = (CatCombo.SelectedItem as ComboBoxItem)?.Tag as string ?? "todas"; ApplyFilter(); };
@@ -432,7 +486,7 @@ namespace Sothe
             int visible = 0;
             foreach (var it in _items)
             {
-                bool hiddenByAdv = !adv && (it.Cat == "PROHIBIDO" || it.Danger == "extreme");
+                bool hiddenByAdv = !adv && (it.Cat == "FORBIDDEN" || it.Danger == "extreme");
                 bool ok = !hiddenByAdv
                     && (_fDanger == "todos" || it.Danger == _fDanger)
                     && (_fCat == "todas" || it.Cat == _fCat)
@@ -490,28 +544,27 @@ namespace Sothe
 
             if (toApply.Count == 0 && toRevert.Count == 0)
             {
-                ShowToast("Nada que hacer: el sistema ya coincide con lo marcado.");
+                ShowToast(Loc.T("idle"));
                 return;
             }
 
             if (dryRun)
             {
-                var sb = new StringBuilder("No se ha tocado nada. Esto es lo que haría APLICAR:\n\n");
-                sb.AppendLine($"Se aplicarían ({toApply.Count}):");
+                var sb = new StringBuilder(Loc.T("dry.header"));
+                sb.AppendLine(Loc.T("dry.apply", toApply.Count));
                 foreach (var id in toApply) sb.AppendLine("   +  " + TweakName(id));
                 sb.AppendLine();
-                sb.AppendLine($"Se revertirían ({toRevert.Count}):");
+                sb.AppendLine(Loc.T("dry.revert", toRevert.Count));
                 foreach (var id in toRevert) sb.AppendLine("   −  " + TweakName(id));
-                SotheDialog.Info(this, "Simulación", sb.ToString().TrimEnd());
+                SotheDialog.Info(this, Loc.T("dry.title"), sb.ToString().TrimEnd());
                 return;
             }
 
             var newExtreme = _tweaks.Where(t => toApply.Contains(t.Id) && t.Danger == "extreme").ToList();
             if (newExtreme.Count > 0)
             {
-                var msg = "Vas a aplicar ajustes PROHIBIDOS:\n\n" + string.Join("\n", newExtreme.Select(t => "   •  " + t.Name)) +
-                          "\n\nPueden desactivar protecciones de Windows. ¿Continuar?";
-                if (!SotheDialog.Confirm(this, "Peligro", msg, "Aplicar igualmente", danger: true)) return;
+                var msg = Loc.T("danger.head") + string.Join("\n", newExtreme.Select(t => "   •  " + t.DisplayName)) + Loc.T("danger.tail");
+                if (!SotheDialog.Confirm(this, Loc.T("danger.title"), msg, Loc.T("danger.ok"), danger: true)) return;
             }
 
             _sessionDirty = true;   // no auto-reiniciar por una actualizacion mientras se toca el sistema
@@ -529,16 +582,16 @@ namespace Sothe
                     int total = Math.Max(toRevert.Count + toApply.Count, 1); int i = 0;
                     foreach (var id in toRevert)
                     {
-                        i++; rep.Report(Tuple.Create(i * 100 / total, "Revirtiendo: " + TweakName(id)));
+                        i++; rep.Report(Tuple.Create(i * 100 / total, Loc.T("prog.revert", TweakName(id))));
                         var rv = _eng.RevertTweak(id);
                         if (rv.Ok) okReverted++;
                         errs.AddRange(rv.Errors.Select(e => TweakName(id) + " → " + e));
                     }
                     foreach (var id in toApply)
                     {
-                        i++; rep.Report(Tuple.Create(i * 100 / total, "Aplicando: " + TweakName(id)));
+                        i++; rep.Report(Tuple.Create(i * 100 / total, Loc.T("prog.apply", TweakName(id))));
                         var t = _tweaks.First(x => x.Id == id); var r = _eng.ApplyTweak(t);
-                        errs.AddRange(r.Errors.Select(e => t.Name + " → " + e));
+                        errs.AddRange(r.Errors.Select(e => t.DisplayName + " → " + e));
                         if (r.Ok && !r.Skipped) okApplied++;
                         if (t.Reboot) reboot = true;
                     }
@@ -548,16 +601,16 @@ namespace Sothe
             finally { SetBusy(false); }
 
             RefreshApplied(); UpdateCount();
-            StatusText.Text = "Listo.";
-            var summary = $"Aplicados: {okApplied} de {toApply.Count}   ·   Revertidos: {okReverted} de {toRevert.Count}";
-            if (reboot) summary += "\n\nAlgunos cambios necesitan REINICIAR para surtir efecto.";
-            if (errs.Count > 0) summary += $"\n\n{errs.Count} operaciones fallaron (detalle también en %ProgramData%\\SotheOptimizer\\sothe.log):\n" + string.Join("\n", errs.Select(x => "   •  " + x));
-            SotheDialog.Info(this, errs.Count > 0 ? "Aplicado con errores" : "Cambios aplicados", summary);
+            StatusText.Text = Loc.T("done");
+            var summary = Loc.T("summary", okApplied, toApply.Count, okReverted, toRevert.Count);
+            if (reboot) summary += Loc.T("summary.reboot");
+            if (errs.Count > 0) summary += Loc.T("summary.err", errs.Count) + string.Join("\n", errs.Select(x => "   •  " + x));
+            SotheDialog.Info(this, errs.Count > 0 ? Loc.T("summary.title.err") : Loc.T("summary.title.ok"), summary);
         }
 
         private async Task RevertAll()
         {
-            if (!SotheDialog.Confirm(this, "Revertir TODO", "Se deshará todo lo aplicado por Toji, empezando por lo último, y se restaurarán los valores que tenía el sistema antes de cada cambio. Los ajustes de comando se deshacen con su orden de reversión; el debloat (Appx) no es reversible.", "Revertir TODO", danger: true)) return;
+            if (!SotheDialog.Confirm(this, Loc.T("revall.title"), Loc.T("revall.body"), Loc.T("revall.title"), danger: true)) return;
             var applied = _eng.AppliedNewestFirst();   // LIFO
             var errs = new List<string>();
             _sessionDirty = true;
@@ -571,7 +624,7 @@ namespace Sothe
                     int total = Math.Max(applied.Count, 1); int i = 0;
                     foreach (var id in applied)
                     {
-                        i++; rep.Report(Tuple.Create(i * 100 / total, "Revirtiendo: " + TweakName(id)));
+                        i++; rep.Report(Tuple.Create(i * 100 / total, Loc.T("prog.revert", TweakName(id))));
                         errs.AddRange(_eng.RevertTweak(id).Errors.Select(e => TweakName(id) + " → " + e));
                     }
                 });
@@ -580,12 +633,12 @@ namespace Sothe
             finally { SetBusy(false); }
 
             foreach (var kv in _boxes) kv.Value.IsChecked = false;
-            ClearProfileSelection("Selección manual");
+            ClearProfileSelection(Loc.T("profiles.manual"));
             RefreshApplied(); UpdateCount();
-            StatusText.Text = "Listo.";
-            SotheDialog.Info(this, "Revertir TODO", errs.Count == 0
-                ? "Todo revertido. Reinicia el PC para que se asiente."
-                : "Revertido con avisos (detalle también en sothe.log):\n" + string.Join("\n", errs.Select(x => "   •  " + x)));
+            StatusText.Text = Loc.T("done");
+            SotheDialog.Info(this, Loc.T("revall.title"), errs.Count == 0
+                ? Loc.T("revall.done")
+                : Loc.T("revall.warn") + string.Join("\n", errs.Select(x => "   •  " + x)));
         }
 
         private bool _restorePointDone;   // una vez por sesion: Windows limita los puntos de restauracion
@@ -596,40 +649,38 @@ namespace Sothe
             if (_restorePointDone || AutoRestoreChk.IsChecked != true) return true;
             SetBusy(true);
             Progress.IsIndeterminate = true;
-            StatusText.Text = "Creando punto de restauración antes de aplicar… puede tardar un minuto.";
+            StatusText.Text = Loc.T("rp.creating.apply");
             bool ok;
             try { ok = await Task.Run(() => _eng.CreateRestorePoint()); }
             catch { ok = false; }
             finally { SetBusy(false); }
-            StatusText.Text = "Listo.";
-            if (ok) { _restorePointDone = true; ShowToast("Punto de restauración creado"); return true; }
-            return SotheDialog.Confirm(this, "Sin punto de restauración",
-                "No se pudo crear el punto de restauración (¿está desactivada la protección del sistema?).\n\nPuedes continuar igualmente: cada ajuste guarda su estado previo y se puede revertir, pero un punto de restauración cubre fallos que eso no cubre.",
-                "Continuar sin punto", danger: true);
+            StatusText.Text = Loc.T("done");
+            if (ok) { _restorePointDone = true; ShowToast(Loc.T("rp.created")); return true; }
+            return SotheDialog.Confirm(this, Loc.T("rp.none.title"), Loc.T("rp.none.body"), Loc.T("rp.none.ok"), danger: true);
         }
 
         private async Task CreateRestorePoint()
         {
             SetBusy(true);
             Progress.IsIndeterminate = true;
-            StatusText.Text = "Creando punto de restauración… puede tardar un minuto.";
+            StatusText.Text = Loc.T("rp.creating");
             bool ok;
             try { ok = await Task.Run(() => _eng.CreateRestorePoint()); }
             catch { ok = false; }
             finally { SetBusy(false); }
-            StatusText.Text = "Listo.";
-            if (ok) ShowToast("Punto de restauración creado");
-            else ShowToast("No se pudo crear el punto de restauración", ToastKind.Error);
+            StatusText.Text = Loc.T("done");
+            if (ok) ShowToast(Loc.T("rp.created"));
+            else ShowToast(Loc.T("rp.fail"), ToastKind.Error);
         }
 
         private async Task CleanTemp()
         {
             SetBusy(true);
             Progress.IsIndeterminate = true;
-            StatusText.Text = "Limpiando temporales y papelera…";
-            try { await Task.Run(() => _eng.ClearTemp()); ShowToast("Basura eliminada"); }
-            catch (Exception ex) { ShowToast("No se pudo limpiar: " + ex.Message, ToastKind.Error); }
-            finally { SetBusy(false); StatusText.Text = "Listo."; }
+            StatusText.Text = Loc.T("clean.progress");
+            try { await Task.Run(() => _eng.ClearTemp()); ShowToast(Loc.T("clean.done")); }
+            catch (Exception ex) { ShowToast(Loc.T("clean.fail", ex.Message), ToastKind.Error); }
+            finally { SetBusy(false); StatusText.Text = Loc.T("done"); }
         }
 
         private async Task RunQuiet(string command, string done)
@@ -643,7 +694,7 @@ namespace Sothe
         {
             var r = await new DataUpdater(_eng).CheckAndUpdateAsync();
             if (r.Status == OtaStatus.Updated)
-                ShowToast($"Base de ajustes actualizada (v{r.Version}). Reinicia Toji para verla.");
+                ShowToast(Loc.T("ota.updated", r.Version));
         }
 
         // Comprobacion silenciosa de nueva version de la app. Solo descarga si la firma del autor es valida y el
@@ -655,7 +706,7 @@ namespace Sothe
                 var updater = new AppUpdater(System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
                 if (!updater.IsConfigured) return;
                 // Solo se prepara una actualizacion si la carpeta de datos es de confianza (ver SecureStorage)
-                if (!OperatingSystem.IsWindows() || !SecureStorage.RootTrusted) { _eng.Log("Auto-update omitido: la carpeta de datos no es de confianza."); return; }
+                if (!OperatingSystem.IsWindows() || !SecureStorage.RootTrusted) { _eng.Log("Auto-update skipped: the data folder is not trusted."); return; }
                 var check = await updater.CheckAsync();
                 if (check.Status != UpdateStatus.Available)
                 {
@@ -677,13 +728,13 @@ namespace Sothe
                 if (!_busy && !_sessionDirty && OperatingSystem.IsWindows() && !string.IsNullOrEmpty(Environment.ProcessPath)
                     && AppUpdater.TryApplyStaged(Environment.ProcessPath, stageDir, ver, out _))
                 {
-                    _eng.Log($"Auto-update: instalando v{staged.Version} y reiniciando");
-                    ShowToast($"Actualizando a v{staged.Version}…");
+                    _eng.Log($"Auto-update: installing v{staged.Version} and restarting");
+                    ShowToast(Loc.T("upd.installing", staged.Version));
                     await Task.Delay(1200);   // deja ver el aviso antes de reiniciar
                     Application.Current.Shutdown();
                     return;
                 }
-                ShowToast($"Actualización v{staged.Version} lista: se instalará al reiniciar Toji.");
+                ShowToast(Loc.T("upd.ready", staged.Version));
             }
             catch (Exception ex) { _eng.Log("Auto-update: " + ex.Message); }
         }
@@ -691,36 +742,36 @@ namespace Sothe
         private async Task SaveProfile()
         {
             var ids = CheckedIds().ToList();
-            if (ids.Count == 0) { ShowToast("Marca primero los ajustes que quieras en el perfil.", ToastKind.Warn); return; }
-            var name = SotheDialog.Prompt(this, "Guardar perfil",
-                $"Guarda los {ids.Count} ajustes marcados como un perfil propio. Aparecerá junto a los perfiles de Toji.",
-                "Mi setup", "Guardar", "Nombre del perfil",
+            if (ids.Count == 0) { ShowToast(Loc.T("profile.pick"), ToastKind.Warn); return; }
+            var name = SotheDialog.Prompt(this, Loc.T("profile.save.title"),
+                Loc.T("profile.save.body", ids.Count),
+                Loc.T("profile.default"), Loc.T("profile.save.ok"), Loc.T("profile.name.ph"),
                 validate: s =>
                 {
-                    if (string.IsNullOrWhiteSpace(s)) return "Escribe un nombre para el perfil.";
+                    if (string.IsNullOrWhiteSpace(s)) return Loc.T("profile.err.empty");
                     if (_eng.IsReservedProfileName(s, out var suggestion))
-                        return $"«{s.Trim()}» es un perfil oficial de Toji y no se puede sobrescribir. Elige otro nombre, por ejemplo «{suggestion}».";
+                        return Loc.T("profile.err.reserved", s.Trim(), suggestion);
                     return null;
                 });
             if (name == null) return;
             name = name.Trim();
             try { _eng.SaveProfile(name, ids); }
-            catch (Exception ex) { SotheDialog.Info(this, "No se pudo guardar", "No se pudo guardar el perfil.\n\n" + ex.Message); return; }
+            catch (Exception ex) { SotheDialog.Info(this, Loc.T("profile.fail.title"), Loc.T("profile.fail.body", ex.Message)); return; }
             BuildProfileBar();
-            ShowToast($"Perfil «{name}» guardado");
+            ShowToast(Loc.T("profile.saved", name));
         }
 
         // Un clic: copia el codigo al portapapeles y avisa con un toast
         private void ExportCode()
         {
             var ids = CheckedIds().ToList();
-            if (ids.Count == 0) { ShowToast("Marca al menos un ajuste para exportar.", ToastKind.Warn); return; }
+            if (ids.Count == 0) { ShowToast(Loc.T("export.none"), ToastKind.Warn); return; }
             try
             {
                 Clipboard.SetText(_eng.ExportCode(ids));
-                ShowToast("Configuración copiada al portapapeles");
+                ShowToast(Loc.T("export.done"));
             }
-            catch { ShowToast("No se pudo acceder al portapapeles. Inténtalo de nuevo.", ToastKind.Error); }
+            catch { ShowToast(Loc.T("export.fail"), ToastKind.Error); }
         }
 
         private void ImportCode()
@@ -737,24 +788,24 @@ namespace Sothe
             catch { }
 
             List<string> ids = null;
-            var code = SotheDialog.Prompt(this, "Importar configuración",
-                "Pega el código de Toji que te han compartido. Se marcarán sus ajustes; nada se aplica hasta que pulses APLICAR.",
-                prefill, "Importar", SotheEngine.ExportPrefix + "…", code: true,
+            var code = SotheDialog.Prompt(this, Loc.T("import.title"),
+                Loc.T("import.body"),
+                prefill, Loc.T("import.ok"), SotheEngine.ExportPrefix + "…", code: true,
                 validate: text =>
                 {
-                    if (string.IsNullOrWhiteSpace(text)) return "Pega un código de Toji.";
+                    if (string.IsNullOrWhiteSpace(text)) return Loc.T("import.empty");
                     try { ids = _eng.ImportCode(text); }
-                    catch { return "Código no válido. Comprueba que lo has copiado completo."; }
-                    if (!ids.Any(id => id != null && _boxes.ContainsKey(id))) return "El código no contiene ajustes compatibles con esta versión.";
+                    catch { return Loc.T("import.bad"); }
+                    if (!ids.Any(id => id != null && _boxes.ContainsKey(id))) return Loc.T("import.none");
                     return null;
                 });
             if (code == null) return;
 
             var set = new HashSet<string>(ids.Where(id => id != null));
             foreach (var kv in _boxes) kv.Value.IsChecked = set.Contains(kv.Key);
-            ClearProfileSelection("Importado desde código");
+            ClearProfileSelection(Loc.T("profile.imported"));
             UpdateCount();
-            ShowToast($"{set.Count(id => _boxes.ContainsKey(id))} ajustes marcados. Revisa y pulsa APLICAR.");
+            ShowToast(Loc.T("import.done", set.Count(id => _boxes.ContainsKey(id))));
         }
     }
 }

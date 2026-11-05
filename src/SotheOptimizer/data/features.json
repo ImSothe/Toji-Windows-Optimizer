@@ -1,10 +1,58 @@
 {
   "features": [
-    { "name": "Subsistema de Linux (WSL)", "feature": "Microsoft-Windows-Subsystem-Linux", "desc": "Base de WSL. Para WSL2 completo ejecuta luego 'wsl --install' en una terminal." },
-    { "name": "Plataforma de maquina virtual", "feature": "VirtualMachinePlatform", "desc": "Necesaria para WSL2 y algunas VMs." },
-    { "name": "Hyper-V", "feature": "Microsoft-Hyper-V-All", "desc": "Hipervisor de Microsoft para maquinas virtuales. (Choca con 'hypervisor_off' del optimizador.)" },
-    { "name": "Windows Sandbox", "feature": "Containers-DisposableClientVM", "desc": "Entorno desechable para probar apps sospechosas. Ideal para ciberseguridad." },
-    { "name": ".NET Framework 3.5", "feature": "NetFx3", "desc": "Requerido por algunos programas antiguos." },
-    { "name": "Cliente Telnet", "feature": "TelnetClient", "desc": "Cliente Telnet para pruebas de red." }
+    {
+      "name": "Windows Subsystem for Linux (WSL)",
+      "feature": "Microsoft-Windows-Subsystem-Linux",
+      "desc": "WSL base. For full WSL2 run 'wsl --install' in a terminal afterwards.",
+      "es": {
+        "name": "Subsistema de Linux (WSL)",
+        "desc": "Base de WSL. Para WSL2 completo ejecuta luego 'wsl --install' en una terminal."
+      }
+    },
+    {
+      "name": "Virtual Machine Platform",
+      "feature": "VirtualMachinePlatform",
+      "desc": "Required for WSL2 and some VMs.",
+      "es": {
+        "name": "Plataforma de máquina virtual",
+        "desc": "Necesaria para WSL2 y algunas VMs."
+      }
+    },
+    {
+      "name": "Hyper-V",
+      "feature": "Microsoft-Hyper-V-All",
+      "desc": "Microsoft's hypervisor for virtual machines. (It conflicts with the optimizer's 'hypervisor_off'.)",
+      "es": {
+        "name": "Hyper-V",
+        "desc": "Hipervisor de Microsoft para máquinas virtuales. (Choca con 'hypervisor_off' del optimizador.)"
+      }
+    },
+    {
+      "name": "Windows Sandbox",
+      "feature": "Containers-DisposableClientVM",
+      "desc": "Disposable environment to test suspicious apps. Ideal for cybersecurity.",
+      "es": {
+        "name": "Windows Sandbox",
+        "desc": "Entorno desechable para probar apps sospechosas. Ideal para ciberseguridad."
+      }
+    },
+    {
+      "name": ".NET Framework 3.5",
+      "feature": "NetFx3",
+      "desc": "Required by some older programs.",
+      "es": {
+        "name": ".NET Framework 3.5",
+        "desc": "Requerido por algunos programas antiguos."
+      }
+    },
+    {
+      "name": "Telnet Client",
+      "feature": "TelnetClient",
+      "desc": "Telnet client for network testing.",
+      "es": {
+        "name": "Cliente Telnet",
+        "desc": "Cliente Telnet para pruebas de red."
+      }
+    }
   ]
 }

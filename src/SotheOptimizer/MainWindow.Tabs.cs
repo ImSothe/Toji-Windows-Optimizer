@@ -15,7 +15,7 @@ namespace Sothe
     public partial class MainWindow
     {
         private const double AppTileMinWidth = 290;
-        private static readonly string[] AppCatOrder = { "Navegadores", "Comunicacion", "Gaming", "Desarrollo", "Utilidades", "Multimedia", "Ciberseguridad" };
+        private static readonly string[] AppCatOrder = { "Browsers", "Communication", "Gaming", "Development", "Utilities", "Multimedia", "Cybersecurity" };
 
         private List<AppItem> _apps = new List<AppItem>();
         private readonly Dictionary<string, CheckBox> _appBoxes = new Dictionary<string, CheckBox>(StringComparer.OrdinalIgnoreCase);
@@ -43,7 +43,7 @@ namespace Sothe
             AppScroll.ScrollChanged += (s, e) => { if (e.ViewportWidthChange != 0) FitAppColumns(); };
             BtnInstall.Click += (s, e) => InstallApps();
             BtnUninstall.Click += (s, e) => UninstallApps();
-            BtnUpgrade.Click += (s, e) => RunWingetConsole("Actualizar apps", Winget.UpgradeAllScript, "Actualizando todas las apps en una ventana aparte…");
+            BtnUpgrade.Click += (s, e) => RunWingetConsole(Loc.T("console.update"), Winget.UpgradeAllScript, Loc.T("apps.updating"));
             BtnGpu.Click += async (s, e) => await OpenGpuDriversAsync();
             BtnAppsRefresh.Click += async (s, e) => await DetectAppsAsync();
             BtnFeatRefresh.Click += async (s, e) => await RefreshFeaturesAsync();
@@ -74,7 +74,7 @@ namespace Sothe
                 foreach (var a in group) panel.Children.Add(BuildAppCard(a));
             }
             if (_apps.Count == 0)
-                AppList.Children.Add(new TextBlock { Text = "No hay apps en apps.json.", Foreground = R("TextSub"), Margin = new Thickness(4, 18, 0, 0) });
+                AppList.Children.Add(new TextBlock { Text = Loc.T("apps.none"), Foreground = R("TextSub"), Margin = new Thickness(4, 18, 0, 0) });
         }
 
         private Border BuildAppCard(AppItem a)
@@ -98,19 +98,19 @@ namespace Sothe
 
             var sp = new StackPanel(); Grid.SetColumn(sp, 1);
             var title = new DockPanel();
-            var installed = Badge("INSTALADA", R("Safe"));
+            var installed = Badge(Loc.T("badge.installed"), R("Safe"));
             installed.Visibility = Visibility.Collapsed;
             DockPanel.SetDock(installed, Dock.Right);
             _appInstalled[a.Id] = installed;
             title.Children.Add(installed);
             title.Children.Add(new TextBlock { Text = a.Name, FontSize = 15, FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center });
             sp.Children.Add(title);
-            sp.Children.Add(new TextBlock { Text = a.Desc, FontSize = 13.5, Foreground = R("TextSub"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 5, 0, 0), LineHeight = 20 });
+            sp.Children.Add(new TextBlock { Text = a.DisplayDesc, FontSize = 13.5, Foreground = R("TextSub"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 5, 0, 0), LineHeight = 20 });
             sp.Children.Add(new TextBlock { Text = a.Id, FontSize = 12, Foreground = R("TextDim"), FontFamily = new FontFamily("Cascadia Mono, Consolas"), Margin = new Thickness(0, 6, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis });
 
             g.Children.Add(cb); g.Children.Add(sp);
             card.Child = g;
-            _appCards.Add((a, card, Fold(a.Name + " " + a.Id + " " + a.Desc + " " + a.Category)));
+            _appCards.Add((a, card, Fold(a.Name + " " + a.Id + " " + a.Desc + " " + (a.Es?.Desc ?? "") + " " + a.Category)));
             return card;
         }
 
@@ -140,9 +140,9 @@ namespace Sothe
         private void UpdateAppCount()
         {
             int n = _appBoxes.Count(kv => kv.Value.IsChecked == true);
-            AppCountText.Text = n == 1 ? "1 seleccionada" : $"{n} seleccionadas";
-            BtnInstall.Content = n > 0 ? $"Instalar ({n})" : "Instalar seleccionadas";
-            BtnUninstall.Content = n > 0 ? $"Desinstalar ({n})" : "Desinstalar seleccionadas";
+            AppCountText.Text = n == 1 ? Loc.T("apps.selected.one") : Loc.T("apps.selected.n", n);
+            BtnInstall.Content = n > 0 ? Loc.T("btn.install.n", n) : Loc.T("btn.install");
+            BtnUninstall.Content = n > 0 ? Loc.T("btn.uninstall.n", n) : Loc.T("btn.uninstall");
         }
 
         private void SetWingetPill(string text, Brush color)
@@ -155,7 +155,7 @@ namespace Sothe
         private async Task DetectAppsAsync()
         {
             BtnAppsRefresh.IsEnabled = false;
-            SetWingetPill("winget: comprobando…", R("TextSub"));
+            SetWingetPill(Loc.T("winget.checking"), R("TextSub"));
             AppStatus.Foreground = R("TextSub");
             try
             {
@@ -164,13 +164,13 @@ namespace Sothe
                 BtnInstall.IsEnabled = BtnUninstall.IsEnabled = BtnUpgrade.IsEnabled = ok;
                 if (!ok)
                 {
-                    SetWingetPill("winget no disponible", R("Extreme"));
+                    SetWingetPill(Loc.T("winget.unavailable"), R("Extreme"));
                     AppStatus.Foreground = R("Extreme");
-                    AppStatus.Text = "winget no está instalado. Instala «Instalador de aplicaciones» (App Installer) desde Microsoft Store y pulsa «Detectar instaladas».";
+                    AppStatus.Text = Loc.T("winget.missing");
                     return;
                 }
                 SetWingetPill("winget " + version, R("Safe"));
-                AppStatus.Text = "Detectando las apps que ya tienes instaladas…";
+                AppStatus.Text = Loc.T("apps.detecting");
                 var installed = await WindowsToolsNative.WingetInstalledAsync();
                 int n = 0;
                 foreach (var kv in _appInstalled)
@@ -179,30 +179,28 @@ namespace Sothe
                     kv.Value.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
                     if (on) n++;
                 }
-                AppStatus.Text = $"{n} de {_apps.Count} apps ya instaladas. Marca las que quieras y pulsa Instalar.";
+                AppStatus.Text = Loc.T("apps.installed.fmt", n, _apps.Count);
             }
-            catch (Exception ex) { AppStatus.Text = "No se pudo consultar winget: " + ex.Message; }
+            catch (Exception ex) { AppStatus.Text = Loc.T("winget.queryfail", ex.Message); }
             finally { BtnAppsRefresh.IsEnabled = true; }
         }
 
         private void InstallApps()
         {
             var ids = CheckedAppIds();
-            if (ids.Count == 0) { ShowToast("Marca al menos una app.", ToastKind.Warn); return; }
-            RunWingetConsole("Instalando apps", Winget.InstallScript(ids),
-                $"Instalando {ids.Count} apps en una ventana aparte. Al terminar pulsa «Detectar instaladas».");
+            if (ids.Count == 0) { ShowToast(Loc.T("apps.pickone"), ToastKind.Warn); return; }
+            RunWingetConsole(Loc.T("console.install"), Winget.InstallScript(ids), Loc.T("apps.installing", ids.Count));
             _eng.Log("WINGET install: " + string.Join(", ", ids));
         }
 
         private void UninstallApps()
         {
             var ids = CheckedAppIds();
-            if (ids.Count == 0) { ShowToast("Marca al menos una app.", ToastKind.Warn); return; }
-            if (!SotheDialog.Confirm(this, "Desinstalar apps",
-                    $"Se desinstalarán {ids.Count} apps:\n\n" + string.Join("\n", ids.Select(id => "   •  " + AppName(id))),
-                    "Desinstalar", danger: true)) return;
-            RunWingetConsole("Desinstalando apps", Winget.UninstallScript(ids),
-                "Desinstalando en una ventana aparte. Al terminar pulsa «Detectar instaladas».");
+            if (ids.Count == 0) { ShowToast(Loc.T("apps.pickone"), ToastKind.Warn); return; }
+            if (!SotheDialog.Confirm(this, Loc.T("apps.uninstall.title"),
+                    Loc.T("apps.uninstall.body", ids.Count) + string.Join("\n", ids.Select(id => "   •  " + AppName(id))),
+                    Loc.T("apps.uninstall.ok"), danger: true)) return;
+            RunWingetConsole(Loc.T("console.uninstall"), Winget.UninstallScript(ids), Loc.T("apps.uninstalling"));
             _eng.Log("WINGET uninstall: " + string.Join(", ", ids));
         }
 
@@ -214,7 +212,7 @@ namespace Sothe
                 AppStatus.Foreground = R("TextSub");
                 AppStatus.Text = status;
             }
-            catch (Exception ex) { ShowToast("No se pudo abrir la consola: " + ex.Message, ToastKind.Error); }
+            catch (Exception ex) { ShowToast(Loc.T("console.fail", ex.Message), ToastKind.Error); }
         }
 
         private async Task OpenGpuDriversAsync()
@@ -224,20 +222,16 @@ namespace Sothe
             {
                 var gpu = GpuDrivers.PickGpu(await Task.Run(() => WindowsToolsNative.GpuNames()));
                 var (vendor, url) = GpuDrivers.DriverPage(gpu);
-                _eng.Log("GPU detectada: " + (gpu ?? "ninguna"));
+                _eng.Log("GPU detected: " + (gpu ?? "none"));
                 if (url == null)
                 {
-                    SotheDialog.Info(this, "Drivers de GPU", gpu == null
-                        ? "No se ha encontrado ninguna tarjeta gráfica."
-                        : $"GPU detectada:\n{gpu}\n\nNo se pudo identificar el fabricante. Busca los drivers en su web oficial.");
+                    SotheDialog.Info(this, Loc.T("gpu.title"), gpu == null ? Loc.T("gpu.none") : Loc.T("gpu.unknown", gpu));
                     return;
                 }
-                if (SotheDialog.Confirm(this, "Drivers de GPU",
-                        $"GPU detectada:\n{gpu}\n\nwinget no instala drivers de GPU (política de los fabricantes), así que se descargan desde la web oficial de {vendor}.",
-                        $"Abrir web de {vendor}"))
+                if (SotheDialog.Confirm(this, Loc.T("gpu.title"), Loc.T("gpu.confirm", gpu, vendor), Loc.T("gpu.open", vendor)))
                     Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
             }
-            catch (Exception ex) { ShowToast("No se pudo detectar la GPU: " + ex.Message, ToastKind.Error); }
+            catch (Exception ex) { ShowToast(Loc.T("gpu.fail", ex.Message), ToastKind.Error); }
             finally { BtnGpu.IsEnabled = true; }
         }
 
@@ -257,14 +251,14 @@ namespace Sothe
                 g.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
                 var sp = new StackPanel();
-                sp.Children.Add(new TextBlock { Text = f.Name, FontSize = 16, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap });
-                sp.Children.Add(new TextBlock { Text = f.Desc, FontSize = 13.5, Foreground = R("TextSub"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 5, 0, 0), LineHeight = 20 });
+                sp.Children.Add(new TextBlock { Text = f.DisplayName, FontSize = 16, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap });
+                sp.Children.Add(new TextBlock { Text = f.DisplayDesc, FontSize = 13.5, Foreground = R("TextSub"), TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 5, 0, 0), LineHeight = 20 });
                 sp.Children.Add(new TextBlock { Text = f.Feature, FontSize = 12, Foreground = R("TextDim"), FontFamily = new FontFamily("Cascadia Mono, Consolas"), Margin = new Thickness(0, 6, 0, 0) });
 
-                var text = new TextBlock { Text = "Consultando…", FontSize = 12.5, FontWeight = FontWeights.SemiBold, Foreground = R("TextSub") };
+                var text = new TextBlock { Text = Loc.T("feat.checking"), FontSize = 12.5, FontWeight = FontWeights.SemiBold, Foreground = R("TextSub") };
                 var pill = new Border { CornerRadius = new CornerRadius(10), Padding = new Thickness(10, 3, 10, 4), Margin = new Thickness(16, 0, 14, 0), VerticalAlignment = VerticalAlignment.Center, Child = text, Background = Tint(R("TextSub"), 0x1E) };
                 Grid.SetColumn(pill, 1);
-                var btn = new Button { Style = (Style)FindResource("Btn"), Content = "Activar", MinWidth = 124, Margin = new Thickness(0), VerticalAlignment = VerticalAlignment.Center, IsEnabled = false };
+                var btn = new Button { Style = (Style)FindResource("Btn"), Content = Loc.T("feat.enable"), MinWidth = 124, Margin = new Thickness(0), VerticalAlignment = VerticalAlignment.Center, IsEnabled = false };
                 Grid.SetColumn(btn, 2);
                 var feature = f;
                 btn.Click += async (s, e) => await ToggleFeatureAsync(feature);
@@ -275,27 +269,27 @@ namespace Sothe
                 _featRows[f.Feature] = (pill, text, btn);
             }
             if (_features.Count == 0)
-                FeatureList.Children.Add(new TextBlock { Text = "No hay características en features.json.", Foreground = R("TextSub") });
+                FeatureList.Children.Add(new TextBlock { Text = Loc.T("feat.none"), Foreground = R("TextSub") });
         }
 
         private void SetFeatureRow(string feature, FeatureState st, bool busy = false)
         {
             if (!_featRows.TryGetValue(feature, out var row)) return;
             string label; Brush color;
-            if (busy) { label = "Aplicando…"; color = R("AccentHi"); }
+            if (busy) { label = Loc.T("feat.applying"); color = R("AccentHi"); }
             else
             {
                 switch (st)
                 {
-                    case FeatureState.Enabled: label = "Activada"; color = R("Safe"); break;
-                    case FeatureState.Disabled: label = "Desactivada"; color = R("TextSub"); break;
-                    case FeatureState.Unavailable: label = "No disponible"; color = R("High"); break;
-                    default: label = "Desconocido"; color = R("TextDim"); break;
+                    case FeatureState.Enabled: label = Loc.T("feat.enabled"); color = R("Safe"); break;
+                    case FeatureState.Disabled: label = Loc.T("feat.disabled"); color = R("TextSub"); break;
+                    case FeatureState.Unavailable: label = Loc.T("feat.unavailable"); color = R("High"); break;
+                    default: label = Loc.T("feat.unknown"); color = R("TextDim"); break;
                 }
             }
             row.text.Text = label; row.text.Foreground = color;
             row.pill.Background = Tint(color, 0x22);
-            row.action.Content = st == FeatureState.Enabled ? "Desactivar" : "Activar";
+            row.action.Content = st == FeatureState.Enabled ? Loc.T("feat.disable") : Loc.T("feat.enable");
             row.action.Style = (Style)FindResource(st == FeatureState.Enabled ? "BtnDanger" : "Btn");
             row.action.Margin = new Thickness(0);
             row.action.IsEnabled = !busy && !_featBusy && (st == FeatureState.Enabled || st == FeatureState.Disabled);
@@ -304,18 +298,18 @@ namespace Sothe
         private async Task RefreshFeaturesAsync()
         {
             BtnFeatRefresh.IsEnabled = false;
-            FeatStatus.Text = "Consultando el estado de las características…";
+            FeatStatus.Text = Loc.T("feat.querying");
             try
             {
                 var names = _features.Select(f => f.Feature).ToList();
                 _featStates = await Task.Run(() => WindowsToolsNative.QueryFeatures(names));
                 foreach (var f in _features) SetFeatureRow(f.Feature, _featStates.TryGetValue(f.Feature, out var st) ? st : FeatureState.Unknown);
-                FeatStatus.Text = $"{_featStates.Values.Count(v => v == FeatureState.Enabled)} de {_features.Count} activadas.";
+                FeatStatus.Text = Loc.T("feat.count", _featStates.Values.Count(v => v == FeatureState.Enabled), _features.Count);
             }
             catch (Exception ex)
             {
                 foreach (var f in _features) SetFeatureRow(f.Feature, FeatureState.Unknown);
-                FeatStatus.Text = "No se pudo consultar el estado: " + ex.Message;
+                FeatStatus.Text = Loc.T("feat.queryfail", ex.Message);
             }
             finally { BtnFeatRefresh.IsEnabled = true; }
         }
@@ -325,21 +319,21 @@ namespace Sothe
             if (_featBusy) return;
             var before = _featStates.TryGetValue(f.Feature, out var s0) ? s0 : FeatureState.Unknown;
             bool enable = before != FeatureState.Enabled;
-            if (!SotheDialog.Confirm(this, enable ? "Activar característica" : "Desactivar característica",
-                    $"{(enable ? "Se activará" : "Se desactivará")} «{f.Name}».\n\n{f.Desc}\n\nPuede tardar varios minutos y lo normal es que pida reiniciar.",
-                    enable ? "Activar" : "Desactivar", danger: !enable)) return;
+            if (!SotheDialog.Confirm(this, Loc.T(enable ? "feat.confirm.title.on" : "feat.confirm.title.off"),
+                    Loc.T(enable ? "feat.confirm.on" : "feat.confirm.off", f.DisplayName, f.DisplayDesc),
+                    Loc.T(enable ? "feat.enable" : "feat.disable"), danger: !enable)) return;
 
             _featBusy = true;
             foreach (var other in _features) SetFeatureRow(other.Feature, _featStates.TryGetValue(other.Feature, out var st) ? st : FeatureState.Unknown, busy: other == f);
             BtnFeatRefresh.IsEnabled = false;
-            FeatStatus.Text = $"{(enable ? "Activando" : "Desactivando")} «{f.Name}»… puede tardar varios minutos.";
+            FeatStatus.Text = Loc.T(enable ? "feat.working.on" : "feat.working.off", f.DisplayName);
             try
             {
                 bool restart = await Task.Run(() => WindowsToolsNative.SetFeature(f.Feature, enable));
-                _eng.Log($"FEATURE {f.Feature} -> {(enable ? "ON" : "OFF")}{(restart ? " (reinicio pendiente)" : "")}");
+                _eng.Log($"FEATURE {f.Feature} -> {(enable ? "ON" : "OFF")}{(restart ? " (restart pending)" : "")}");
                 _featBusy = false;
                 await RefreshFeaturesAsync();
-                var msg = $"«{f.Name}» {(enable ? "activada" : "desactivada")}." + (restart ? " Reinicia el PC para completar el cambio." : "");
+                var msg = Loc.T(enable ? "feat.done.on" : "feat.done.off", f.DisplayName) + (restart ? Loc.T("feat.restart") : "");
                 FeatStatus.Text = msg;
                 ShowToast(msg);
             }
@@ -349,8 +343,8 @@ namespace Sothe
                 _eng.Log($"FEATURE {f.Feature} error: {ex.Message}");
                 foreach (var other in _features) SetFeatureRow(other.Feature, _featStates.TryGetValue(other.Feature, out var st) ? st : FeatureState.Unknown);
                 BtnFeatRefresh.IsEnabled = true;
-                FeatStatus.Text = "No se pudo cambiar la característica.";
-                SotheDialog.Info(this, "No se pudo cambiar", $"«{f.Name}»:\n\n{ex.Message}");
+                FeatStatus.Text = Loc.T("feat.failshort");
+                SotheDialog.Info(this, Loc.T("feat.failtitle"), Loc.T("feat.failbody", f.DisplayName, ex.Message));
             }
         }
     }

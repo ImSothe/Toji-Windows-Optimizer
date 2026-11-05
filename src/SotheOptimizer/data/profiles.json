@@ -2,8 +2,8 @@
   "profiles": [
     {
       "id": "competitivo",
-      "name": "Competitivo",
-      "desc": "Maximo rendimiento para shooters. Baja algo de seguridad del host.",
+      "name": "Competitive",
+      "desc": "Maximum performance for shooters. Lowers some host security.",
       "tweaks": [
         "bg_apps_off",
         "bing_search_off",
@@ -31,12 +31,16 @@
         "vbs_off",
         "vfx_performance",
         "widgets_off"
-      ]
+      ],
+      "es": {
+        "name": "Competitivo",
+        "desc": "Máximo rendimiento para shooters. Baja algo de seguridad del host."
+      }
     },
     {
       "id": "ciber",
-      "name": "Ciberseguridad",
-      "desc": "Rendimiento alto pero manteniendo la seguridad del host (Defender, SmartScreen, UAC y VBS activos). Para labs con VMs.",
+      "name": "Cybersecurity",
+      "desc": "High performance while keeping the host secure (Defender, SmartScreen, UAC and VBS stay on). For labs with VMs.",
       "tweaks": [
         "game_mode",
         "gamebar_dvr_off",
@@ -63,13 +67,21 @@
         "recall_off",
         "copilot_off",
         "debloat_appx"
-      ]
+      ],
+      "es": {
+        "name": "Ciberseguridad",
+        "desc": "Rendimiento alto pero manteniendo la seguridad del host (Defender, SmartScreen, UAC y VBS activos). Para labs con VMs."
+      }
     },
     {
       "id": "limpio",
-      "name": "Limpio",
-      "desc": "Revierte todo y deja Windows por defecto.",
-      "tweaks": []
+      "name": "Clean",
+      "desc": "Reverts everything and leaves Windows at its defaults.",
+      "tweaks": [],
+      "es": {
+        "name": "Limpio",
+        "desc": "Revierte todo y deja Windows por defecto."
+      }
     }
   ]
 }

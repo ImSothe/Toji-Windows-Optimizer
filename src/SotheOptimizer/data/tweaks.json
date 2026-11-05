@@ -4,12 +4,16 @@
   "tweaks": [
     {
       "id": "game_mode",
-      "name": "Activar Game Mode",
-      "category": "Rendimiento",
+      "name": "Enable Game Mode",
+      "category": "Performance",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Prioriza recursos al juego en primer plano.",
+      "desc": "Prioritizes resources for the foreground game.",
+      "es": {
+        "name": "Activar Game Mode",
+        "desc": "Prioriza recursos al juego en primer plano."
+      },
       "ops": [
         {
           "type": "reg",
@@ -27,12 +31,16 @@
     },
     {
       "id": "gamebar_dvr_off",
-      "name": "Desactivar Game Bar / DVR",
-      "category": "Rendimiento",
+      "name": "Disable Game Bar / DVR",
+      "category": "Performance",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Quita la grabacion en segundo plano que roba FPS.",
+      "desc": "Removes the background recording that costs FPS.",
+      "es": {
+        "name": "Desactivar Game Bar / DVR",
+        "desc": "Quita la grabación en segundo plano que roba FPS."
+      },
       "ops": [
         {
           "type": "reg",
@@ -50,12 +58,16 @@
     },
     {
       "id": "mouse_accel_off",
-      "name": "Desactivar aceleracion del raton",
+      "name": "Disable mouse acceleration",
       "category": "Input",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Aim 1:1 sin Enhance Pointer Precision. Imprescindible en tactical shooters.",
+      "desc": "1:1 aim without Enhance Pointer Precision. Essential in tactical shooters.",
+      "es": {
+        "name": "Desactivar aceleración del ratón",
+        "desc": "Aim 1:1 sin Enhance Pointer Precision. Imprescindible en tactical shooters."
+      },
       "ops": [
         {
           "type": "reg",
@@ -82,12 +94,16 @@
     },
     {
       "id": "menu_delay_off",
-      "name": "Quitar retardo de menus",
-      "category": "Interfaz",
+      "name": "Remove menu delay",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Interfaz de Windows mas instantanea al abrir menus.",
+      "desc": "Windows menus open instantly.",
+      "es": {
+        "name": "Quitar retardo de menús",
+        "desc": "Interfaz de Windows más instantánea al abrir menús."
+      },
       "ops": [
         {
           "type": "reg",
@@ -100,12 +116,16 @@
     },
     {
       "id": "bing_search_off",
-      "name": "Quitar Bing/web de la busqueda del menu Inicio",
-      "category": "Interfaz",
+      "name": "Remove Bing/web results from Start search",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "La busqueda del PC deja de consultar internet: mas rapida y local.",
+      "desc": "PC search stops querying the internet: faster and local.",
+      "es": {
+        "name": "Quitar Bing/web de la búsqueda del menú Inicio",
+        "desc": "La búsqueda del PC deja de consultar internet: más rápida y local."
+      },
       "ops": [
         {
           "type": "reg",
@@ -123,12 +143,16 @@
     },
     {
       "id": "transparency_off",
-      "name": "Desactivar transparencias",
-      "category": "Interfaz",
+      "name": "Disable transparency effects",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Menos carga de composicion del escritorio (DWM).",
+      "desc": "Less desktop composition load (DWM).",
+      "es": {
+        "name": "Desactivar transparencias",
+        "desc": "Menos carga de composición del escritorio (DWM)."
+      },
       "ops": [
         {
           "type": "reg",
@@ -140,12 +164,16 @@
     },
     {
       "id": "vfx_performance",
-      "name": "Efectos visuales: rendimiento",
-      "category": "Interfaz",
+      "name": "Visual effects: performance",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Quita animaciones y sombras de Windows.",
+      "desc": "Removes Windows animations and shadows.",
+      "es": {
+        "name": "Efectos visuales: rendimiento",
+        "desc": "Quita animaciones y sombras de Windows."
+      },
       "ops": [
         {
           "type": "reg",
@@ -157,13 +185,18 @@
     },
     {
       "id": "telemetry_off",
-      "name": "Desactivar telemetria",
-      "category": "Privacidad",
+      "name": "Disable telemetry",
+      "category": "Privacy",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Detiene la recopilacion de diagnosticos de Windows.",
-      "warning": "Windows Update puede reactivarla: reaplica tu codigo tras actualizar.",
+      "desc": "Stops Windows diagnostic data collection.",
+      "warning": "Windows Update may re-enable it: re-apply your code after updating.",
+      "es": {
+        "name": "Desactivar telemetría",
+        "desc": "Detiene la recopilación de diagnósticos de Windows.",
+        "warning": "Windows Update puede reactivarla: reaplica tu código tras actualizar."
+      },
       "ops": [
         {
           "type": "reg",
@@ -185,12 +218,16 @@
     },
     {
       "id": "consumer_features_off",
-      "name": "Bloquear bloatware/anuncios auto-instalados",
-      "category": "Privacidad",
+      "name": "Block auto-installed bloatware/ads",
+      "category": "Privacy",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Evita que Windows instale apps promocionadas y anuncios en el menu Inicio.",
+      "desc": "Prevents Windows from installing promoted apps and Start menu ads.",
+      "es": {
+        "name": "Bloquear bloatware/anuncios auto-instalados",
+        "desc": "Evita que Windows instale apps promocionadas y anuncios en el menú Inicio."
+      },
       "ops": [
         {
           "type": "reg",
@@ -202,12 +239,16 @@
     },
     {
       "id": "widgets_off",
-      "name": "Desactivar Widgets / Noticias",
-      "category": "Interfaz",
+      "name": "Disable Widgets / News",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Quita el panel de widgets y su proceso residente.",
+      "desc": "Removes the widgets panel and its resident process.",
+      "es": {
+        "name": "Desactivar Widgets / Noticias",
+        "desc": "Quita el panel de widgets y su proceso residente."
+      },
       "ops": [
         {
           "type": "reg",
@@ -219,12 +260,16 @@
     },
     {
       "id": "bg_apps_off",
-      "name": "Desactivar apps en segundo plano",
-      "category": "Rendimiento",
+      "name": "Disable background apps",
+      "category": "Performance",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Cierra apps UWP que consumen CPU/red en background.",
+      "desc": "Closes UWP apps that use CPU/network in the background.",
+      "es": {
+        "name": "Desactivar apps en segundo plano",
+        "desc": "Cierra apps UWP que consumen CPU/red en background."
+      },
       "ops": [
         {
           "type": "reg",
@@ -236,12 +281,16 @@
     },
     {
       "id": "power_high_performance",
-      "name": "Plan de energia Alto rendimiento",
-      "category": "Energia",
+      "name": "High performance power plan",
+      "category": "Power",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "La CPU no baja de frecuencia en reposo.",
+      "desc": "The CPU does not drop its frequency at idle.",
+      "es": {
+        "name": "Plan de energía Alto rendimiento",
+        "desc": "La CPU no baja de frecuencia en reposo."
+      },
       "ops": [
         {
           "type": "command",
@@ -253,12 +302,16 @@
     },
     {
       "id": "cpu_max_state",
-      "name": "CPU siempre al 100%",
-      "category": "Energia",
+      "name": "CPU always at 100%",
+      "category": "Power",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Estado minimo y maximo del procesador al 100%: cero throttling, mas consumo/calor.",
+      "desc": "Minimum and maximum processor state at 100%: no throttling, more power and heat.",
+      "es": {
+        "name": "CPU siempre al 100%",
+        "desc": "Estado mínimo y máximo del procesador al 100%: cero throttling, más consumo/calor."
+      },
       "ops": [
         {
           "type": "command",
@@ -270,12 +323,16 @@
     },
     {
       "id": "core_parking_off",
-      "name": "Desactivar Core Parking",
-      "category": "Energia",
+      "name": "Disable Core Parking",
+      "category": "Power",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Mantiene todos los nucleos despiertos; menos micro-tirones al despertar hilos.",
+      "desc": "Keeps all cores awake; fewer micro-stutters when threads wake up.",
+      "es": {
+        "name": "Desactivar Core Parking",
+        "desc": "Mantiene todos los núcleos despiertos; menos micro-tirones al despertar hilos."
+      },
       "ops": [
         {
           "type": "command",
@@ -287,12 +344,16 @@
     },
     {
       "id": "network_latency",
-      "name": "Latencia de red para juegos",
-      "category": "Red",
+      "name": "Network latency for games",
+      "category": "Network",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Quita el limitador de throttling multimedia y prioriza respuesta del sistema.",
+      "desc": "Removes the multimedia throttling limiter and prioritizes system responsiveness.",
+      "es": {
+        "name": "Latencia de red para juegos",
+        "desc": "Quita el limitador de throttling multimedia y prioriza respuesta del sistema."
+      },
       "ops": [
         {
           "type": "reg",
@@ -310,12 +371,16 @@
     },
     {
       "id": "nagle_off",
-      "name": "Desactivar Nagle's Algorithm",
-      "category": "Red",
+      "name": "Disable Nagle's Algorithm",
+      "category": "Network",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Pone TcpAckFrequency y TCPNoDelay a 1 en cada interfaz de red (se restaura el valor previo de cada una). Solo afecta a trafico TCP: los shooters usan UDP.",
+      "desc": "Sets TcpAckFrequency and TCPNoDelay to 1 on every network interface (each one's previous value is restored). Only affects TCP traffic: shooters use UDP.",
+      "es": {
+        "name": "Desactivar Nagle's Algorithm",
+        "desc": "Pone TcpAckFrequency y TCPNoDelay a 1 en cada interfaz de red (se restaura el valor previo de cada una). Solo afecta a tráfico TCP: los shooters usan UDP."
+      },
       "ops": [
         {
           "type": "regsub",
@@ -333,12 +398,16 @@
     },
     {
       "id": "gaming_gpu_priority",
-      "name": "Prioridad de GPU/CPU para juegos",
-      "category": "Rendimiento",
+      "name": "GPU/CPU priority for games",
+      "category": "Performance",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Sube la prioridad de la tarea 'Games' del planificador multimedia.",
+      "desc": "Raises the priority of the multimedia scheduler's 'Games' task.",
+      "es": {
+        "name": "Prioridad de GPU/CPU para juegos",
+        "desc": "Sube la prioridad de la tarea 'Games' del planificador multimedia."
+      },
       "ops": [
         {
           "type": "reg",
@@ -370,12 +439,16 @@
     },
     {
       "id": "fullscreen_optim_off",
-      "name": "Desactivar Fullscreen Optimizations",
-      "category": "Rendimiento",
+      "name": "Disable Fullscreen Optimizations",
+      "category": "Performance",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Empuja a pantalla completa exclusiva real: menos latencia de composicion.",
+      "desc": "Pushes games to real exclusive fullscreen: less composition latency.",
+      "es": {
+        "name": "Desactivar Fullscreen Optimizations",
+        "desc": "Empuja a pantalla completa exclusiva real: menos latencia de composición."
+      },
       "ops": [
         {
           "type": "reg",
@@ -399,12 +472,16 @@
     },
     {
       "id": "sysmain_off",
-      "name": "Desactivar SysMain (Superfetch)",
-      "category": "Rendimiento",
+      "name": "Disable SysMain (Superfetch)",
+      "category": "Performance",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Sin precarga agresiva a RAM/disco. Util en SSD/NVMe rapido.",
+      "desc": "No aggressive preloading to RAM/disk. Useful on fast SSD/NVMe.",
+      "es": {
+        "name": "Desactivar SysMain (Superfetch)",
+        "desc": "Sin precarga agresiva a RAM/disco. Útil en SSD/NVMe rápido."
+      },
       "ops": [
         {
           "type": "service",
@@ -415,13 +492,18 @@
     },
     {
       "id": "search_index_off",
-      "name": "Desactivar indexado de busqueda",
-      "category": "Rendimiento",
+      "name": "Disable search indexing",
+      "category": "Performance",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Menos I/O de disco en segundo plano.",
-      "warning": "Las busquedas en el explorador se vuelven mas lentas.",
+      "desc": "Less background disk I/O.",
+      "warning": "Searches in Explorer become slower.",
+      "es": {
+        "name": "Desactivar indexado de búsqueda",
+        "desc": "Menos I/O de disco en segundo plano.",
+        "warning": "Las búsquedas en el explorador se vuelven más lentas."
+      },
       "ops": [
         {
           "type": "service",
@@ -432,13 +514,18 @@
     },
     {
       "id": "hibernate_off",
-      "name": "Desactivar hibernacion (liberar disco)",
-      "category": "Almacenamiento",
+      "name": "Disable hibernation (free disk space)",
+      "category": "Storage",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Elimina hiberfil.sys; libera disco ~ tu cantidad de RAM.",
-      "warning": "Pierdes hibernar y el inicio rapido.",
+      "desc": "Deletes hiberfil.sys; frees roughly as much disk as you have RAM.",
+      "warning": "You lose hibernate and Fast Startup.",
+      "es": {
+        "name": "Desactivar hibernación (liberar disco)",
+        "desc": "Elimina hiberfil.sys; libera disco ~ tu cantidad de RAM.",
+        "warning": "Pierdes hibernar y el inicio rápido."
+      },
       "ops": [
         {
           "type": "command",
@@ -450,13 +537,17 @@
     },
     {
       "id": "gpu_hw_scheduling",
-      "name": "Programacion de GPU por hardware (HAGS)",
+      "name": "Hardware-accelerated GPU scheduling (HAGS)",
       "category": "GPU",
       "danger": "moderate",
       "portable": false,
       "anticheat": false,
       "reboot": true,
-      "desc": "Deja que la GPU gestione su propia planificacion. A veces baja latencia, a veces empeora: prueba.",
+      "desc": "Lets the GPU manage its own scheduling. Sometimes lowers latency, sometimes makes it worse: test it.",
+      "es": {
+        "name": "Programación de GPU por hardware (HAGS)",
+        "desc": "Deja que la GPU gestione su propia planificación. A veces baja latencia, a veces empeora: prueba."
+      },
       "ops": [
         {
           "type": "reg",
@@ -468,14 +559,19 @@
     },
     {
       "id": "vbs_off",
-      "name": "Desactivar VBS (seguridad por virtualizacion)",
-      "category": "Seguridad",
+      "name": "Disable VBS (virtualization-based security)",
+      "category": "Security",
       "danger": "high",
       "portable": true,
       "anticheat": false,
       "reboot": true,
-      "desc": "El causante no1 de bajones de FPS tras actualizar. Recuperalos.",
-      "warning": "Windows Update lo reactiva a menudo. Reduce proteccion frente a exploits de kernel.",
+      "desc": "The number one cause of FPS drops after updating. Get them back.",
+      "warning": "Windows Update often re-enables it. Reduces protection against kernel exploits.",
+      "es": {
+        "name": "Desactivar VBS (seguridad por virtualización)",
+        "desc": "El causante no1 de bajones de FPS tras actualizar. Recupéralos.",
+        "warning": "Windows Update lo reactiva a menudo. Reduce protección frente a exploits de kernel."
+      },
       "ops": [
         {
           "type": "reg",
@@ -487,14 +583,19 @@
     },
     {
       "id": "hvci_off",
-      "name": "Desactivar Aislamiento del nucleo (HVCI)",
-      "category": "Seguridad",
+      "name": "Disable Core Isolation (HVCI)",
+      "category": "Security",
       "danger": "high",
       "portable": true,
       "anticheat": true,
       "reboot": true,
-      "desc": "Libera CPU para el juego a cambio de menos proteccion de memoria.",
-      "warning": "Revisa que Vanguard (Valorant) siga arrancando antes de competir.",
+      "desc": "Frees CPU for the game in exchange for less memory protection.",
+      "warning": "Check that Vanguard (Valorant) still starts before competing.",
+      "es": {
+        "name": "Desactivar Aislamiento del núcleo (HVCI)",
+        "desc": "Libera CPU para el juego a cambio de menos protección de memoria.",
+        "warning": "Revisa que Vanguard (Valorant) siga arrancando antes de competir."
+      },
       "ops": [
         {
           "type": "reg",
@@ -506,13 +607,18 @@
     },
     {
       "id": "camera_off",
-      "name": "Desactivar camara (para apps)",
-      "category": "Privacidad",
+      "name": "Disable camera (for apps)",
+      "category": "Privacy",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Ninguna app podra acceder a la webcam.",
-      "warning": "Bloquea el acceso; para apagar el dispositivo de verdad usa el Administrador de dispositivos.",
+      "desc": "No app will be able to access the webcam.",
+      "warning": "It blocks access; to really turn the device off use Device Manager.",
+      "es": {
+        "name": "Desactivar cámara (para apps)",
+        "desc": "Ninguna app podrá acceder a la webcam.",
+        "warning": "Bloquea el acceso; para apagar el dispositivo de verdad usa el Administrador de dispositivos."
+      },
       "ops": [
         {
           "type": "reg",
@@ -525,12 +631,16 @@
     },
     {
       "id": "smartscreen_off",
-      "name": "Desactivar SmartScreen",
-      "category": "Seguridad",
+      "name": "Disable SmartScreen",
+      "category": "Security",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Quita el filtro de reputacion de apps/descargas.",
+      "desc": "Removes the app/download reputation filter.",
+      "es": {
+        "name": "Desactivar SmartScreen",
+        "desc": "Quita el filtro de reputación de apps/descargas."
+      },
       "ops": [
         {
           "type": "reg",
@@ -542,12 +652,16 @@
     },
     {
       "id": "uac_noprompt",
-      "name": "UAC sin avisos (admin)",
-      "category": "Seguridad",
+      "name": "UAC without prompts (admin)",
+      "category": "Security",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "No vuelve a preguntar al elevar (UAC sigue tecnicamente activo).",
+      "desc": "It no longer asks when elevating (UAC is technically still on).",
+      "es": {
+        "name": "UAC sin avisos (admin)",
+        "desc": "No vuelve a preguntar al elevar (UAC sigue técnicamente activo)."
+      },
       "ops": [
         {
           "type": "reg",
@@ -559,12 +673,16 @@
     },
     {
       "id": "copilot_off",
-      "name": "Desactivar Copilot",
-      "category": "Privacidad",
+      "name": "Disable Copilot",
+      "category": "Privacy",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Quita el asistente Copilot de Windows.",
+      "desc": "Removes the Windows Copilot assistant.",
+      "es": {
+        "name": "Desactivar Copilot",
+        "desc": "Quita el asistente Copilot de Windows."
+      },
       "ops": [
         {
           "type": "reg",
@@ -576,12 +694,16 @@
     },
     {
       "id": "recall_off",
-      "name": "Desactivar Recall (capturas de IA)",
-      "category": "Privacidad",
+      "name": "Disable Recall (AI snapshots)",
+      "category": "Privacy",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Impide que Windows analice y guarde snapshots de tu actividad.",
+      "desc": "Stops Windows from analyzing and saving snapshots of your activity.",
+      "es": {
+        "name": "Desactivar Recall (capturas de IA)",
+        "desc": "Impide que Windows analice y guarde snapshots de tu actividad."
+      },
       "ops": [
         {
           "type": "reg",
@@ -593,12 +715,16 @@
     },
     {
       "id": "update_defer_features",
-      "name": "Aplazar updates de funciones (mantener seguridad)",
+      "name": "Defer feature updates (keep security)",
       "category": "Windows Update",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Aplaza las grandes actualizaciones de version ~1 ano, PERO sigue recibiendo parches de seguridad. La via honesta a 'solo seguridad'.",
+      "desc": "Defers the big version updates by about 1 year BUT you still receive security patches. The honest route to 'security only'.",
+      "es": {
+        "name": "Aplazar updates de funciones (mantener seguridad)",
+        "desc": "Aplaza las grandes actualizaciones de versión ~1 año, PERO sigue recibiendo parches de seguridad. La vía honesta a 'solo seguridad'."
+      },
       "ops": [
         {
           "type": "reg",
@@ -616,13 +742,18 @@
     },
     {
       "id": "windows_update_off",
-      "name": "Desactivar Windows Update (total)",
+      "name": "Disable Windows Update (completely)",
       "category": "Windows Update",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Corta todas las actualizaciones, incluidas las de seguridad.",
-      "warning": "Deja el PC sin parches. Reactivalo cada cierto tiempo o usa el aplazamiento en su lugar.",
+      "desc": "Cuts all updates, including security ones.",
+      "warning": "Leaves the PC unpatched. Re-enable it from time to time or use deferral instead.",
+      "es": {
+        "name": "Desactivar Windows Update (total)",
+        "desc": "Corta todas las actualizaciones, incluidas las de seguridad.",
+        "warning": "Deja el PC sin parches. Reactívalo cada cierto tiempo o usa el aplazamiento en su lugar."
+      },
       "ops": [
         {
           "type": "service",
@@ -639,13 +770,18 @@
     },
     {
       "id": "defender_realtime_off",
-      "name": "Desactivar proteccion en tiempo real de Defender",
-      "category": "Seguridad",
+      "name": "Disable Defender real-time protection",
+      "category": "Security",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Apaga el analisis en tiempo real del antivirus de Windows.",
-      "warning": "La Proteccion contra manipulaciones (Tamper Protection) puede revertirlo. Desactivala a mano en Seguridad de Windows para que persista.",
+      "desc": "Turns off the Windows antivirus's real-time scanning.",
+      "warning": "Tamper Protection can revert it. Turn it off by hand in Windows Security for it to persist.",
+      "es": {
+        "name": "Desactivar protección en tiempo real de Defender",
+        "desc": "Apaga el análisis en tiempo real del antivirus de Windows.",
+        "warning": "La Protección contra manipulaciones (Tamper Protection) puede revertirlo. Desactívala a mano en Seguridad de Windows para que persista."
+      },
       "ops": [
         {
           "type": "reg",
@@ -657,13 +793,18 @@
     },
     {
       "id": "debloat_appx",
-      "name": "Debloat de apps preinstaladas",
+      "name": "Debloat preinstalled apps",
       "category": "Debloat",
       "danger": "high",
       "portable": false,
       "anticheat": false,
-      "desc": "Elimina bloatware tipico de Windows (clima, noticias, 3D Viewer, solitario, mapas, etc.).",
-      "warning": "NO es auto-reversible: para recuperarlas hay que reinstalar desde la Microsoft Store.",
+      "desc": "Removes typical Windows bloatware (weather, news, 3D Viewer, solitaire, maps, etc.).",
+      "warning": "NOT auto-reversible: to get them back you have to reinstall them from the Microsoft Store.",
+      "es": {
+        "name": "Debloat de apps preinstaladas",
+        "desc": "Elimina bloatware típico de Windows (clima, noticias, 3D Viewer, solitario, mapas, etc.).",
+        "warning": "NO es auto-reversible: para recuperarlas hay que reinstalar desde la Microsoft Store."
+      },
       "ops": [
         {
           "type": "appx",
@@ -725,14 +866,19 @@
     },
     {
       "id": "spectre_meltdown_off",
-      "name": "Desactivar mitigaciones Spectre/Meltdown",
-      "category": "PROHIBIDO",
+      "name": "Disable Spectre/Meltdown mitigations",
+      "category": "FORBIDDEN",
       "danger": "extreme",
       "portable": true,
       "anticheat": false,
       "reboot": true,
-      "desc": "Recupera algo de rendimiento de CPU eliminando las mitigaciones de ejecucion especulativa.",
-      "warning": "Deja la CPU expuesta a esa familia de ataques. Solo tiene sentido en un PC 100% de juego y sin datos sensibles.",
+      "desc": "Recovers some CPU performance by removing speculative-execution mitigations.",
+      "warning": "Leaves the CPU exposed to that family of attacks. Only makes sense on a 100% gaming PC with no sensitive data.",
+      "es": {
+        "name": "Desactivar mitigaciones Spectre/Meltdown",
+        "desc": "Recupera algo de rendimiento de CPU eliminando las mitigaciones de ejecución especulativa.",
+        "warning": "Deja la CPU expuesta a esa familia de ataques. Solo tiene sentido en un PC 100% de juego y sin datos sensibles."
+      },
       "ops": [
         {
           "type": "reg",
@@ -750,14 +896,19 @@
     },
     {
       "id": "hypervisor_off",
-      "name": "Desactivar Hypervisor (bcdedit)",
-      "category": "PROHIBIDO",
+      "name": "Disable Hypervisor (bcdedit)",
+      "category": "FORBIDDEN",
       "danger": "extreme",
       "portable": false,
       "anticheat": false,
       "reboot": true,
-      "desc": "Apaga el hipervisor a nivel de arranque; complementa VBS off para exprimir FPS.",
-      "warning": "Rompe Hyper-V, Sandbox de Windows y WSL2. Requiere reinicio.",
+      "desc": "Turns the hypervisor off at boot level; complements VBS off to squeeze out FPS.",
+      "warning": "Breaks Hyper-V, Windows Sandbox and WSL2. Requires a reboot.",
+      "es": {
+        "name": "Desactivar Hypervisor (bcdedit)",
+        "desc": "Apaga el hipervisor a nivel de arranque; complementa VBS off para exprimir FPS.",
+        "warning": "Rompe Hyper-V, Sandbox de Windows y WSL2. Requiere reinicio."
+      },
       "ops": [
         {
           "type": "command",
@@ -769,13 +920,18 @@
     },
     {
       "id": "firewall_off",
-      "name": "Desactivar Firewall de Windows",
-      "category": "PROHIBIDO",
+      "name": "Disable Windows Firewall",
+      "category": "FORBIDDEN",
       "danger": "extreme",
       "portable": true,
       "anticheat": false,
-      "desc": "Apaga el cortafuegos en todos los perfiles.",
-      "warning": "El PC queda abierto en la red. No lo hagas en redes publicas.",
+      "desc": "Turns the firewall off on all profiles.",
+      "warning": "The PC is left open on the network. Do not do it on public networks.",
+      "es": {
+        "name": "Desactivar Firewall de Windows",
+        "desc": "Apaga el cortafuegos en todos los perfiles.",
+        "warning": "El PC queda abierto en la red. No lo hagas en redes publicas."
+      },
       "ops": [
         {
           "type": "command",
@@ -787,14 +943,19 @@
     },
     {
       "id": "uac_full_off",
-      "name": "Desactivar UAC por completo",
-      "category": "PROHIBIDO",
+      "name": "Disable UAC completely",
+      "category": "FORBIDDEN",
       "danger": "extreme",
       "portable": true,
       "anticheat": false,
       "reboot": true,
-      "desc": "Elimina el Control de cuentas de usuario entero.",
-      "warning": "Rompe muchas apps de la Store y baja mucho la seguridad. Requiere reinicio.",
+      "desc": "Removes User Account Control entirely.",
+      "warning": "Breaks many Store apps and greatly lowers security. Requires a reboot.",
+      "es": {
+        "name": "Desactivar UAC por completo",
+        "desc": "Elimina el Control de cuentas de usuario entero.",
+        "warning": "Rompe muchas apps de la Store y baja mucho la seguridad. Requiere reinicio."
+      },
       "ops": [
         {
           "type": "reg",
@@ -806,12 +967,16 @@
     },
     {
       "id": "show_file_ext",
-      "name": "Mostrar extensiones de archivo",
-      "category": "Interfaz",
+      "name": "Show file extensions",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Muestra .exe .txt .ps1 etc. Basico para no comerte un 'foto.jpg.exe'. Muy util en ciberseguridad.",
+      "desc": "Shows .exe .txt .ps1 etc. Basic so you do not get caught by a 'photo.jpg.exe'. Very useful in cybersecurity.",
+      "es": {
+        "name": "Mostrar extensiones de archivo",
+        "desc": "Muestra .exe .txt .ps1 etc. Básico para no comerte un 'foto.jpg.exe'. Muy útil en ciberseguridad."
+      },
       "ops": [
         {
           "type": "reg",
@@ -823,12 +988,16 @@
     },
     {
       "id": "dark_mode",
-      "name": "Modo oscuro del sistema",
-      "category": "Interfaz",
+      "name": "System dark mode",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Pone Windows y las apps en tema oscuro.",
+      "desc": "Puts Windows and apps in the dark theme.",
+      "es": {
+        "name": "Modo oscuro del sistema",
+        "desc": "Pone Windows y las apps en tema oscuro."
+      },
       "ops": [
         {
           "type": "reg",
@@ -846,13 +1015,18 @@
     },
     {
       "id": "taskbar_left",
-      "name": "Barra de tareas a la izquierda",
-      "category": "Interfaz",
+      "name": "Taskbar on the left",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Alinea los iconos a la izquierda (estilo clasico).",
-      "warning": "Requiere cerrar sesion o reiniciar el Explorador para verse.",
+      "desc": "Aligns the icons to the left (classic style).",
+      "warning": "Requires signing out or restarting Explorer to take effect.",
+      "es": {
+        "name": "Barra de tareas a la izquierda",
+        "desc": "Alinea los iconos a la izquierda (estilo clasico).",
+        "warning": "Requiere cerrar sesión o reiniciar el Explorador para verse."
+      },
       "ops": [
         {
           "type": "reg",
@@ -864,13 +1038,18 @@
     },
     {
       "id": "taskbar_search_hide",
-      "name": "Quitar caja de busqueda de la barra",
-      "category": "Interfaz",
+      "name": "Hide the taskbar search box",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Oculta el buscador de la barra de tareas.",
-      "warning": "Requiere reiniciar el Explorador para verse.",
+      "desc": "Hides the taskbar search.",
+      "warning": "Requires restarting Explorer to take effect.",
+      "es": {
+        "name": "Quitar caja de búsqueda de la barra",
+        "desc": "Oculta el buscador de la barra de tareas.",
+        "warning": "Requiere reiniciar el Explorador para verse."
+      },
       "ops": [
         {
           "type": "reg",
@@ -882,13 +1061,18 @@
     },
     {
       "id": "taskview_button_off",
-      "name": "Quitar boton Vista de tareas",
-      "category": "Interfaz",
+      "name": "Hide the Task View button",
+      "category": "Interface",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Oculta el boton de Vista de tareas de la barra.",
-      "warning": "Requiere reiniciar el Explorador para verse.",
+      "desc": "Hides the taskbar Task View button.",
+      "warning": "Requires restarting Explorer to take effect.",
+      "es": {
+        "name": "Quitar boton Vista de tareas",
+        "desc": "Oculta el boton de Vista de tareas de la barra.",
+        "warning": "Requiere reiniciar el Explorador para verse."
+      },
       "ops": [
         {
           "type": "reg",
@@ -900,12 +1084,16 @@
     },
     {
       "id": "advertising_id_off",
-      "name": "Desactivar ID de publicidad",
-      "category": "Privacidad",
+      "name": "Disable advertising ID",
+      "category": "Privacy",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Apps dejan de usar tu identificador para anuncios personalizados.",
+      "desc": "Apps stop using your identifier for personalized ads.",
+      "es": {
+        "name": "Desactivar ID de publicidad",
+        "desc": "Apps dejan de usar tu identificador para anuncios personalizados."
+      },
       "ops": [
         {
           "type": "reg",
@@ -917,12 +1105,16 @@
     },
     {
       "id": "tips_off",
-      "name": "Desactivar sugerencias y anuncios de Windows",
-      "category": "Privacidad",
+      "name": "Disable Windows tips and ads",
+      "category": "Privacy",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Quita los 'consejos', tips y contenido promocionado del sistema.",
+      "desc": "Removes the system 'tips', suggestions and promoted content.",
+      "es": {
+        "name": "Desactivar sugerencias y anuncios de Windows",
+        "desc": "Quita los 'consejos', tips y contenido promocionado del sistema."
+      },
       "ops": [
         {
           "type": "reg",
@@ -940,12 +1132,16 @@
     },
     {
       "id": "activity_history_off",
-      "name": "Desactivar historial de actividad",
-      "category": "Privacidad",
+      "name": "Disable activity history",
+      "category": "Privacy",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Windows deja de registrar y subir tu linea de tiempo de actividad.",
+      "desc": "Windows stops recording and uploading your activity timeline.",
+      "es": {
+        "name": "Desactivar historial de actividad",
+        "desc": "Windows deja de registrar y subir tu línea de tiempo de actividad."
+      },
       "ops": [
         {
           "type": "reg",
@@ -969,12 +1165,16 @@
     },
     {
       "id": "cortana_off",
-      "name": "Desactivar Cortana",
-      "category": "Privacidad",
+      "name": "Disable Cortana",
+      "category": "Privacy",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Bloquea Cortana por directiva.",
+      "desc": "Blocks Cortana by policy.",
+      "es": {
+        "name": "Desactivar Cortana",
+        "desc": "Bloquea Cortana por directiva."
+      },
       "ops": [
         {
           "type": "reg",
@@ -986,12 +1186,16 @@
     },
     {
       "id": "location_off",
-      "name": "Desactivar ubicacion (para apps)",
-      "category": "Privacidad",
+      "name": "Disable location (for apps)",
+      "category": "Privacy",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Ninguna app podra acceder a tu ubicacion.",
+      "desc": "No app will be able to access your location.",
+      "es": {
+        "name": "Desactivar ubicación (para apps)",
+        "desc": "Ninguna app podrá acceder a tu ubicación."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1004,13 +1208,18 @@
     },
     {
       "id": "mic_off",
-      "name": "Desactivar microfono (para apps)",
-      "category": "Privacidad",
+      "name": "Disable microphone (for apps)",
+      "category": "Privacy",
       "danger": "high",
       "portable": true,
       "anticheat": false,
-      "desc": "Ninguna app podra acceder al microfono.",
-      "warning": "Ojo: tambien lo bloquea para Discord, juegos, etc.",
+      "desc": "No app will be able to access the microphone.",
+      "warning": "Careful: it also blocks it for Discord, games, etc.",
+      "es": {
+        "name": "Desactivar micrófono (para apps)",
+        "desc": "Ninguna app podrá acceder al micrófono.",
+        "warning": "Ojo: también lo bloquea para Discord, juegos, etc."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1023,12 +1232,16 @@
     },
     {
       "id": "power_throttling_off",
-      "name": "Desactivar Power Throttling",
-      "category": "Rendimiento",
+      "name": "Disable Power Throttling",
+      "category": "Performance",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Windows deja de frenar apps en segundo plano para ahorrar energia. Mas consistencia, mas consumo.",
+      "desc": "Windows stops throttling background apps to save power. More consistency, more power draw.",
+      "es": {
+        "name": "Desactivar Power Throttling",
+        "desc": "Windows deja de frenar apps en segundo plano para ahorrar energía. Más consistencia, más consumo."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1040,12 +1253,16 @@
     },
     {
       "id": "fast_startup_off",
-      "name": "Desactivar Inicio rapido",
-      "category": "Energia",
+      "name": "Disable Fast Startup",
+      "category": "Power",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Apagados/arranques mas limpios (util en arranque dual). El PC se apaga del todo en vez de hibernar el kernel.",
+      "desc": "Cleaner shutdowns/boots (useful with dual boot). The PC shuts down fully instead of hibernating the kernel.",
+      "es": {
+        "name": "Desactivar Inicio rápido",
+        "desc": "Apagados/arranques más limpios (útil en arranque dual). El PC se apaga del todo en vez de hibernar el kernel."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1057,13 +1274,18 @@
     },
     {
       "id": "reserved_storage_off",
-      "name": "Desactivar almacenamiento reservado",
-      "category": "Almacenamiento",
+      "name": "Disable reserved storage",
+      "category": "Storage",
       "danger": "moderate",
       "portable": false,
       "anticheat": false,
-      "desc": "Libera ~7 GB que Windows aparta para updates.",
-      "warning": "Puede tardar unos segundos en aplicarse (DISM).",
+      "desc": "Frees the ~7 GB that Windows sets aside for updates.",
+      "warning": "It can take a few seconds to apply (DISM).",
+      "es": {
+        "name": "Desactivar almacenamiento reservado",
+        "desc": "Libera ~7 GB que Windows aparta para updates.",
+        "warning": "Puede tardar unos segundos en aplicarse (DISM)."
+      },
       "ops": [
         {
           "type": "command",
@@ -1074,12 +1296,16 @@
     },
     {
       "id": "edge_debloat",
-      "name": "Debloat de Microsoft Edge",
+      "name": "Microsoft Edge debloat",
       "category": "Debloat",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Quita el arranque previo y el modo en segundo plano de Edge (deja de correr sin abrirlo).",
+      "desc": "Removes the startup boost and background mode of Edge (it stops running without being opened).",
+      "es": {
+        "name": "Debloat de Microsoft Edge",
+        "desc": "Quita el arranque previo y el modo en segundo plano de Edge (deja de correr sin abrirlo)."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1097,13 +1323,18 @@
     },
     {
       "id": "version_watermark_off",
-      "name": "Ocultar marca de agua de version/compilacion",
-      "category": "Activacion",
+      "name": "Hide the version/build watermark",
+      "category": "Activation",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Oculta el texto de version/compilacion del escritorio (esquina inferior derecha).",
-      "warning": "Esto NO activa Windows ni garantiza quitar el aviso 'Activar Windows' de una copia sin licencia; la unica via limpia para ese es una licencia legitima.",
+      "desc": "Hides the version/build text on the desktop (bottom-right corner).",
+      "warning": "This does NOT activate Windows and does not guarantee removing the 'Activate Windows' notice on an unlicensed copy; the only clean way for that is a legitimate license.",
+      "es": {
+        "name": "Ocultar marca de agua de versión/compilación",
+        "desc": "Oculta el texto de versión/compilación del escritorio (esquina inferior derecha).",
+        "warning": "Esto NO activa Windows ni garantiza quitar el aviso 'Activar Windows' de una copia sin licencia; la única vía limpia para ese es una licencia legitima."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1115,12 +1346,16 @@
     },
     {
       "id": "power_ultimate",
-      "name": "Plan de energia Ultimate Performance",
-      "category": "Energia",
+      "name": "Ultimate Performance power plan",
+      "category": "Power",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Activa el plan oculto de maximo rendimiento (mas que 'Alto rendimiento').",
+      "desc": "Enables the hidden maximum-performance plan (more than 'High performance').",
+      "es": {
+        "name": "Plan de energía Ultimate Performance",
+        "desc": "Activa el plan oculto de máximo rendimiento (más que 'Alto rendimiento')."
+      },
       "ops": [
         {
           "type": "command",
@@ -1132,12 +1367,16 @@
     },
     {
       "id": "disable_prefetch",
-      "name": "Desactivar Prefetch/Superfetch (registro)",
-      "category": "Rendimiento",
+      "name": "Disable Prefetch/Superfetch (registry)",
+      "category": "Performance",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Corta la precarga a disco a nivel de registro. Recomendado en SSD/NVMe.",
+      "desc": "Cuts disk preloading at registry level. Recommended on SSD/NVMe.",
+      "es": {
+        "name": "Desactivar Prefetch/Superfetch (registro)",
+        "desc": "Corta la precarga a disco a nivel de registro. Recomendado en SSD/NVMe."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1155,14 +1394,19 @@
     },
     {
       "id": "disable_paging_executive",
-      "name": "Mantener el kernel en RAM",
-      "category": "Rendimiento",
+      "name": "Keep the kernel in RAM",
+      "category": "Performance",
       "danger": "high",
       "portable": true,
       "anticheat": false,
       "reboot": true,
-      "desc": "Impide que Windows pagine el nucleo a disco. Mas respuesta si te sobra RAM (16GB+).",
-      "warning": "Con poca RAM puede ser contraproducente.",
+      "desc": "Stops Windows from paging the kernel to disk. More responsiveness if you have RAM to spare (16 GB+).",
+      "warning": "With little RAM it can be counterproductive.",
+      "es": {
+        "name": "Mantener el kernel en RAM",
+        "desc": "Impide que Windows pagine el núcleo a disco. Más respuesta si te sobra RAM (16GB+).",
+        "warning": "Con poca RAM puede ser contraproducente."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1174,12 +1418,16 @@
     },
     {
       "id": "win32_priority",
-      "name": "Prioridad total al primer plano",
-      "category": "Rendimiento",
+      "name": "Full priority to the foreground",
+      "category": "Performance",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Da mas quantum de CPU a la ventana activa (el juego). Win32PrioritySeparation optimizado.",
+      "desc": "Gives more CPU quantum to the active window (the game). Tuned Win32PrioritySeparation.",
+      "es": {
+        "name": "Prioridad total al primer plano",
+        "desc": "Da más quantum de CPU a la ventana activa (el juego). Win32PrioritySeparation optimizado."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1191,12 +1439,16 @@
     },
     {
       "id": "disable_ndu",
-      "name": "Desactivar servicio Ndu (uso de red)",
-      "category": "Red",
+      "name": "Disable the Ndu service (network usage)",
+      "category": "Network",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Servicio de monitor de datos de red; puede consumir RAM. Lo desactiva.",
+      "desc": "Network data usage monitor service; it can consume RAM. This disables it.",
+      "es": {
+        "name": "Desactivar servicio Ndu (uso de red)",
+        "desc": "Servicio de monitor de datos de red; puede consumir RAM. Lo desactiva."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1208,12 +1460,16 @@
     },
     {
       "id": "disable_delivery_optimization",
-      "name": "Desactivar Delivery Optimization",
-      "category": "Red",
+      "name": "Disable Delivery Optimization",
+      "category": "Network",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Windows deja de compartir/descargar updates P2P por tu red.",
+      "desc": "Windows stops sharing/downloading updates peer-to-peer over your network.",
+      "es": {
+        "name": "Desactivar Delivery Optimization",
+        "desc": "Windows deja de compartir/descargar updates P2P por tu red."
+      },
       "ops": [
         {
           "type": "service",
@@ -1224,12 +1480,16 @@
     },
     {
       "id": "disable_error_reporting",
-      "name": "Desactivar informe de errores",
-      "category": "Privacidad",
+      "name": "Disable error reporting",
+      "category": "Privacy",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Windows deja de enviar informes de errores a Microsoft.",
+      "desc": "Windows stops sending error reports to Microsoft.",
+      "es": {
+        "name": "Desactivar informe de errores",
+        "desc": "Windows deja de enviar informes de errores a Microsoft."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1241,12 +1501,16 @@
     },
     {
       "id": "disable_telemetry_tasks",
-      "name": "Desactivar tareas de telemetria (CEIP)",
-      "category": "Privacidad",
+      "name": "Disable telemetry tasks (CEIP)",
+      "category": "Privacy",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Desactiva las tareas programadas de recopilacion de datos de Windows.",
+      "desc": "Disables the Windows scheduled data-collection tasks.",
+      "es": {
+        "name": "Desactivar tareas de telemetría (CEIP)",
+        "desc": "Desactiva las tareas programadas de recopilación de datos de Windows."
+      },
       "ops": [
         {
           "type": "command",
@@ -1258,14 +1522,19 @@
     },
     {
       "id": "gpu_tdr_delay",
-      "name": "Subir TdrDelay de la GPU",
+      "name": "Raise the GPU TdrDelay",
       "category": "GPU",
       "danger": "high",
       "portable": false,
       "anticheat": false,
       "reboot": true,
-      "desc": "Da mas margen antes de reiniciar el driver grafico. Util con overclock agresivo.",
-      "warning": "No sube FPS; evita cuelgues/pantallazos por timeout del driver. Solo si haces OC.",
+      "desc": "Gives more margin before the graphics driver is reset. Useful with aggressive overclocking.",
+      "warning": "It does not raise FPS; it avoids freezes/black screens from driver timeouts. Only if you overclock.",
+      "es": {
+        "name": "Subir TdrDelay de la GPU",
+        "desc": "Da más margen antes de reiniciar el driver gráfico. Útil con overclock agresivo.",
+        "warning": "No sube FPS; evita cuelgues/pantallazos por timeout del driver. Solo si haces OC."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1277,14 +1546,19 @@
     },
     {
       "id": "bcd_timer",
-      "name": "Forzar temporizadores del sistema (bcdedit)",
-      "category": "PROHIBIDO",
+      "name": "Force system timers (bcdedit)",
+      "category": "FORBIDDEN",
       "danger": "extreme",
       "portable": false,
       "anticheat": false,
       "reboot": true,
-      "desc": "Fuerza dynamic tick off y platform tick. Puede bajar latencia en algunos equipos.",
-      "warning": "Efecto MUY dependiente del hardware; en muchos PCs no ayuda o empeora. Mide antes/despues.",
+      "desc": "Forces dynamic tick off and platform tick. It can lower latency on some machines.",
+      "warning": "The effect is VERY hardware dependent; on many PCs it does not help or makes things worse. Measure before/after.",
+      "es": {
+        "name": "Forzar temporizadores del sistema (bcdedit)",
+        "desc": "Fuerza dynamic tick off y platform tick. Puede bajar latencia en algunos equipos.",
+        "warning": "Efecto MUY dependiente del hardware; en muchos PCs no ayuda o empeora. Mide antes/después."
+      },
       "ops": [
         {
           "type": "command",
@@ -1296,13 +1570,18 @@
     },
     {
       "id": "cpu_idle_disable",
-      "name": "Impedir que la CPU entre en reposo",
-      "category": "PROHIBIDO",
+      "name": "Prevent the CPU from idling",
+      "category": "FORBIDDEN",
       "danger": "extreme",
       "portable": true,
       "anticheat": false,
-      "desc": "La CPU nunca baja a estados idle: minima latencia posible.",
-      "warning": "Sube MUCHO consumo y temperatura. Solo sobremesa con buena refrigeracion.",
+      "desc": "The CPU never drops to idle states: lowest possible latency.",
+      "warning": "Raises power draw and temperature A LOT. Desktop only, with good cooling.",
+      "es": {
+        "name": "Impedir que la CPU entre en reposo",
+        "desc": "La CPU nunca baja a estados idle: minima latencia posible.",
+        "warning": "Sube MUCHO consumo y temperatura. Solo sobremesa con buena refrigeración."
+      },
       "ops": [
         {
           "type": "command",
@@ -1314,13 +1593,18 @@
     },
     {
       "id": "defender_full_off",
-      "name": "Desactivar Defender por completo",
-      "category": "PROHIBIDO",
+      "name": "Disable Defender completely",
+      "category": "FORBIDDEN",
       "danger": "extreme",
       "portable": true,
       "anticheat": false,
-      "desc": "Apaga todas las capas de Microsoft Defender por directiva.",
-      "warning": "La Proteccion contra manipulaciones (Tamper Protection) revertira esto salvo que la desactives a mano en Seguridad de Windows. Deja el PC sin antivirus.",
+      "desc": "Turns off every Microsoft Defender layer by policy.",
+      "warning": "Tamper Protection will revert this unless you turn it off by hand in Windows Security. Leaves the PC without antivirus.",
+      "es": {
+        "name": "Desactivar Defender por completo",
+        "desc": "Apaga todas las capas de Microsoft Defender por directiva.",
+        "warning": "La Protección contra manipulaciones (Tamper Protection) revertirá esto salvo que la desactives a mano en Seguridad de Windows. Deja el PC sin antivirus."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1356,14 +1640,19 @@
     },
     {
       "id": "hpet_off",
-      "name": "Desactivar HPET (temporizador de eventos)",
-      "category": "PROHIBIDO",
+      "name": "Disable HPET (event timer)",
+      "category": "FORBIDDEN",
       "danger": "high",
       "portable": false,
       "anticheat": false,
       "reboot": true,
-      "desc": "Desactiva el High Precision Event Timer del sistema y quita useplatformclock. Puede bajar latencia de entrada.",
-      "warning": "Efecto MUY dependiente del hardware: en unos PCs mejora, en otros da microtirones. Mide antes/despues.",
+      "desc": "Disables the system High Precision Event Timer and removes useplatformclock. It can lower input latency.",
+      "warning": "The effect is VERY hardware dependent: on some PCs it improves, on others it causes micro-stutters. Measure before/after.",
+      "es": {
+        "name": "Desactivar HPET (temporizador de eventos)",
+        "desc": "Desactiva el High Precision Event Timer del sistema y quita useplatformclock. Puede bajar latencia de entrada.",
+        "warning": "Efecto MUY dependiente del hardware: en unos PCs mejora, en otros da microtirones. Mide antes/después."
+      },
       "ops": [
         {
           "type": "command",
@@ -1375,13 +1664,18 @@
     },
     {
       "id": "timer_resolution",
-      "name": "Timer Resolution global (0.5ms)",
+      "name": "Global Timer Resolution (0.5 ms)",
       "category": "Input",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Permite que los juegos mantengan el temporizador a maxima resolucion aunque no esten en foco. Menos input lag.",
-      "warning": "Para FORZAR 0.5ms fijo hace falta ademas una app residente (tipo ISLC); este ajuste solo habilita que se respete.",
+      "desc": "Lets games keep the timer at maximum resolution even when not in focus. Less input lag.",
+      "warning": "To FORCE a fixed 0.5 ms you also need a resident app (like ISLC); this tweak only lets it be honored.",
+      "es": {
+        "name": "Timer Resolution global (0.5ms)",
+        "desc": "Permite que los juegos mantengan el temporizador a maxima resolución aunque no estén en foco. Menos input lag.",
+        "warning": "Para FORZAR 0.5ms fijo hace falta además una app residente (tipo ISLC); este ajuste solo habilita que se respete."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1393,13 +1687,18 @@
     },
     {
       "id": "timer_res_fixed",
-      "name": "Timer Resolution FIJO (0.5ms residente)",
+      "name": "FIXED Timer Resolution (0.5 ms resident)",
       "category": "Input",
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
-      "desc": "Instala un proceso ligero que arranca con Windows y mantiene el temporizador fijo en la resolucion que mejor responde en tu PC (se calibra al aplicar, unos segundos con el PC en reposo).",
-      "warning": "Medido en Windows 11: un proceso residente baja el reloj del sistema a ~0.5 ms, pero Sleep(1) de OTROS programas solo mejora con GlobalTimerResolutionRequests (este ajuste lo activa) y puede requerir reiniciar. Sube un poco el consumo.",
+      "desc": "Installs a lightweight process that starts with Windows and holds the timer fixed at the resolution that responds best on your PC (calibrated when applied, a few seconds with the PC idle).",
+      "warning": "Measured on Windows 11: a resident process drops the system clock to ~0.5 ms, but OTHER programs' Sleep(1) only improves with GlobalTimerResolutionRequests (this tweak enables it) and may require a reboot. Slightly higher power draw.",
+      "es": {
+        "name": "Timer Resolution FIJO (0.5ms residente)",
+        "desc": "Instala un proceso ligero que arranca con Windows y mantiene el temporizador fijo en la resolución que mejor responde en tu PC (se calibra al aplicar, unos segundos con el PC en reposo).",
+        "warning": "Medido en Windows 11: un proceso residente baja el reloj del sistema a ~0.5 ms, pero Sleep(1) de OTROS programas solo mejora con GlobalTimerResolutionRequests (este ajuste lo activa) y puede requerir reiniciar. Sube un poco el consumo."
+      },
       "ops": [
         {
           "type": "reg",
@@ -1417,13 +1716,18 @@
     },
     {
       "id": "nvidia_telemetry_off",
-      "name": "Desactivar telemetria de Nvidia",
+      "name": "Disable Nvidia telemetry",
       "category": "GPU",
       "danger": "moderate",
       "portable": false,
       "anticheat": false,
-      "desc": "Apaga las tareas y el servicio de telemetria del driver Nvidia (NvTelemetry).",
-      "warning": "No toca ajustes 3D del panel (eso necesita Nvidia Profile Inspector).",
+      "desc": "Turns off the Nvidia driver telemetry tasks and service (NvTelemetry).",
+      "warning": "It does not touch the control panel 3D settings (that needs Nvidia Profile Inspector).",
+      "es": {
+        "name": "Desactivar telemetría de Nvidia",
+        "desc": "Apaga las tareas y el servicio de telemetría del driver Nvidia (NvTelemetry).",
+        "warning": "No toca ajustes 3D del panel (eso necesita Nvidia Profile Inspector)."
+      },
       "ops": [
         {
           "type": "command",
@@ -1434,14 +1738,19 @@
     },
     {
       "id": "gpu_msi_mode",
-      "name": "MSI Mode para la GPU (prioridad de interrupciones)",
+      "name": "MSI Mode for the GPU (interrupt priority)",
       "category": "GPU",
       "danger": "high",
       "portable": false,
       "anticheat": false,
       "reboot": true,
-      "desc": "Activa Message Signaled Interrupts en la tarjeta grafica: interrupciones mas eficientes, mejor frametime/latencia.",
-      "warning": "Depende del hardware. Requiere reiniciar. En algun equipo puede no aplicar por permisos del dispositivo.",
+      "desc": "Enables Message Signaled Interrupts on the graphics card: more efficient interrupts, better frametime/latency.",
+      "warning": "Hardware dependent. Requires a reboot. On some machines it may not apply because of device permissions.",
+      "es": {
+        "name": "MSI Mode para la GPU (prioridad de interrupciones)",
+        "desc": "Activa Message Signaled Interrupts en la tarjeta gráfica: interrupciones más eficientes, mejor frametime/latencia.",
+        "warning": "Depende del hardware. Requiere reiniciar. En algun equipo puede no aplicar por permisos del dispositivo."
+      },
       "ops": [
         {
           "type": "command",

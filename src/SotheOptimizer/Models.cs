@@ -4,6 +4,14 @@ using System.Text.Json.Serialization;
 
 namespace Sothe
 {
+    // Texto en el otro idioma ("es") de un elemento de los datos. Los campos principales de los JSON estan en ingles.
+    public class LocText
+    {
+        public string Name { get; set; }
+        public string Desc { get; set; }
+        public string Warning { get; set; }
+    }
+
     // Mapea tweaks.json (mismas claves, System.Text.Json con case-insensitive)
     public class Tweak
     {
@@ -16,7 +24,13 @@ namespace Sothe
         public bool Reboot { get; set; }
         public string Desc { get; set; }
         public string Warning { get; set; }
+        public LocText Es { get; set; }
         public List<TweakOp> Ops { get; set; } = new List<TweakOp>();
+
+        // Texto segun el idioma elegido (ingles por defecto; espanol si existe el bloque "es")
+        [JsonIgnore] public string DisplayName => Loc.Pick(Name, Es?.Name);
+        [JsonIgnore] public string DisplayDesc => Loc.Pick(Desc, Es?.Desc);
+        [JsonIgnore] public string DisplayWarning => Loc.Pick(Warning, Es?.Warning);
     }
 
     public class TweakOp
@@ -43,7 +57,12 @@ namespace Sothe
         public string Name { get; set; }
         public string Desc { get; set; }
         public List<string> Tweaks { get; set; } = new List<string>();
+        public LocText Es { get; set; }
         [JsonIgnore] public bool IsCustom { get; set; }   // creado por el usuario (profiles.user.json)
+
+        [JsonIgnore] public string DisplayName => Loc.Pick(Name, Es?.Name);
+        // Los perfiles propios guardan "Perfil personalizado" como marca interna: se muestra en el idioma elegido
+        [JsonIgnore] public string DisplayDesc => Desc == SotheEngine.CustomProfileDesc ? Loc.T("profile.custom") : Loc.Pick(Desc, Es?.Desc);
     }
     public class ProfilesFile { public List<Profile> Profiles { get; set; } = new List<Profile>(); }
 
@@ -54,6 +73,8 @@ namespace Sothe
         public string Name { get; set; }
         public string Category { get; set; }
         public string Desc { get; set; }
+        public LocText Es { get; set; }
+        [JsonIgnore] public string DisplayDesc => Loc.Pick(Desc, Es?.Desc);
     }
     public class AppsFile { public List<AppItem> Apps { get; set; } = new List<AppItem>(); }
 
@@ -63,6 +84,9 @@ namespace Sothe
         public string Name { get; set; }
         public string Feature { get; set; }       // nombre DISM, p. ej. "Microsoft-Hyper-V-All"
         public string Desc { get; set; }
+        public LocText Es { get; set; }
+        [JsonIgnore] public string DisplayName => Loc.Pick(Name, Es?.Name);
+        [JsonIgnore] public string DisplayDesc => Loc.Pick(Desc, Es?.Desc);
     }
     public class FeaturesFile { public List<FeatureItem> Features { get; set; } = new List<FeatureItem>(); }
 

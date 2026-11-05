@@ -14,6 +14,8 @@
   <ItemGroup>
     <Compile Include="..\..\src\SotheOptimizer\SotheEngine.cs" Link="App\SotheEngine.cs" />
     <Compile Include="..\..\src\SotheOptimizer\Models.cs" Link="App\Models.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Localization.cs" Link="App\Localization.cs" />
+    <Compile Include="..\..\src\SotheOptimizer\Strings.cs" Link="App\Strings.cs" />
     <Compile Include="..\..\src\SotheOptimizer\PowerShellRunner.cs" Link="App\PowerShellRunner.cs" />
     <Compile Include="..\..\src\SotheOptimizer\SignedData.cs" Link="App\SignedData.cs" />
     <Compile Include="..\..\src\SotheOptimizer\TextUtil.cs" Link="App\TextUtil.cs" />

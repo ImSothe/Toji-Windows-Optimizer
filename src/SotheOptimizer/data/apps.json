@@ -3,188 +3,281 @@
     {
       "id": "Brave.Brave",
       "name": "Brave",
-      "category": "Navegadores",
-      "desc": "Navegador con bloqueo de anuncios integrado."
+      "category": "Browsers",
+      "desc": "Browser with built-in ad blocking.",
+      "es": {
+        "desc": "Navegador con bloqueo de anuncios integrado."
+      }
     },
     {
       "id": "Mozilla.Firefox",
       "name": "Firefox",
-      "category": "Navegadores",
-      "desc": "Navegador libre y centrado en privacidad."
+      "category": "Browsers",
+      "desc": "Free, privacy-focused browser.",
+      "es": {
+        "desc": "Navegador libre y centrado en privacidad."
+      }
     },
     {
       "id": "Google.Chrome",
       "name": "Chrome",
-      "category": "Navegadores",
-      "desc": "El navegador de Google."
+      "category": "Browsers",
+      "desc": "Google's browser.",
+      "es": {
+        "desc": "El navegador de Google."
+      }
     },
     {
       "id": "Discord.Discord",
       "name": "Discord",
-      "category": "Comunicacion",
-      "desc": "Chat de voz y texto para gaming y comunidades."
+      "category": "Communication",
+      "desc": "Voice and text chat for gaming and communities.",
+      "es": {
+        "desc": "Chat de voz y texto para gaming y comunidades."
+      }
     },
     {
       "id": "Telegram.TelegramDesktop",
       "name": "Telegram",
-      "category": "Comunicacion",
-      "desc": "Mensajeria rapida y multiplataforma."
+      "category": "Communication",
+      "desc": "Fast cross-platform messaging.",
+      "es": {
+        "desc": "Mensajería rápida y multiplataforma."
+      }
     },
     {
       "id": "Valve.Steam",
       "name": "Steam",
       "category": "Gaming",
-      "desc": "La tienda y launcher de juegos de Valve."
+      "desc": "Valve's game store and launcher.",
+      "es": {
+        "desc": "La tienda y launcher de juegos de Valve."
+      }
     },
     {
       "id": "EpicGames.EpicGamesLauncher",
       "name": "Epic Games",
       "category": "Gaming",
-      "desc": "Launcher de Epic (Fortnite, juegos gratis)."
+      "desc": "Epic launcher (Fortnite, free games).",
+      "es": {
+        "desc": "Launcher de Epic (Fortnite, juegos gratis)."
+      }
     },
     {
       "id": "Blizzard.BattleNet",
       "name": "Battle.net",
       "category": "Gaming",
-      "desc": "Launcher de Blizzard (Overwatch, etc.)."
+      "desc": "Blizzard launcher (Overwatch, etc.).",
+      "es": {
+        "desc": "Launcher de Blizzard (Overwatch, etc.)."
+      }
     },
     {
       "id": "BitSum.ProcessLasso",
       "name": "Process Lasso",
       "category": "Gaming",
-      "desc": "Gestion de prioridades y afinidad de CPU."
+      "desc": "CPU priority and affinity management.",
+      "es": {
+        "desc": "Gestión de prioridades y afinidad de CPU."
+      }
     },
     {
       "id": "OBSProject.OBSStudio",
       "name": "OBS Studio",
       "category": "Gaming",
-      "desc": "Grabacion y streaming."
+      "desc": "Recording and streaming.",
+      "es": {
+        "desc": "Grabación y streaming."
+      }
     },
     {
       "id": "Microsoft.VisualStudioCode",
       "name": "VS Code",
-      "category": "Desarrollo",
-      "desc": "Editor de codigo de Microsoft."
+      "category": "Development",
+      "desc": "Microsoft's code editor.",
+      "es": {
+        "desc": "Editor de código de Microsoft."
+      }
     },
     {
       "id": "Git.Git",
       "name": "Git",
-      "category": "Desarrollo",
-      "desc": "Control de versiones."
+      "category": "Development",
+      "desc": "Version control.",
+      "es": {
+        "desc": "Control de versiones."
+      }
     },
     {
       "id": "Python.Python.3.12",
       "name": "Python 3.12",
-      "category": "Desarrollo",
-      "desc": "Lenguaje Python."
+      "category": "Development",
+      "desc": "The Python language.",
+      "es": {
+        "desc": "Lenguaje Python."
+      }
     },
     {
       "id": "OpenJS.NodeJS",
       "name": "Node.js",
-      "category": "Desarrollo",
-      "desc": "Runtime de JavaScript."
+      "category": "Development",
+      "desc": "JavaScript runtime.",
+      "es": {
+        "desc": "Runtime de JavaScript."
+      }
     },
     {
       "id": "Microsoft.WindowsTerminal",
       "name": "Windows Terminal",
-      "category": "Desarrollo",
-      "desc": "Terminal moderna para Windows."
+      "category": "Development",
+      "desc": "Modern terminal for Windows.",
+      "es": {
+        "desc": "Terminal moderna para Windows."
+      }
     },
     {
       "id": "Microsoft.PowerShell",
       "name": "PowerShell 7",
-      "category": "Desarrollo",
-      "desc": "PowerShell moderno (multiplataforma)."
+      "category": "Development",
+      "desc": "Modern PowerShell (cross-platform).",
+      "es": {
+        "desc": "PowerShell moderno (multiplataforma)."
+      }
     },
     {
       "id": "7zip.7zip",
       "name": "7-Zip",
-      "category": "Utilidades",
-      "desc": "Compresor de archivos."
+      "category": "Utilities",
+      "desc": "File archiver.",
+      "es": {
+        "desc": "Compresor de archivos."
+      }
     },
     {
       "id": "Notepad++.Notepad++",
       "name": "Notepad++",
-      "category": "Utilidades",
-      "desc": "Editor de texto ligero."
+      "category": "Utilities",
+      "desc": "Lightweight text editor.",
+      "es": {
+        "desc": "Editor de texto ligero."
+      }
     },
     {
       "id": "Microsoft.PowerToys",
       "name": "PowerToys",
-      "category": "Utilidades",
-      "desc": "Utilidades avanzadas de Windows."
+      "category": "Utilities",
+      "desc": "Advanced Windows utilities.",
+      "es": {
+        "desc": "Utilidades avanzadas de Windows."
+      }
     },
     {
       "id": "ShareX.ShareX",
       "name": "ShareX",
-      "category": "Utilidades",
-      "desc": "Capturas de pantalla y grabacion."
+      "category": "Utilities",
+      "desc": "Screenshots and screen recording.",
+      "es": {
+        "desc": "Capturas de pantalla y grabación."
+      }
     },
     {
       "id": "voidtools.Everything",
       "name": "Everything",
-      "category": "Utilidades",
-      "desc": "Busqueda de archivos instantanea."
+      "category": "Utilities",
+      "desc": "Instant file search.",
+      "es": {
+        "desc": "Búsqueda de archivos instantánea."
+      }
     },
     {
       "id": "qBittorrent.qBittorrent",
       "name": "qBittorrent",
-      "category": "Utilidades",
-      "desc": "Cliente de torrents sin anuncios."
+      "category": "Utilities",
+      "desc": "Ad-free torrent client.",
+      "es": {
+        "desc": "Cliente de torrents sin anuncios."
+      }
     },
     {
       "id": "VideoLAN.VLC",
       "name": "VLC",
       "category": "Multimedia",
-      "desc": "Reproductor que abre cualquier formato."
+      "desc": "Player that opens any format.",
+      "es": {
+        "desc": "Reproductor que abre cualquier formato."
+      }
     },
     {
       "id": "Spotify.Spotify",
       "name": "Spotify",
       "category": "Multimedia",
-      "desc": "Musica en streaming."
+      "desc": "Music streaming.",
+      "es": {
+        "desc": "Música en streaming."
+      }
     },
     {
       "id": "WiresharkFoundation.Wireshark",
       "name": "Wireshark",
-      "category": "Ciberseguridad",
-      "desc": "Analisis de trafico de red."
+      "category": "Cybersecurity",
+      "desc": "Network traffic analysis.",
+      "es": {
+        "desc": "Análisis de tráfico de red."
+      }
     },
     {
       "id": "Insecure.Nmap",
       "name": "Nmap",
-      "category": "Ciberseguridad",
-      "desc": "Escaner de red y puertos."
+      "category": "Cybersecurity",
+      "desc": "Network and port scanner.",
+      "es": {
+        "desc": "Escáner de red y puertos."
+      }
     },
     {
       "id": "Oracle.VirtualBox",
       "name": "VirtualBox",
-      "category": "Ciberseguridad",
-      "desc": "Maquinas virtuales para tus labs."
+      "category": "Cybersecurity",
+      "desc": "Virtual machines for your labs.",
+      "es": {
+        "desc": "Máquinas virtuales para tus labs."
+      }
     },
     {
       "id": "Opera.Opera",
       "name": "Opera",
-      "category": "Navegadores",
-      "desc": "Navegador con VPN gratis integrada."
+      "category": "Browsers",
+      "desc": "Browser with a free built-in VPN.",
+      "es": {
+        "desc": "Navegador con VPN gratis integrada."
+      }
     },
     {
       "id": "Opera.OperaGX",
       "name": "Opera GX",
-      "category": "Navegadores",
-      "desc": "Navegador para gamers: limita RAM/CPU y red."
+      "category": "Browsers",
+      "desc": "Browser for gamers: limits RAM/CPU and network.",
+      "es": {
+        "desc": "Navegador para gamers: limita RAM/CPU y red."
+      }
     },
     {
       "id": "VMware.WorkstationPlayer",
       "name": "VMware Workstation Player",
-      "category": "Ciberseguridad",
-      "desc": "Maquinas virtuales (alternativa a VirtualBox) para tus labs."
+      "category": "Cybersecurity",
+      "desc": "Virtual machines (a VirtualBox alternative) for your labs.",
+      "es": {
+        "desc": "Máquinas virtuales (alternativa a VirtualBox) para tus labs."
+      }
     },
     {
       "id": "Orbmu2k.NvidiaProfileInspector",
       "name": "Nvidia Profile Inspector",
       "category": "Gaming",
-      "desc": "Ajustes 3D avanzados de Nvidia (low latency, vsync, etc.) e importar/exportar .nip."
+      "desc": "Advanced Nvidia 3D settings (low latency, vsync, etc.) and .nip import/export.",
+      "es": {
+        "desc": "Ajustes 3D avanzados de Nvidia (low latency, vsync, etc.) e importar/exportar .nip."
+      }
     }
   ]
 }

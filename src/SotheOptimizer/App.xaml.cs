@@ -31,6 +31,7 @@ namespace Sothe
             // Los datos de %ProgramData% se ejecutan mas tarde como administrador: antes de usar nada, se comprueba que
             // solo un administrador pudo crearlos (ver SecureStorage). Si no se puede asegurar, no se instalan actualizaciones.
             bool rootTrusted = OperatingSystem.IsWindows() && SecureStorage.Harden(root);
+            Loc.Load(root);   // idioma elegido la ultima vez (ingles por defecto)
 
             // Sin esto, al cerrarse el EULA (unica ventana abierta) WPF da la app por terminada
             // y el primer arranque se cierra justo despues de aceptar.
