@@ -18,7 +18,7 @@ namespace Sothe.Tests
     // SHA-256. Estos tests cubren la comprobacion contra un GitHub simulado con la forma real de su API de releases.
     public class AppUpdaterTests
     {
-        private const string Repo = "ImSothe/TojiCelestialOptimizer";
+        private const string Repo = "ImSothe/Toji-Windows-Optimizer";
         private static readonly Version Current = new Version(1, 0, 0);
 
         // GitHub simulado: sirve /repos/{repo}/releases/latest y las URLs de descarga de los assets

@@ -94,30 +94,9 @@ con un toast). Sin `GitHubRepo`, no hace ninguna llamada de red.
 `Assets\icon.ico` sale del logo vectorial (`SotheLogo` en `Themes\SotheTheme.xaml`). Si cambias el logo, regeneralo:
 `dotnet run --project tools/IconGen -- src/SotheOptimizer/Themes/SotheTheme.xaml src/SotheOptimizer/Assets/icon.ico`
 
-## Licencias
-- `Licensing/LicenseConfig.cs` ya tiene la cuenta, el producto y la politica de prueba de Keygen (no son secretos).
-- **Node-locked:** cada clave se valida con la huella del PC (`validate-key` con `scope.fingerprint` + `scope.product`)
-  y se activa en la primera maquina (`POST /machines` con `Authorization: License <clave>`). Una clave = un PC.
-- **Clave de prueba de 3 meses:** el usuario la pega en el campo del dialogo de licencia (pulsa la insignia
-  "SIN LICENCIA" o salta el muro de pago). Las licencias de la politica de prueba salen como PRUEBA con los dias
-  restantes; las de cualquier otra politica del producto, como PRO.
-- **Al arrancar** se valida online en segundo plano. Sin red se usa la cache cifrada (la prueba vale hasta su fecha;
-  una licencia PRO, 14 dias sin validar). Si la clave caduca, se suspende o deja de estar activa en este PC, los ajustes
-  PRO se bloquean y la app lo avisa una sola vez. Lo gratuito y revertir siguen funcionando.
-- Politica de prueba en el panel de Keygen (compruebalo antes de repartir claves):
-  - Duration: 3 meses (7776000 s) y Expiration strategy: restringir acceso al caducar.
-  - Max machines: 1 y Floating: desactivado (node-locked).
-  - Authentication strategy: LICENSE (o MIXED). Sin esto la app no puede activar la maquina con la clave (error 403).
-  - Machine uniqueness: UNIQUE_PER_POLICY, para que cada PC solo pueda activar una clave de prueba.
-- **Debug:** `SOTHE_LICENSE_DEMO=1` usa el proveedor DEMO en vez de Keygen: claves `SOTHE-DEMO-PRUEBA` (3 meses),
-  `SOTHE-DEMO-CADUCADA`, `SOTHE-DEMO-PRO` y `SOTHE-DEMO-REVOKED`.
-- **Pruebas contra Keygen real** (no activan maquinas, no gastan claves):
-  `$env:SOTHE_KEYGEN_LIVE=1; $env:SOTHE_KEYGEN_TEST_KEY="<una clave de prueba>"; dotnet test tests/SotheOptimizer.Tests`
-- **Paywall inteligente:** cada tweak de `data\tweaks.json` lleva `"isPro"`. Sin licencia, APLICAR aplica lo gratuito
-  (privacidad, telemetria, interfaz...) y, si hay algun ajuste PRO nuevo marcado, se para y abre el muro de pago.
-  Sin la propiedad el ajuste es gratis. Como `data\` tiene que ir firmado, nadie puede cambiar precios editando el
-  JSON; tu si puedes hacerlo con una OTA firmada (marcar o liberar ajustes PRO).
-- Revertir, Revertir TODO, Simular, exportar/importar y Reparaciones funcionan siempre sin licencia.
+## Licencia
+Codigo abierto bajo MIT (ver `LICENSE`). No hay licencias de pago, claves ni muro de pago: todos los ajustes se aplican
+sin restricciones, y revertir es siempre posible.
 
 ## Notas
 - **Ajustes "PROHIBIDO":** los 8 tweaks de alto riesgo (desactivar Defender, Firewall, UAC, mitigaciones
@@ -151,13 +130,10 @@ PowerShellRunner.cs  ejecuta PowerShell oculto y detecta fallos (codigo de salid
 DataUpdater.cs     OTA de data\*.json firmada (ECDSA) con fusion de perfiles
 SignedData.cs      clave publica + verificacion de firma de data\ en cada carga (si no cuadra, JSON incrustado)
 AppUpdater.cs      auto-actualizacion del .exe: descarga solo firmada (ECDSA)+SHA-256, se instala al reiniciar
-Licensing\         huella HWID, cache cifrada (DPAPI), estados y proveedores (Keygen / Demo)
-PaywallDialog.*    muro de pago (APLICAR con algun ajuste PRO nuevo, y Guardar perfil)
 SotheEngine.cs      motor: aplicar/revertir/backup/codigo/restaurar
 data\*.json        tweaks, apps, features, perfiles (editables / OTA)
 ```
 
 ## Pendiente
-- Enlace de compra (`LicenseConfig.CheckoutUrl`) y, si se quieren pruebas de un clic sin clave, el Worker (`TrialWorkerUrl`).
-- Generar las claves OTA (`OtaSigner keygen ... --source`) y publicar los JSON firmados en una URL publica.
+- Generar las claves OTA (`OtaSigner keygen ... --source`) y publicar los JSON firmados en una URL publica, si se quiere activar la OTA de datos.
 - Firma de codigo del .exe (SmartScreen).
