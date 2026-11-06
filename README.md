@@ -5,7 +5,7 @@
 **A Windows tuning tool for power users: no hidden dangerous settings, and every change can be put back.**
 
 [![CI](https://github.com/ImSothe/Toji-Windows-Optimizer/actions/workflows/ci.yml/badge.svg)](https://github.com/ImSothe/Toji-Windows-Optimizer/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/ImSothe/Sothe-Windows-Optimizer?label=release&color=8b5cf6)](https://github.com/ImSothe/Sothe-Windows-Optimizer/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/ImSothe/Toji-Windows-Optimizer?label=release&color=8b5cf6)](https://github.com/ImSothe/Toji-Windows-Optimizer/releases/latest)
 ![Windows 10 | 11](https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-0078D4?logo=windows&logoColor=white)
 ![.NET 8](https://img.shields.io/badge/.NET-8%20(bundled)-512BD4?logo=dotnet&logoColor=white)
 ![WPF](https://img.shields.io/badge/UI-WPF-5C2D91)
@@ -68,13 +68,13 @@ button ("Revert ALL") restores it in the right order.
 
 ## Download & install
 
-Signed binary releases are published in
-[**Sothe-Windows-Optimizer › Releases**](https://github.com/ImSothe/Sothe-Windows-Optimizer/releases/latest), the
-repository existing installs poll for updates. A single self-contained `.exe`: no installer, no dependencies.
+The `.exe` is in **[Releases](https://github.com/ImSothe/Toji-Windows-Optimizer/releases/latest)** (right-hand column of this
+page, or the link above): GitHub does not list it among the source files. Releases are signed; the app's auto-update reads
+them. A single self-contained `.exe`: no installer, no dependencies.
 
 > **Release status.** `v1.2.0` is the first open-source build (MIT, no licensing). The update-signing key was replaced, so installs of `v1.1.0` or older (the closed-source builds) will not auto-update: download `v1.2.0` once by hand; from there auto-update works again.
 
-1. Download **`SotheOptimizer.exe`** (the file keeps its original name so existing installs update in place).
+1. Download **`SotheOptimizer.exe`** (the file keeps its original name so existing installs update in place; builds before 1.2.0 were published in the older `Sothe-Windows-Optimizer` repository).
 2. *(Recommended)* verify it: `Get-FileHash .\SotheOptimizer.exe -Algorithm SHA256` must match the `sha256` field of
    that release's `release.json`.
 3. Double-click it. Windows asks for **administrator rights** (UAC): accept.
