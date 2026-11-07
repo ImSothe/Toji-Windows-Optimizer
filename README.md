@@ -72,9 +72,9 @@ button ("Revert ALL") restores it in the right order.
 
 ## Download & install
 
-The `.exe` is in **[Releases](https://github.com/ImSothe/Toji-Windows-Optimizer/releases/latest)** (right-hand column of this
-page, or the link above): GitHub does not list it among the source files. Releases are signed; the app's auto-update reads
-them. A single self-contained `.exe`: no installer, no dependencies.
+`SotheOptimizer.exe` sits in the root of this repository, so **Code → Download ZIP** already contains it. The signed build
+is also in **[Releases](https://github.com/ImSothe/Toji-Windows-Optimizer/releases/latest)**, which is what the app's auto-update
+reads. A single self-contained `.exe` (72 MB, compressed): no installer, no dependencies.
 
 > **Release status.** `v1.2.0` is the first open-source build (MIT, no licensing). The update-signing key was replaced, so installs of `v1.1.0` or older (the closed-source builds) will not auto-update: download `v1.2.0` once by hand; from there auto-update works again.
 
