@@ -18,6 +18,10 @@
 
 <img src="docs/images/toji-optimizations.png" width="860" alt="Toji: tweaks list with risk levels, profiles, search and the Apply / Revert all bar" />
 
+<sub>Real recording: three harmless tweaks applied, then reverted. Everything else on the machine stays untouched.</sub>
+
+<img src="docs/images/toji-demo.gif" width="860" alt="Toji demo: check three tweaks, Apply, then uncheck them and Apply again to revert" />
+
 </div>
 
 ---
