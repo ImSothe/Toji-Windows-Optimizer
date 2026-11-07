@@ -72,7 +72,7 @@ button ("Revert ALL") restores it in the right order.
 
 ## Download & install
 
-`Toji Optimizer.exe` sits in the root of this repository, so **Code → Download ZIP** already contains it. The signed build
+`TojiOptimizer.exe` sits in the root of this repository, so **Code → Download ZIP** already contains it. The signed build
 is also in **[Releases](https://github.com/ImSothe/Toji-Windows-Optimizer/releases/latest)**, which is what the app's auto-update
 reads. A single self-contained `.exe` (72 MB, compressed; the copy in Releases is named `SotheOptimizer.exe` so existing installs update in place): no installer, no dependencies.
 
