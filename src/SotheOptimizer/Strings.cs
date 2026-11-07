@@ -249,6 +249,9 @@ namespace Sothe
             { "lang.busy", "Wait for the current operation to finish before changing the language." },
             { "search.tweaks", "Search tweaks… (e.g. mouse, telemetry, network)" },
             { "search.apps", "Search apps… (e.g. steam, discord, nmap)" },
+            { "dlg.gotit", "Got it" },
+            { "dlg.continue", "Continue" },
+            { "win.restore", "Restore" },
         };
 
         public static readonly Dictionary<string, string> Es = new Dictionary<string, string>
@@ -493,6 +496,9 @@ namespace Sothe
             { "lang.busy", "Espera a que termine la operación en curso antes de cambiar el idioma." },
             { "search.tweaks", "Buscar ajustes… (ej. ratón, telemetría, red)" },
             { "search.apps", "Buscar apps… (ej. steam, discord, nmap)" },
+            { "dlg.gotit", "Entendido" },
+            { "dlg.continue", "Continuar" },
+            { "win.restore", "Restaurar" },
         };
     }
 }

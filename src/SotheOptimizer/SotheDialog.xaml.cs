@@ -61,19 +61,19 @@ namespace Sothe
 
         public static void Info(Window owner, string title, string message)
         {
-            new SotheDialog(owner, title, message, "Entendido", null, false).ShowDialog();
+            new SotheDialog(owner, title, message, Loc.T("dlg.gotit"), null, false).ShowDialog();
         }
 
-        public static bool Confirm(Window owner, string title, string message, string okText = "Continuar", bool danger = false)
+        public static bool Confirm(Window owner, string title, string message, string okText = null, bool danger = false)
         {
-            return new SotheDialog(owner, title, message, okText, "Cancelar", danger).ShowDialog() == true;
+            return new SotheDialog(owner, title, message, okText ?? Loc.T("dlg.continue"), Loc.T("dlg.cancel"), danger).ShowDialog() == true;
         }
 
         // Devuelve el texto aceptado o null si se cancela. validate: devuelve un mensaje de error o null si es valido
         public static string Prompt(Window owner, string title, string message, string initial, string okText,
                                     string placeholder = "", bool code = false, Func<string, string> validate = null)
         {
-            var d = new SotheDialog(owner, title, message, okText, "Cancelar", false) { _validate = validate };
+            var d = new SotheDialog(owner, title, message, okText, Loc.T("dlg.cancel"), false) { _validate = validate };
             d.InputBox.Visibility = Visibility.Visible;
             d.InputBox.Text = initial ?? "";
             d.InputBox.Tag = placeholder;

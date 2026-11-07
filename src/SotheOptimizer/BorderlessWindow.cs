@@ -32,7 +32,7 @@ namespace Sothe
                 root.BorderThickness = new Thickness(maxed ? 0 : 1);
                 UpdateClip(root, maxed);
                 if (maximize?.Content is Path glyph) glyph.Data = maxed ? RestoreGlyph : MaximizeGlyph;
-                if (maximize != null) maximize.ToolTip = maxed ? "Restaurar" : "Maximizar";
+                if (maximize != null) maximize.ToolTip = maxed ? Loc.T("win.restore") : Loc.T("win.maximize");
             }
 
             void ToggleMaximize() =>
