@@ -315,6 +315,10 @@ namespace Sothe
                         {
                             if (!IsValidServiceName(op.Name)) throw new ArgumentException("invalid service name: " + op.Name);
                             string svcPath = "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\" + op.Name;
+                            // A service this Windows does not have (e.g. CscService on some editions) is skipped: creating the key
+                            // would leave a half-made ghost service that revert could not remove.
+                            using (var svcKey = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Services\\" + op.Name))
+                                if (svcKey == null) break;
                             var prior = RegGet(svcPath, "Start");
                             backup.Add(new OpBackup { Type = "reg", Path = svcPath, Name = "Start", PriorExists = prior.exists, PriorValue = prior.val, PriorKind = prior.kind,
                                 Service = op.Name, WasRunning = IsServiceRunning(op.Name) });

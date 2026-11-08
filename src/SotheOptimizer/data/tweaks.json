@@ -1759,6 +1759,206 @@
           "capture": "Get-PnpDevice -Class Display -Status OK -ErrorAction SilentlyContinue | ForEach-Object { $k = \"HKLM:\\SYSTEM\\CurrentControlSet\\Enum\\$($_.InstanceId)\\Device Parameters\\Interrupt Management\\MessageSignaledInterruptProperties\"; $v = (Get-ItemProperty -Path $k -Name MSISupported -ErrorAction SilentlyContinue).MSISupported; $_.InstanceId + '|' + $(if ($null -eq $v) { 'absent' } else { $v }) }"
         }
       ]
+    },
+    {
+      "id": "teredo_off",
+      "name": "Disable Teredo tunneling",
+      "category": "Network",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Turns off the Teredo IPv6-over-IPv4 tunnel, an extra network layer that games do not need. The previous state is restored on revert.",
+      "es": {
+        "name": "Desactivar el túnel Teredo",
+        "desc": "Apaga el túnel Teredo (IPv6 sobre IPv4), una capa de red extra que los juegos no necesitan. Al revertir se restaura el estado anterior."
+      },
+      "ops": [
+        {
+          "type": "command",
+          "apply": "netsh interface teredo set state disabled",
+          "revert": "if ($captured) { netsh interface teredo set state $captured } else { netsh interface teredo set state default }",
+          "capture": "$o = netsh interface teredo show state; $global:LASTEXITCODE = 0; $t = $o | Where-Object { $_ -match ':' } | Select-Object -First 1; if ($t -match ':\\s*(\\w+)\\s*$') { $Matches[1] }"
+        }
+      ]
+    },
+    {
+      "id": "ipv4_preferred",
+      "name": "Prefer IPv4 over IPv6",
+      "category": "Network",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Makes Windows try IPv4 first (DisabledComponents = 32) without turning IPv6 off. Can shave connection setup time on servers with poor IPv6 routing.",
+      "warning": "Takes effect after a restart.",
+      "es": {
+        "name": "Preferir IPv4 sobre IPv6",
+        "desc": "Hace que Windows pruebe IPv4 primero (DisabledComponents = 32) sin apagar IPv6. Puede acortar la conexión a servidores con mal enrutado IPv6.",
+        "warning": "Se aplica tras reiniciar."
+      },
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
+          "name": "DisabledComponents",
+          "value": 32
+        }
+      ]
+    },
+    {
+      "id": "mpo_off",
+      "name": "Disable Multiplane Overlay (MPO)",
+      "category": "GPU",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Turns off MPO in the desktop compositor. It is a common fix for stutter, flicker and black frames on NVIDIA GPUs in windowed and borderless games.",
+      "warning": "Takes effect after a restart.",
+      "es": {
+        "name": "Desactivar Multiplane Overlay (MPO)",
+        "desc": "Apaga MPO en el compositor del escritorio. Es una solución habitual para tirones, parpadeos y fotogramas negros en GPUs NVIDIA con juegos en ventana o sin bordes.",
+        "warning": "Se aplica tras reiniciar."
+      },
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm",
+          "name": "OverlayTestMode",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "services_trim",
+      "name": "Trim idle services (Maps, Offline Files)",
+      "category": "Performance",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Sets MapsBroker (downloaded maps) to Manual and CscService (Offline Files) to Disabled. Neither is used on a gaming PC. Previous startup types are restored on revert.",
+      "es": {
+        "name": "Recortar servicios sin uso (Mapas, Archivos sin conexión)",
+        "desc": "Pone MapsBroker (mapas descargados) en Manual y CscService (Archivos sin conexión) en Desactivado. Ninguno se usa en un PC de juegos. Al revertir se restauran los tipos de inicio previos."
+      },
+      "ops": [
+        {
+          "type": "service",
+          "name": "MapsBroker",
+          "startup": "Manual"
+        },
+        {
+          "type": "service",
+          "name": "CscService",
+          "startup": "Disabled"
+        }
+      ]
+    },
+    {
+      "id": "storage_sense_off",
+      "name": "Disable Storage Sense",
+      "category": "Storage",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Stops Windows from deleting temporary files and emptying the Recycle Bin on its own in the middle of a session.",
+      "es": {
+        "name": "Desactivar Sensor de almacenamiento",
+        "desc": "Evita que Windows borre archivos temporales y vacíe la papelera por su cuenta en mitad de una sesión."
+      },
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy",
+          "name": "01",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "id": "sticky_keys_off",
+      "name": "Disable the Sticky Keys shortcut",
+      "category": "Input",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Pressing Shift five times no longer opens the Sticky Keys prompt, which steals focus and can minimize a fullscreen game.",
+      "es": {
+        "name": "Desactivar el atajo de Teclas especiales",
+        "desc": "Pulsar Shift cinco veces ya no abre el aviso de Teclas especiales, que roba el foco y puede minimizar un juego a pantalla completa."
+      },
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Control Panel\\Accessibility\\StickyKeys",
+          "name": "Flags",
+          "kind": "String",
+          "value": "506"
+        }
+      ]
+    },
+    {
+      "id": "end_task_taskbar",
+      "name": "End Task in the taskbar menu",
+      "category": "Interface",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Adds End task to the right-click menu of taskbar buttons, handy for killing a frozen game without opening Task Manager.",
+      "es": {
+        "name": "Finalizar tarea en el menú de la barra de tareas",
+        "desc": "Añade Finalizar tarea al clic derecho de los botones de la barra de tareas, útil para cerrar un juego colgado sin abrir el Administrador de tareas."
+      },
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\TaskbarDeveloperSettings",
+          "name": "TaskbarEndTask",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "long_paths",
+      "name": "Enable long file paths",
+      "category": "Interface",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Lets Win32 apps use paths longer than 260 characters (LongPathsEnabled = 1). Avoids path-length errors in game mods and dev tools.",
+      "es": {
+        "name": "Activar rutas de archivo largas",
+        "desc": "Permite a las apps Win32 usar rutas de más de 260 caracteres (LongPathsEnabled = 1). Evita errores de longitud de ruta en mods y herramientas de desarrollo."
+      },
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+          "name": "LongPathsEnabled",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "classic_context_menu",
+      "name": "Classic right-click menu",
+      "category": "Interface",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Restores the full Windows 10 context menu instead of the Windows 11 'Show more options' one.",
+      "warning": "Sign out or restart Explorer to see it.",
+      "es": {
+        "name": "Menú contextual clásico",
+        "desc": "Recupera el menú contextual completo de Windows 10 en lugar del 'Mostrar más opciones' de Windows 11.",
+        "warning": "Cierra sesión o reinicia el Explorador para verlo."
+      },
+      "ops": [
+        {
+          "type": "command",
+          "apply": "New-Item -Path 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32' -Value '' -Force | Out-Null",
+          "revert": "if ($captured -ne 'yes') { Remove-Item -Path 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}' -Recurse -Force -ErrorAction SilentlyContinue }",
+          "capture": "if (Test-Path 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}') { 'yes' } else { 'no' }"
+        }
+      ]
     }
   ]
 }

@@ -28,7 +28,7 @@
 
 ## What it is
 
-Toji applies **70 performance, latency, privacy and cleanup tweaks** to Windows, built for **competitive gaming**
+Toji applies **79 performance, latency, privacy and cleanup tweaks** to Windows, built for **competitive gaming**
 (CS2, Valorant, Overwatch...) and **cybersecurity labs** running VMs.
 
 Unlike most "optimizer" apps it **does not hide the dangerous settings**: it lets you touch Defender, the firewall,
@@ -57,7 +57,7 @@ button ("Revert ALL") restores it in the right order.
 
 | | |
 |---|---|
-| **Tweaks** | 70, across 13 categories (Performance, Input, Network, GPU, Power, Privacy, UI, Storage, Security, Debloat, Windows Update...), each described as data in `tweaks.json` |
+| **Tweaks** | 79, across 13 categories (Performance, Input, Network, GPU, Power, Privacy, UI, Storage, Security, Debloat, Windows Update...), each described as data in `tweaks.json` |
 | **Risk levels** | `safe` 🟢 · `moderate` 🔵 · `high` 🟠 · `extreme` 🔴 (**FORBIDDEN**, hidden behind Advanced Mode) |
 | **Apps (winget)** | 31 programs, batch install/uninstall |
 | **Windows features** | 6 (Hyper-V, .NET 3.5, WSL...) |
