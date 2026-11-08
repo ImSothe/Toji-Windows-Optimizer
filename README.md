@@ -28,7 +28,7 @@
 
 ## What it is
 
-Toji applies **79 performance, latency, privacy and cleanup tweaks** to Windows, built for **competitive gaming**
+Toji applies **84 performance, latency, privacy and cleanup tweaks** to Windows, built for **competitive gaming**
 (CS2, Valorant, Overwatch...) and **cybersecurity labs** running VMs.
 
 Unlike most "optimizer" apps it **does not hide the dangerous settings**: it lets you touch Defender, the firewall,
@@ -57,7 +57,7 @@ button ("Revert ALL") restores it in the right order.
 
 | | |
 |---|---|
-| **Tweaks** | 79, across 13 categories (Performance, Input, Network, GPU, Power, Privacy, UI, Storage, Security, Debloat, Windows Update...), each described as data in `tweaks.json` |
+| **Tweaks** | 84, across 13 categories (Performance, Input, Network, GPU, Power, Privacy, UI, Storage, Security, Debloat, Windows Update...), each described as data in `tweaks.json` |
 | **Risk levels** | `safe` 🟢 · `moderate` 🔵 · `high` 🟠 · `extreme` 🔴 (**FORBIDDEN**, hidden behind Advanced Mode) |
 | **Apps (winget)** | 31 programs, batch install/uninstall |
 | **Windows features** | 6 (Hyper-V, .NET 3.5, WSL...) |
@@ -301,3 +301,11 @@ warranty. See [LICENSE](LICENSE).
 
 [MIT](LICENSE). Built with AI-assisted development (Claude Code); the design, the decisions and the verification are
 mine. Contact: [LinkedIn](https://www.linkedin.com/in/%C3%A1ngel-baz-monteiro-8196a21a9/).
+
+**Prior art.** Fourteen of the tweaks (Teredo, IPv4 preference, MPO, trimmed services, Storage Sense, Sticky Keys, End Task, long
+paths, classic context menu, OneDrive and Edge removal, Razer and Logitech blocks, Brave debloat) were chosen after reading the
+public configuration of [Chris Titus Tech's WinUtil](https://github.com/ChrisTitusTech/winutil) (MIT). That is documentation
+reading, not binary reverse engineering: the registry values and commands come from its open `tweaks.json`. Everything was
+re-implemented on Toji's own engine, so each one has a captured previous state and a LIFO revert, and the new ones were
+apply/revert-checked on a real Windows 11 machine. Some were also changed on purpose: Edge removal keeps your browser profile,
+and the OneDrive and Edge removals reinstall through winget on revert.

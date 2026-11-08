@@ -1959,6 +1959,195 @@
           "capture": "if (Test-Path 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}') { 'yes' } else { 'no' }"
         }
       ]
+    },
+    {
+      "id": "onedrive_remove",
+      "name": "Remove OneDrive",
+      "category": "Debloat",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Uninstalls Microsoft OneDrive and clears its leftovers. Your OneDrive folder and the files in it are NOT deleted (it is write-protected while the uninstaller runs). Revert reinstalls OneDrive with winget.",
+      "warning": "Files that exist only in the cloud will no longer sync. Revert needs winget and an internet connection.",
+      "es": {
+        "name": "Quitar OneDrive",
+        "desc": "Desinstala Microsoft OneDrive y limpia sus restos. Tu carpeta de OneDrive y sus archivos NO se borran (se protege mientras corre el desinstalador). Al revertir se reinstala OneDrive con winget.",
+        "warning": "Los archivos que solo están en la nube dejarán de sincronizarse. Revertir necesita winget e internet."
+      },
+      "ops": [
+        {
+          "type": "command",
+          "capture": "$s = @(\"$env:SystemRoot\\System32\\OneDriveSetup.exe\", \"$env:SystemRoot\\SysWOW64\\OneDriveSetup.exe\") | Where-Object { Test-Path $_ } | Select-Object -First 1; if ($s) { 'installed' } else { 'absent' }",
+          "apply": "$s = @(\"$env:SystemRoot\\System32\\OneDriveSetup.exe\", \"$env:SystemRoot\\SysWOW64\\OneDriveSetup.exe\") | Where-Object { Test-Path $_ } | Select-Object -First 1; if ($s) { $od = $env:OneDrive; $acl = $null; $has = $od -and (Test-Path -LiteralPath $od -PathType Container); if ($has) { $acl = Get-Acl -LiteralPath $od; icacls $od /deny '*S-1-5-32-544:(D,DC)' | Out-Null }; try { Get-Process OneDrive -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Process -FilePath $s -ArgumentList '/uninstall' -Wait; foreach ($p in \"$env:LocalAppData\\Microsoft\\OneDrive\", \"$env:ProgramData\\Microsoft OneDrive\") { if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue } } } finally { if ($has -and $acl) { Set-Acl -LiteralPath $od -AclObject $acl } } }; $global:LASTEXITCODE = 0",
+          "revert": "if ($captured -eq 'installed') { winget install --id Microsoft.OneDrive --source winget --accept-package-agreements --accept-source-agreements }"
+        }
+      ]
+    },
+    {
+      "id": "edge_remove",
+      "name": "Remove Microsoft Edge",
+      "category": "Debloat",
+      "danger": "high",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Runs Edge's own system-level uninstaller (your browsing profile is kept). Revert reinstalls Edge with winget. More aggressive than 'Microsoft Edge debloat'.",
+      "warning": "Some Windows features and apps open links in Edge. Have another browser installed first. Windows Update can bring Edge back.",
+      "es": {
+        "name": "Quitar Microsoft Edge",
+        "desc": "Ejecuta el desinstalador de sistema de Edge (tu perfil de navegación se conserva). Al revertir se reinstala Edge con winget. Más agresivo que 'Microsoft Edge debloat'.",
+        "warning": "Algunas funciones y apps de Windows abren enlaces en Edge. Instala otro navegador antes. Windows Update puede volver a instalarlo."
+      },
+      "ops": [
+        {
+          "type": "command",
+          "capture": "$d = \"${env:ProgramFiles(x86)}\\Microsoft\\Edge\\Application\"; $setup = if (Test-Path $d) { Get-ChildItem \"$d\\*\\Installer\\setup.exe\" -ErrorAction SilentlyContinue | Select-Object -Last 1 }; if ($setup) { 'installed' } else { 'absent' }",
+          "apply": "$d = \"${env:ProgramFiles(x86)}\\Microsoft\\Edge\\Application\"; $setup = if (Test-Path $d) { Get-ChildItem \"$d\\*\\Installer\\setup.exe\" -ErrorAction SilentlyContinue | Select-Object -Last 1 }; if ($setup) { $stub = \"$env:SystemRoot\\SystemApps\\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\\MicrosoftEdge.exe\"; $made = -not (Test-Path $stub); if ($made) { New-Item -Path $stub -Force | Out-Null }; try { Start-Process -FilePath $setup.FullName -ArgumentList '--uninstall --system-level --force-uninstall' -Wait } finally { if ($made -and (Test-Path $stub) -and ((Get-Item $stub).Length -eq 0)) { Remove-Item $stub -Force -ErrorAction SilentlyContinue } } }; $global:LASTEXITCODE = 0",
+          "revert": "if ($captured -eq 'installed') { winget install --id Microsoft.Edge --source winget --accept-package-agreements --accept-source-agreements }"
+        }
+      ]
+    },
+    {
+      "id": "razer_block",
+      "name": "Block Razer software auto-install",
+      "category": "Debloat",
+      "danger": "moderate",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Stops Windows from downloading Razer's installer when a Razer device is plugged in: write access to the folder it uses is denied and automatic driver search is turned off.",
+      "warning": "Turning off automatic driver search affects every device, not only Razer: Windows Update will not fetch drivers on its own.",
+      "es": {
+        "name": "Bloquear la instalación automática del software de Razer",
+        "desc": "Evita que Windows descargue el instalador de Razer al conectar un dispositivo Razer: se deniega la escritura en su carpeta y se apaga la búsqueda automática de controladores.",
+        "warning": "Apagar la búsqueda automática de controladores afecta a todos los dispositivos, no solo a Razer: Windows Update no descargará controladores por su cuenta."
+      },
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DriverSearching",
+          "name": "SearchOrderConfig",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Device Installer",
+          "name": "DisableCoInstallers",
+          "value": 1
+        },
+        {
+          "type": "command",
+          "capture": "$p = \"$env:SystemRoot\\Installer\\Razer\"; if (-not (Test-Path $p)) { 'created' } elseif ((Get-Acl $p).Access | Where-Object { $_.AccessControlType -eq 'Deny' -and $_.IdentityReference.Value -eq 'Everyone' }) { 'denied' } else { 'existed' }",
+          "apply": "$p = \"$env:SystemRoot\\Installer\\Razer\"; if (-not (Test-Path $p)) { New-Item -Path $p -ItemType Directory -Force | Out-Null }; icacls $p /deny '*S-1-1-0:(W)' | Out-Null; if ($LASTEXITCODE -ne 0) { throw \"icacls failed on $p (exit code $LASTEXITCODE)\" }",
+          "revert": "$p = \"$env:SystemRoot\\Installer\\Razer\"; if ((Test-Path $p) -and $captured -ne 'denied') { icacls $p /remove:d '*S-1-1-0' | Out-Null; if ($captured -eq 'created' -and -not (Get-ChildItem $p -Force)) { Remove-Item $p -Force } }"
+        }
+      ]
+    },
+    {
+      "id": "logitech_block",
+      "name": "Block Logitech Download Assistant",
+      "category": "Debloat",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Stops the Logitech Download Assistant that installs itself with Logitech devices, and denies write access to the folder it installs into.",
+      "es": {
+        "name": "Bloquear el asistente de descargas de Logitech",
+        "desc": "Detiene el asistente de descargas de Logitech que se instala solo con los dispositivos Logitech y deniega la escritura en su carpeta de instalación."
+      },
+      "ops": [
+        {
+          "type": "command",
+          "capture": "$p = \"$(if ($env:ProgramW6432) { $env:ProgramW6432 } else { $env:ProgramFiles })\\LogiDownloadAssistant\"; if (-not (Test-Path $p)) { 'created' } elseif ((Get-Acl $p).Access | Where-Object { $_.AccessControlType -eq 'Deny' -and $_.IdentityReference.Value -eq 'Everyone' }) { 'denied' } else { 'existed' }",
+          "apply": "$p = \"$(if ($env:ProgramW6432) { $env:ProgramW6432 } else { $env:ProgramFiles })\\LogiDownloadAssistant\"; Stop-Process -Name 'logi_download_assistant' -Force -ErrorAction SilentlyContinue; if (-not (Test-Path $p)) { New-Item -Path $p -ItemType Directory -Force | Out-Null }; icacls $p /deny '*S-1-1-0:(W)' | Out-Null; if ($LASTEXITCODE -ne 0) { throw \"icacls failed on $p (exit code $LASTEXITCODE)\" }",
+          "revert": "$p = \"$(if ($env:ProgramW6432) { $env:ProgramW6432 } else { $env:ProgramFiles })\\LogiDownloadAssistant\"; if ((Test-Path $p) -and $captured -ne 'denied') { icacls $p /remove:d '*S-1-1-0' | Out-Null; if ($captured -eq 'created' -and -not (Get-ChildItem $p -Force)) { Remove-Item $p -Force } }"
+        }
+      ]
+    },
+    {
+      "id": "brave_debloat",
+      "name": "Brave browser debloat",
+      "category": "Debloat",
+      "danger": "safe",
+      "portable": true,
+      "anticheat": false,
+      "desc": "Sets Brave's enterprise policies to turn off Rewards, Wallet, VPN, AI Chat, News, Talk, Tor and usage metrics. Does nothing if Brave is not installed.",
+      "es": {
+        "name": "Brave sin extras",
+        "desc": "Configura las políticas de Brave para apagar Rewards, Wallet, VPN, AI Chat, News, Talk, Tor y las métricas de uso. No hace nada si Brave no está instalado."
+      },
+      "ops": [
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "BraveRewardsDisabled",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "BraveWalletDisabled",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "BraveVPNDisabled",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "BraveAIChatEnabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "BraveStatsPingEnabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "BraveNewsDisabled",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "BraveTalkDisabled",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "TorDisabled",
+          "value": 1
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "BraveP3AEnabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "UrlKeyedAnonymizedDataCollectionEnabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "SafeBrowsingExtendedReportingEnabled",
+          "value": 0
+        },
+        {
+          "type": "reg",
+          "path": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave",
+          "name": "MetricsReportingEnabled",
+          "value": 0
+        }
+      ]
     }
   ]
 }
