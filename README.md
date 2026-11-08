@@ -301,11 +301,3 @@ warranty. See [LICENSE](LICENSE).
 
 [MIT](LICENSE). Built with AI-assisted development (Claude Code); the design, the decisions and the verification are
 mine. Contact: [LinkedIn](https://www.linkedin.com/in/%C3%A1ngel-baz-monteiro-8196a21a9/).
-
-**Prior art.** Fourteen of the tweaks (Teredo, IPv4 preference, MPO, trimmed services, Storage Sense, Sticky Keys, End Task, long
-paths, classic context menu, OneDrive and Edge removal, Razer and Logitech blocks, Brave debloat) were chosen after reading the
-public configuration of [Chris Titus Tech's WinUtil](https://github.com/ChrisTitusTech/winutil) (MIT). That is documentation
-reading, not binary reverse engineering: the registry values and commands come from its open `tweaks.json`. Everything was
-re-implemented on Toji's own engine, so each one has a captured previous state and a LIFO revert, and the new ones were
-apply/revert-checked on a real Windows 11 machine. Some were also changed on purpose: Edge removal keeps your browser profile,
-and the OneDrive and Edge removals reinstall through winget on revert.
