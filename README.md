@@ -301,3 +301,8 @@ warranty. See [LICENSE](LICENSE).
 
 [MIT](LICENSE). Built with AI-assisted development (Claude Code); the design, the decisions and the verification are
 mine. Contact: [LinkedIn](https://www.linkedin.com/in/%C3%A1ngel-baz-monteiro-8196a21a9/).
+
+**Credits.** Fourteen of the tweaks (Teredo, IPv4 preference, MPO, trimmed services, Storage Sense, Sticky Keys, End Task, long paths,
+classic context menu, OneDrive and Edge removal, Razer and Logitech blocks, Brave debloat) were chosen after reading the public
+configuration of [Chris Titus Tech's WinUtil](https://github.com/ChrisTitusTech/winutil) (MIT). They are re-implemented on Toji's own
+engine, with a captured previous state and a LIFO revert for each.
