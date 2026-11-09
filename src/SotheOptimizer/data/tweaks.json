@@ -1732,7 +1732,8 @@
         {
           "type": "command",
           "apply": "Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -like 'Nv*' } | Disable-ScheduledTask -ErrorAction SilentlyContinue ; Set-Service NvTelemetryContainer -StartupType Disabled -ErrorAction SilentlyContinue ; Stop-Service NvTelemetryContainer -Force -ErrorAction SilentlyContinue",
-          "revert": "Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -like 'Nv*' } | Enable-ScheduledTask -ErrorAction SilentlyContinue ; Set-Service NvTelemetryContainer -StartupType Manual -ErrorAction SilentlyContinue"
+          "revert": "$lines = $captured -split \"`n\"; if ($lines.Count -gt 1) { foreach ($p in $lines[1..($lines.Count - 1)]) { if ($p.Trim()) { $p = $p.Trim(); $i = $p.LastIndexOf('\\'); Enable-ScheduledTask -TaskPath $p.Substring(0, $i + 1) -TaskName $p.Substring($i + 1) -ErrorAction SilentlyContinue | Out-Null } } }; $st = $lines[0].Trim(); if ($st -and $st -ne 'none') { Set-Service NvTelemetryContainer -StartupType $st -ErrorAction SilentlyContinue }",
+          "capture": "$t = (Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -like 'Nv*' -and $_.State -ne 'Disabled' } | ForEach-Object { $_.TaskPath + $_.TaskName }) -join \"`n\"; $s = (Get-Service NvTelemetryContainer -ErrorAction SilentlyContinue).StartType; if (-not $s) { $s = 'none' }; \"$s`n$t\""
         }
       ]
     },
