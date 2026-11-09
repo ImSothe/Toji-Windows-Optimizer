@@ -10,7 +10,7 @@
 ![.NET 8](https://img.shields.io/badge/.NET-8%20(bundled)-512BD4?logo=dotnet&logoColor=white)
 ![WPF](https://img.shields.io/badge/UI-WPF-5C2D91)
 ![Tests](https://img.shields.io/badge/tests-196%20passing-success)
-![Coverage](https://img.shields.io/badge/line%20coverage-87.5%25%20(non--UI)-success)
+![Coverage](https://img.shields.io/badge/line%20coverage-87.2%25%20(non--UI)-success)
 ![Signed updates](https://img.shields.io/badge/auto--update-signed%20ECDSA%20P--256-8b5cf6)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -92,7 +92,7 @@ reads. A single self-contained `.exe` (72 MB, compressed; the copy in Releases i
 - **Windows 10 or 11, 64-bit.**
 - **Administrator rights**: the app edits the registry (HKLM), services and system features. If you cancel the UAC
   prompt the app simply does not open and nothing is touched.
-- **No .NET install needed**: the runtime is bundled in the `.exe` (hence the ~155 MB size).
+- **No .NET install needed**: the runtime is bundled in the `.exe` (hence the ~72 MB size, compressed).
 - An Internet connection is **optional**: only used for update checks and the winget catalog.
 
 ## Build from source
@@ -246,8 +246,8 @@ elevated program is a juicy target: please read [SECURITY.md](SECURITY.md) and r
 dotnet test tests/SotheOptimizer.Tests -c Release
 ```
 
-**196 tests**, ~3 s. Line coverage is **87.5 %** (788 / 901) and branch coverage 72.5 %, measured with `coverlet` over
-the engine, updaters, signing, storage hardening and timer code. The WPF windows (about 1.6k lines) are **not**
+**196 tests**, ~3 s. Line coverage is **87.2 %** (831 / 953) and branch coverage 71.4 %, measured with `coverlet` over
+the engine, updaters, signing, storage hardening and timer code (the 492-line English/Spanish text table is left out: every line of it is trivially covered and would only inflate the figure). The WPF windows (about 1.6k lines) are **not**
 covered, so that figure is not the coverage of the whole product. Registry round-trip tests only ever touch
 `HKCU\Software\TojiTests\<guid>`.
 
@@ -301,3 +301,11 @@ warranty. See [LICENSE](LICENSE).
 
 [MIT](LICENSE). Built with AI-assisted development (Claude Code); the design, the decisions and the verification are
 mine. Contact: [LinkedIn](https://www.linkedin.com/in/%C3%A1ngel-baz-monteiro-8196a21a9/).
+
+**Prior art.** Fourteen of the tweaks (Teredo, IPv4 preference, MPO, trimmed services, Storage Sense, Sticky Keys, End Task,
+long paths, classic context menu, OneDrive and Edge removal, Razer and Logitech blocks, Brave debloat) were chosen after reading
+the public configuration of [Chris Titus Tech's WinUtil](https://github.com/ChrisTitusTech/winutil) (MIT), and some of the
+PowerShell for the removals and blocks is adapted from it. They were re-implemented on Toji's own engine, so each one has a
+captured previous state and a LIFO revert, and the new ones were apply/revert-checked on a real Windows 11 machine. Some were
+changed on purpose: Edge removal keeps your browser profile, and the OneDrive and Edge removals reinstall through winget on
+revert. The upstream license notice is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
