@@ -9,8 +9,8 @@
 ![Windows 10 | 11](https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-0078D4?logo=windows&logoColor=white)
 ![.NET 8](https://img.shields.io/badge/.NET-8%20(bundled)-512BD4?logo=dotnet&logoColor=white)
 ![WPF](https://img.shields.io/badge/UI-WPF-5C2D91)
-![Tests](https://img.shields.io/badge/tests-196%20passing-success)
-![Coverage](https://img.shields.io/badge/line%20coverage-87.2%25%20(non--UI)-success)
+![Tests](https://img.shields.io/badge/tests-206%20passing-success)
+![Coverage](https://img.shields.io/badge/line%20coverage-87.5%25%20(non--UI)-success)
 ![Signed updates](https://img.shields.io/badge/auto--update-signed%20ECDSA%20P--256-8b5cf6)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -246,7 +246,7 @@ elevated program is a juicy target: please read [SECURITY.md](SECURITY.md) and r
 dotnet test tests/SotheOptimizer.Tests -c Release
 ```
 
-**196 tests**, ~3 s. Line coverage is **87.2 %** (831 / 953) and branch coverage 71.4 %, measured with `coverlet` over
+**206 tests**, ~3 s. Line coverage is **87.5 %** (834 / 953) and branch coverage 71.7 %, measured with `coverlet` over
 the engine, updaters, signing, storage hardening and timer code (the 492-line English/Spanish text table is left out: every line of it is trivially covered and would only inflate the figure). The WPF windows (about 1.6k lines) are **not**
 covered, so that figure is not the coverage of the whole product. Registry round-trip tests only ever touch
 `HKCU\Software\TojiTests\<guid>`.

@@ -1788,19 +1788,18 @@
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Makes Windows try IPv4 first (DisabledComponents = 32) without turning IPv6 off. Can shave connection setup time on servers with poor IPv6 routing.",
-      "warning": "Takes effect after a restart.",
+      "reboot": true,
+      "desc": "Makes Windows try IPv4 first by setting only the 0x20 bit of DisabledComponents, so any other IPv6 setting you already had is kept. It does not turn IPv6 off. Revert restores the exact previous value.",
       "es": {
         "name": "Preferir IPv4 sobre IPv6",
-        "desc": "Hace que Windows pruebe IPv4 primero (DisabledComponents = 32) sin apagar IPv6. Puede acortar la conexión a servidores con mal enrutado IPv6.",
-        "warning": "Se aplica tras reiniciar."
+        "desc": "Hace que Windows pruebe IPv4 primero activando solo el bit 0x20 de DisabledComponents, así que se conserva cualquier otro ajuste de IPv6 que ya tuvieras. No apaga IPv6. Al revertir se restaura el valor exacto anterior."
       },
       "ops": [
         {
-          "type": "reg",
-          "path": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
-          "name": "DisabledComponents",
-          "value": 32
+          "type": "command",
+          "capture": "$v = (Get-ItemProperty 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters' -Name DisabledComponents -ErrorAction SilentlyContinue).DisabledComponents; if ($null -eq $v) { 'absent' } else { [string]$v }",
+          "apply": "$k = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters'; $v = (Get-ItemProperty $k -Name DisabledComponents -ErrorAction SilentlyContinue).DisabledComponents; if ($null -eq $v) { $v = 0 }; New-ItemProperty -Path $k -Name DisabledComponents -PropertyType DWord -Value ([int]$v -bor 0x20) -Force | Out-Null",
+          "revert": "$k = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters'; if ($captured -eq 'absent') { Remove-ItemProperty -Path $k -Name DisabledComponents -ErrorAction SilentlyContinue } else { New-ItemProperty -Path $k -Name DisabledComponents -PropertyType DWord -Value ([int]$captured) -Force | Out-Null }"
         }
       ]
     },
@@ -1811,12 +1810,11 @@
       "danger": "moderate",
       "portable": true,
       "anticheat": false,
+      "reboot": true,
       "desc": "Turns off MPO in the desktop compositor. It is a common fix for stutter, flicker and black frames on NVIDIA GPUs in windowed and borderless games.",
-      "warning": "Takes effect after a restart.",
       "es": {
         "name": "Desactivar Multiplane Overlay (MPO)",
-        "desc": "Apaga MPO en el compositor del escritorio. Es una solución habitual para tirones, parpadeos y fotogramas negros en GPUs NVIDIA con juegos en ventana o sin bordes.",
-        "warning": "Se aplica tras reiniciar."
+        "desc": "Apaga MPO en el compositor del escritorio. Es una solución habitual para tirones, parpadeos y fotogramas negros en GPUs NVIDIA con juegos en ventana o sin bordes."
       },
       "ops": [
         {
@@ -1875,15 +1873,15 @@
     },
     {
       "id": "sticky_keys_off",
-      "name": "Disable the Sticky Keys shortcut",
+      "name": "Disable accessibility shortcut prompts",
       "category": "Input",
       "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Pressing Shift five times no longer opens the Sticky Keys prompt, which steals focus and can minimize a fullscreen game.",
+      "desc": "Pressing Shift five times (Sticky Keys), holding Shift for 8 seconds (Filter Keys) or holding Num Lock for 5 seconds (Toggle Keys) no longer opens a prompt that steals focus and can minimize a fullscreen game. The features themselves stay available in Settings.",
       "es": {
-        "name": "Desactivar el atajo de Teclas especiales",
-        "desc": "Pulsar Shift cinco veces ya no abre el aviso de Teclas especiales, que roba el foco y puede minimizar un juego a pantalla completa."
+        "name": "Desactivar los avisos de atajos de accesibilidad",
+        "desc": "Pulsar Shift cinco veces (Teclas especiales), mantener Shift 8 segundos (Teclas de filtro) o Bloq Num 5 segundos (Teclas de alternancia) ya no abre un aviso que roba el foco y puede minimizar un juego a pantalla completa. Las funciones siguen disponibles en Configuración."
       },
       "ops": [
         {
@@ -1892,6 +1890,20 @@
           "name": "Flags",
           "kind": "String",
           "value": "506"
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\Control Panel\\Accessibility\\Keyboard Response",
+          "name": "Flags",
+          "kind": "String",
+          "value": "122"
+        },
+        {
+          "type": "reg",
+          "path": "HKCU:\\Control Panel\\Accessibility\\ToggleKeys",
+          "name": "Flags",
+          "kind": "String",
+          "value": "58"
         }
       ]
     },
@@ -1977,8 +1989,8 @@
       "ops": [
         {
           "type": "command",
-          "capture": "$s = @(\"$env:SystemRoot\\System32\\OneDriveSetup.exe\", \"$env:SystemRoot\\SysWOW64\\OneDriveSetup.exe\") | Where-Object { Test-Path $_ } | Select-Object -First 1; if ($s) { 'installed' } else { 'absent' }",
-          "apply": "$s = @(\"$env:SystemRoot\\System32\\OneDriveSetup.exe\", \"$env:SystemRoot\\SysWOW64\\OneDriveSetup.exe\") | Where-Object { Test-Path $_ } | Select-Object -First 1; if ($s) { $od = $env:OneDrive; $acl = $null; $has = $od -and (Test-Path -LiteralPath $od -PathType Container); if ($has) { $acl = Get-Acl -LiteralPath $od; icacls $od /deny '*S-1-5-32-544:(D,DC)' | Out-Null }; try { Get-Process OneDrive -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Process -FilePath $s -ArgumentList '/uninstall' -Wait; foreach ($p in \"$env:LocalAppData\\Microsoft\\OneDrive\", \"$env:ProgramData\\Microsoft OneDrive\") { if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue } } } finally { if ($has -and $acl) { Set-Acl -LiteralPath $od -AclObject $acl } } }; $global:LASTEXITCODE = 0",
+          "capture": "$inst = @(\"$env:LocalAppData\\Microsoft\\OneDrive\\OneDrive.exe\", \"$env:ProgramFiles\\Microsoft OneDrive\\OneDrive.exe\", \"${env:ProgramFiles(x86)}\\Microsoft OneDrive\\OneDrive.exe\") | Where-Object { Test-Path $_ }; if ($inst) { 'installed' } else { 'absent' }",
+          "apply": "$inst = @(\"$env:LocalAppData\\Microsoft\\OneDrive\\OneDrive.exe\", \"$env:ProgramFiles\\Microsoft OneDrive\\OneDrive.exe\", \"${env:ProgramFiles(x86)}\\Microsoft OneDrive\\OneDrive.exe\") | Where-Object { Test-Path $_ }; $s = @(\"$env:SystemRoot\\System32\\OneDriveSetup.exe\", \"$env:SystemRoot\\SysWOW64\\OneDriveSetup.exe\") | Where-Object { Test-Path $_ } | Select-Object -First 1; if ($inst -and $s) { $od = $env:OneDrive; $acl = $null; $has = $od -and (Test-Path -LiteralPath $od -PathType Container); if ($has) { $acl = Get-Acl -LiteralPath $od; icacls $od /deny '*S-1-5-32-544:(D,DC)' | Out-Null }; try { Get-Process OneDrive -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Process -FilePath $s -ArgumentList '/uninstall' -Wait; foreach ($p in \"$env:LocalAppData\\Microsoft\\OneDrive\", \"$env:ProgramData\\Microsoft OneDrive\") { if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -Recurse -Force -ErrorAction SilentlyContinue } } } finally { if ($has -and $acl) { Set-Acl -LiteralPath $od -AclObject $acl } }; if (@(\"$env:LocalAppData\\Microsoft\\OneDrive\\OneDrive.exe\", \"$env:ProgramFiles\\Microsoft OneDrive\\OneDrive.exe\", \"${env:ProgramFiles(x86)}\\Microsoft OneDrive\\OneDrive.exe\") | Where-Object { Test-Path $_ }) { throw 'OneDrive is still installed after running its uninstaller' } }; $global:LASTEXITCODE = 0",
           "revert": "if ($captured -eq 'installed') { winget install --id Microsoft.OneDrive --source winget --accept-package-agreements --accept-source-agreements }"
         }
       ]
@@ -2001,7 +2013,7 @@
         {
           "type": "command",
           "capture": "$d = \"${env:ProgramFiles(x86)}\\Microsoft\\Edge\\Application\"; $setup = if (Test-Path $d) { Get-ChildItem \"$d\\*\\Installer\\setup.exe\" -ErrorAction SilentlyContinue | Select-Object -Last 1 }; if ($setup) { 'installed' } else { 'absent' }",
-          "apply": "$d = \"${env:ProgramFiles(x86)}\\Microsoft\\Edge\\Application\"; $setup = if (Test-Path $d) { Get-ChildItem \"$d\\*\\Installer\\setup.exe\" -ErrorAction SilentlyContinue | Select-Object -Last 1 }; if ($setup) { $stub = \"$env:SystemRoot\\SystemApps\\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\\MicrosoftEdge.exe\"; $made = -not (Test-Path $stub); if ($made) { New-Item -Path $stub -Force | Out-Null }; try { Start-Process -FilePath $setup.FullName -ArgumentList '--uninstall --system-level --force-uninstall' -Wait } finally { if ($made -and (Test-Path $stub) -and ((Get-Item $stub).Length -eq 0)) { Remove-Item $stub -Force -ErrorAction SilentlyContinue } } }; $global:LASTEXITCODE = 0",
+          "apply": "$d = \"${env:ProgramFiles(x86)}\\Microsoft\\Edge\\Application\"; $setup = if (Test-Path $d) { Get-ChildItem \"$d\\*\\Installer\\setup.exe\" -ErrorAction SilentlyContinue | Select-Object -Last 1 }; if ($setup) { $stub = \"$env:SystemRoot\\SystemApps\\Microsoft.MicrosoftEdge_8wekyb3d8bbwe\\MicrosoftEdge.exe\"; $made = -not (Test-Path $stub); if ($made) { New-Item -Path $stub -Force | Out-Null }; try { Start-Process -FilePath $setup.FullName -ArgumentList '--uninstall --system-level --force-uninstall' -Wait } finally { if ($made -and (Test-Path $stub) -and ((Get-Item $stub).Length -eq 0)) { Remove-Item $stub -Force -ErrorAction SilentlyContinue } } }; if ($setup -and (Test-Path -LiteralPath $setup.FullName)) { throw 'Microsoft Edge is still installed after running its uninstaller' }; $global:LASTEXITCODE = 0",
           "revert": "if ($captured -eq 'installed') { winget install --id Microsoft.Edge --source winget --accept-package-agreements --accept-source-agreements }"
         }
       ]
@@ -2010,29 +2022,15 @@
       "id": "razer_block",
       "name": "Block Razer software auto-install",
       "category": "Debloat",
-      "danger": "moderate",
+      "danger": "safe",
       "portable": true,
       "anticheat": false,
-      "desc": "Stops Windows from downloading Razer's installer when a Razer device is plugged in: write access to the folder it uses is denied and automatic driver search is turned off.",
-      "warning": "Turning off automatic driver search affects every device, not only Razer: Windows Update will not fetch drivers on its own.",
+      "desc": "Stops Windows from downloading Razer's installer when a Razer device is plugged in, by denying write access to the folder it uses. Scoped to that one folder: it does not change driver search for any other device.",
       "es": {
         "name": "Bloquear la instalación automática del software de Razer",
-        "desc": "Evita que Windows descargue el instalador de Razer al conectar un dispositivo Razer: se deniega la escritura en su carpeta y se apaga la búsqueda automática de controladores.",
-        "warning": "Apagar la búsqueda automática de controladores afecta a todos los dispositivos, no solo a Razer: Windows Update no descargará controladores por su cuenta."
+        "desc": "Evita que Windows descargue el instalador de Razer al conectar un dispositivo Razer, denegando la escritura en la carpeta que usa. Solo afecta a esa carpeta: no cambia la búsqueda de controladores de ningún otro dispositivo."
       },
       "ops": [
-        {
-          "type": "reg",
-          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DriverSearching",
-          "name": "SearchOrderConfig",
-          "value": 0
-        },
-        {
-          "type": "reg",
-          "path": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Device Installer",
-          "name": "DisableCoInstallers",
-          "value": 1
-        },
         {
           "type": "command",
           "capture": "$p = \"$env:SystemRoot\\Installer\\Razer\"; if (-not (Test-Path $p)) { 'created' } elseif ((Get-Acl $p).Access | Where-Object { $_.AccessControlType -eq 'Deny' -and $_.IdentityReference.Value -eq 'Everyone' }) { 'denied' } else { 'existed' }",
