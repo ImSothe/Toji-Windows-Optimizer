@@ -17,7 +17,7 @@ dotnet run
 dotnet publish -c Release
 ```
 El proyecto ya trae la configuracion (PublishSingleFile, win-x64, self-contained). Resultado: **un solo archivo**,
-`bin\Release\net8.0-windows\win-x64\publish\SotheOptimizer.exe` (~155 MB), sin DLLs ni carpetas al lado.
+`bin\Release\net8.0-windows\win-x64\publish\SotheOptimizer.exe` (~72 MB), sin DLLs ni carpetas al lado.
 
 - **Self-contained** = no hace falta instalar .NET en el PC del usuario.
 - Los JSON de `data\` van **incrustados** en el exe. La OTA crea `data\` junto al exe al actualizar y esa copia

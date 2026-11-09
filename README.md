@@ -92,7 +92,7 @@ reads. A single self-contained `.exe` (72 MB, compressed; the copy in Releases i
 - **Windows 10 or 11, 64-bit.**
 - **Administrator rights**: the app edits the registry (HKLM), services and system features. If you cancel the UAC
   prompt the app simply does not open and nothing is touched.
-- **No .NET install needed**: the runtime is bundled in the `.exe` (hence the ~155 MB size).
+- **No .NET install needed**: the runtime is bundled in the `.exe` (hence the ~72 MB size).
 - An Internet connection is **optional**: only used for update checks and the winget catalog.
 
 ## Build from source
