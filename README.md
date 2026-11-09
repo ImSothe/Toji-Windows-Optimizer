@@ -302,10 +302,30 @@ warranty. See [LICENSE](LICENSE).
 [MIT](LICENSE). Built with AI-assisted development (Claude Code); the design, the decisions and the verification are
 mine. Contact: [LinkedIn](https://www.linkedin.com/in/%C3%A1ngel-baz-monteiro-8196a21a9/).
 
-**Prior art.** Fourteen of the tweaks (Teredo, IPv4 preference, MPO, trimmed services, Storage Sense, Sticky Keys, End Task,
-long paths, classic context menu, OneDrive and Edge removal, Razer and Logitech blocks, Brave debloat) were chosen after reading
-the public configuration of [Chris Titus Tech's WinUtil](https://github.com/ChrisTitusTech/winutil) (MIT), and some of the
-PowerShell for the removals and blocks is adapted from it. They were re-implemented on Toji's own engine, so each one has a
-captured previous state and a LIFO revert, and the new ones were apply/revert-checked on a real Windows 11 machine. Some were
-changed on purpose: Edge removal keeps your browser profile, and the OneDrive and Edge removals reinstall through winget on
-revert. The upstream license notice is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+## Credits: what comes from WinUtil, and what Toji changed
+
+Fourteen of the 84 tweaks were chosen after reading the public configuration of
+[Chris Titus Tech's WinUtil](https://github.com/ChrisTitusTech/winutil) (MIT): Teredo, IPv4 preference, MPO, trimmed services,
+Storage Sense, accessibility shortcuts, End Task, long paths, classic context menu, OneDrive and Edge removal, Razer and Logitech
+blocks, and Brave debloat. The idea, the registry values and some of the PowerShell (the removals and the blocks) come from it;
+the upstream license notice is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). The other 70 tweaks are not based on WinUtil.
+
+They run on Toji's own engine, so every one gets a write-ahead backup, a captured previous state and a newest-first revert. On
+top of that, these are the differences from the original versions:
+
+| Tweak | What Toji does differently |
+|---|---|
+| IPv4 preference | Sets only the `0x20` bit of `DisabledComponents` and restores the exact previous value (WinUtil writes a fixed `32`). |
+| Teredo | Only `netsh` and the previous Teredo state is restored; WinUtil also writes `DisabledComponents = 1` and always reverts to `default`. |
+| MPO | Only `OverlayTestMode = 5`; the previous value is restored. |
+| Services | Only MapsBroker (Manual) and CscService (Disabled). WinUtil's DiagTrack, StorSvc and SharedAccess are left out. A service Windows does not have is skipped instead of creating an empty key. |
+| Accessibility shortcuts | Covers Sticky, Filter and Toggle Keys (WinUtil: Sticky Keys only). |
+| Classic context menu | Does not kill Explorer, and revert removes the key only if Toji created it. |
+| OneDrive | Detects a real installation (not just the installer in System32), keeps your OneDrive folder, does not kill Explorer, fails with an error if OneDrive is still there, and revert reinstalls only if it was installed. |
+| Edge | Keeps your browser profile (no `--delete-profile`), fails with an error if Edge is still there, and revert reinstalls only if it was installed. |
+| Razer, Logitech | Only deny write on their own folder and never empty an existing one. WinUtil's Razer tweak also turns off driver search for every device; Toji does not. A deny rule that already existed is left alone on revert. |
+| Brave | Same policies; previous values are restored. |
+
+Also new: English and Spanish text for each tweak, reboot badges, 10 tests for these rules, and an apply/revert check on a real
+Windows 11 machine for the ones that do not weaken security or remove software. OneDrive and Edge removal are covered by data
+tests only.
