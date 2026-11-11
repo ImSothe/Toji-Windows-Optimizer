@@ -12,7 +12,7 @@
 ![Tests](https://img.shields.io/badge/tests-206%20passing-success)
 ![Coverage](https://img.shields.io/badge/line%20coverage-87.5%25%20(non--UI)-success)
 ![Signed updates](https://img.shields.io/badge/auto--update-signed%20ECDSA%20P--256-8b5cf6)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)
 
 [**⬇ Download**](#download--install) · [How it works](#architecture) · [Security](#security) · [Build](#build-from-source) · [Known limits](#known-limits)
 
@@ -76,7 +76,7 @@ button ("Revert ALL") restores it in the right order.
 is also in **[Releases](https://github.com/ImSothe/Toji-Windows-Optimizer/releases/latest)**, which is what the app's auto-update
 reads. A single self-contained `.exe` (72 MB, compressed; the copy in Releases is named `SotheOptimizer.exe` so existing installs update in place): no installer, no dependencies.
 
-> **Release status.** `v1.2.0` is the first open-source build (MIT, no licensing). The update-signing key was replaced, so installs of `v1.1.0` or older (the closed-source builds) will not auto-update: download `v1.2.0` once by hand; from there auto-update works again.
+> **Release status.** `v1.2.0` is the first build published with its source code and without licence keys. The update-signing key was replaced, so installs of `v1.1.0` or older (the closed-source builds) will not auto-update: download `v1.2.0` once by hand; from there auto-update works again.
 
 1. Download **`SotheOptimizer.exe`** (the file keeps its original name so existing installs update in place; builds before 1.2.0 were published in the older `Sothe-Windows-Optimizer` repository).
 2. *(Recommended)* verify it: `Get-FileHash .\SotheOptimizer.exe -Algorithm SHA256` must match the `sha256` field of
@@ -299,7 +299,9 @@ warranty. See [LICENSE](LICENSE).
 
 ## License & credits
 
-[MIT](LICENSE). Built with AI-assisted development (Claude Code); the design, the decisions and the verification are
+[PolyForm Noncommercial 1.0.0](LICENSE): the source is public and free to use, study and modify for any noncommercial
+purpose, including personal use; commercial use is reserved to the author. Releases `v1.2.0` to `v1.4.1` were published under
+the MIT licence, which still applies to those versions. Built with AI-assisted development (Claude Code); the design, the decisions and the verification are
 mine. Contact: [LinkedIn](https://www.linkedin.com/in/%C3%A1ngel-baz-monteiro-8196a21a9/).
 
 ## Credits: what comes from WinUtil, and what Toji changed

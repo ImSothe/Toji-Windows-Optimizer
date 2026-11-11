@@ -42,4 +42,4 @@ Un motor en PowerShell (`toji-core.ps1`) aplica operaciones definidas en JSON (`
 
 ## Licencia
 
-MIT — ver [LICENSE](LICENSE).
+PolyForm Noncommercial 1.0.0: uso libre para cualquier fin no comercial. Ver [LICENSE](LICENSE).

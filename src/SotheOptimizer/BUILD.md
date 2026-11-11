@@ -95,7 +95,7 @@ con un toast). Sin `GitHubRepo`, no hace ninguna llamada de red.
 `dotnet run --project tools/IconGen -- src/SotheOptimizer/Themes/SotheTheme.xaml src/SotheOptimizer/Assets/icon.ico`
 
 ## Licencia
-Codigo abierto bajo MIT (ver `LICENSE`). No hay licencias de pago, claves ni muro de pago: todos los ajustes se aplican
+Codigo publico bajo licencia PolyForm Noncommercial 1.0.0 (ver `LICENSE`): uso libre para cualquier fin no comercial. No hay licencias de pago, claves ni muro de pago: todos los ajustes se aplican
 sin restricciones, y revertir es siempre posible.
 
 ## Notas

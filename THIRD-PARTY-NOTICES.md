@@ -1,6 +1,6 @@
 # Third-party notices
 
-Toji itself is released under the [MIT license](LICENSE). The following third-party work informed parts of it.
+Toji itself is released under the [PolyForm Noncommercial License 1.0.0](LICENSE). The following third-party work informed parts of it.
 
 ## WinUtil (Chris Titus Tech)
 
