@@ -448,17 +448,28 @@ namespace Sothe
         // Se pone a 0 solo durante la llamada y se devuelve a su valor original (o se borra si no existia): antes se dejaba
         // a 0 para siempre, un cambio del sistema que nadie habia pedido.
         public const string RestorePointScript =
+            "$ErrorActionPreference = 'Stop'; " +
             "$k = 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore'; $n = 'SystemRestorePointCreationFrequency'; " +
             "$old = (Get-ItemProperty -Path $k -Name $n -ErrorAction SilentlyContinue).$n; " +
-            "try { Set-ItemProperty -Path $k -Name $n -Value 0 -Type DWord -Force; " +
-            "Enable-ComputerRestore -Drive \"$env:SystemDrive\\\\\"; " +
-            "Checkpoint-Computer -Description 'Toji' -RestorePointType MODIFY_SETTINGS } " +
+            "try { " +
+            "if ((Get-Service VSS).StartType -eq 'Disabled') { throw 'the Volume Shadow Copy service (VSS) is disabled: set it to Manual and try again' }; " +
+            "Set-ItemProperty -Path $k -Name $n -Value 0 -Type DWord -Force; " +
+            // one trailing backslash ('C:\'): with two, Enable-ComputerRestore could not find the drive
+            "$d = $env:SystemDrive + '\\'; Enable-ComputerRestore -Drive $d; " +
+            // -WarningAction Stop: Windows only warns (it does not fail) when it throttles or refuses the point; without this it was reported as created
+            "Checkpoint-Computer -Description 'Toji' -RestorePointType MODIFY_SETTINGS -WarningAction Stop; " +
+            "$last = Get-ComputerRestorePoint | Sort-Object SequenceNumber | Select-Object -Last 1; " +
+            "if (-not $last -or $last.Description -ne 'Toji') { throw 'Windows did not list a new restore point after creating it' } } " +
             "finally { if ($null -ne $old) { Set-ItemProperty -Path $k -Name $n -Value $old -Type DWord -Force } else { Remove-ItemProperty -Path $k -Name $n -ErrorAction SilentlyContinue } }";
+
+        // Reason for the last failure (null if it worked): the UI shows it instead of a bare "could not create"
+        public string LastRestorePointError { get; private set; }
 
         public bool CreateRestorePoint()
         {
+            LastRestorePointError = null;
             try { RunPowerShellHidden(RestorePointScript); return true; }
-            catch (Exception ex) { Log("Restore point: " + ex.Message); return false; }
+            catch (Exception ex) { LastRestorePointError = ex.Message; Log("Restore point: " + ex.Message); return false; }
         }
         public void ClearTemp()
         {

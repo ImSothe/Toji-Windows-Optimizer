@@ -656,7 +656,7 @@ namespace Sothe
             finally { SetBusy(false); }
             StatusText.Text = Loc.T("done");
             if (ok) { _restorePointDone = true; ShowToast(Loc.T("rp.created")); return true; }
-            return SotheDialog.Confirm(this, Loc.T("rp.none.title"), Loc.T("rp.none.body"), Loc.T("rp.none.ok"), danger: true);
+            return SotheDialog.Confirm(this, Loc.T("rp.none.title"), Loc.T("rp.none.body", RestorePointReason()), Loc.T("rp.none.ok"), danger: true);
         }
 
         private async Task CreateRestorePoint()
@@ -670,8 +670,10 @@ namespace Sothe
             finally { SetBusy(false); }
             StatusText.Text = Loc.T("done");
             if (ok) ShowToast(Loc.T("rp.created"));
-            else ShowToast(Loc.T("rp.fail"), ToastKind.Error);
+            else SotheDialog.Info(this, Loc.T("rp.none.title"), Loc.T("rp.fail") + ": " + RestorePointReason());
         }
+
+        private string RestorePointReason() => string.IsNullOrWhiteSpace(_eng.LastRestorePointError) ? Loc.T("rp.reason.unknown") : _eng.LastRestorePointError;
 
         private async Task CleanTemp()
         {

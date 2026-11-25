@@ -27,5 +27,31 @@ namespace Sothe.Tests
         {
             Assert.Contains("Checkpoint-Computer -Description 'Toji'", SotheEngine.RestorePointScript);
         }
+
+        // Bug real: la unidad se pasaba como "C:\\" (dos barras) y Enable-ComputerRestore no la encontraba
+        [Fact]
+        public void ElScript_PasaLaUnidadConUnaSolaBarra()
+        {
+            var s = SotheEngine.RestorePointScript;
+            Assert.Contains("$d = $env:SystemDrive + '\\'; Enable-ComputerRestore -Drive $d", s);
+            Assert.DoesNotContain("\\\\", s);
+        }
+
+        [Fact]
+        public void ElScript_FallaConMotivoClaro_EnVezDeDarloPorCreado()
+        {
+            var s = SotheEngine.RestorePointScript;
+            Assert.StartsWith("$ErrorActionPreference = 'Stop'", s);
+            Assert.Contains("-WarningAction Stop", s);                 // el aviso de "demasiado pronto" pasa a ser error
+            Assert.Contains("(VSS) is disabled", s);                   // servicio de instantaneas desactivado
+            Assert.Contains("Get-ComputerRestorePoint", s);            // se comprueba que el punto existe de verdad
+        }
+
+        [Fact]
+        public void SinIntentoPrevio_NoHayMotivoDeFallo()
+        {
+            using var d = new TestDirs();
+            Assert.Null(d.Engine().LastRestorePointError);
+        }
     }
 }
